@@ -1,0 +1,65 @@
+<!DOCTYPE 
+    html
+    PUBLIC
+    "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html 
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:py="http://genshi.edgewall.org/"
+    xmlns:xi="http://www.w3.org/2001/XInclude">
+
+
+  <xi:include href="master.html" />
+  <link rel="stylesheet" type="text/css" media="screen" href="${tg.url('/css/administrar.css')}" />
+  <head>
+    <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
+    <title>
+      SAIP - Administrar
+    </title>
+  </head>
+
+  <body>
+    <div id="navigation-block">
+      <img src="../images/background.jpg" id="hide" />
+      <ul id="sliding-navigation">
+        <li class="sliding-element">
+        <h3>
+          Menu
+        </h3>
+      </li>
+      <li py:if="tg.predicates.has_any_permission('AdministrarUsuarios','AdministrarTodo')" class="sliding-element">
+      <a href="${tg.url('usuarios/')}"  title="Usuarios" >
+        Usuarios
+      </a>
+    </li>
+    <li py:if="tg.predicates.has_any_permission('AdministrarRoles','AdministrarTodo')" class="sliding-element">
+    <a href="${tg.url('roles/')}" 	  title="Roles"	  >
+      Roles
+    </a>
+  </li>
+  <li py:if="tg.predicates.has_any_permission('AdministrarPermisos','AdministrarTodo')" class="sliding-element">
+  <a href="${tg.url('permisos/')}"  title="Permisos" >
+    Permisos
+  </a>
+</li>
+<li py:if="tg.predicates.has_any_permission('AdministrarProyectos','AdministrarTodo')" class="sliding-element">
+<a href="${tg.url('proyectos/')}" title="Proyectos">
+  Proyectos
+</a>
+</li>
+<li py:if="tg.predicates.has_any_permission('AdministrarFases','AdministrarTodo')" class="sliding-element">
+<a href="${tg.url('fases/')}" title="Fases">
+  Fases
+</a>
+</li>
+<li py:if="tg.predicates.has_any_permission('AdministrarTiposDeItem','AdministrarTodo')" class="sliding-element">
+<a href="${tg.url('tiposDeItem/')}" title="Tipos de Item">
+  Tipos de Item
+</a>
+</li>
+</ul>
+</div>
+<br />
+</body>
+</html>

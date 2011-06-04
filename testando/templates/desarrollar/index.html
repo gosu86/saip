@@ -1,0 +1,44 @@
+<!DOCTYPE 
+    html
+    PUBLIC
+    "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html 
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:py="http://genshi.edgewall.org/"
+    xmlns:xi="http://www.w3.org/2001/XInclude">
+
+
+  <xi:include href="master.html" />
+
+  <head>
+    <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
+    <title>
+      SAIP - Desarrollar
+    </title>
+  </head>
+
+  <body>
+    <div id="navigation-block">
+      <img src="../images/background.jpg" id="hide" />
+      <ul id="sliding-navigation">
+        <li class="sliding-element">
+        <h3>
+          Menu
+        </h3>
+      </li>
+      <li class="sliding-element">
+      <a href="${tg.url('proyectos/')}" title="Proyectos">
+        Proyectos
+      </a>
+    </li>
+    <li class="sliding-element">
+    <a href="${tg.url('fases/')}" title="Fases">
+      Fases
+    </a>
+  </li>
+</ul>
+</div>
+</body>
+</html>

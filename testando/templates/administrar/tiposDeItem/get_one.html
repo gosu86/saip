@@ -1,0 +1,33 @@
+<html 
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:py="http://genshi.edgewall.org/"
+    xmlns:xi="http://www.w3.org/2001/XInclude">
+
+
+  <xi:include href="master.html" />
+  <title>
+  </title>
+  <head>
+    <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
+    <title>
+      SAIP - Ver
+    </title>
+
+  </head>
+  <body class="tundra">
+    <div id="getting_started">
+      &nbsp;
+      <div>
+        <h1>
+          Estructura del Tipo de Item
+        </h1>
+
+        <a href='../'>
+          Volver
+        </a>
+      </div>
+      <br/>
+	<div py:replace="tmpl_context.form(value)">View Form</div>
+    </div>
+  </body>
+</html>

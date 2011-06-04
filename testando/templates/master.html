@@ -1,0 +1,147 @@
+<!DOCTYPE 
+    html
+    PUBLIC
+    "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html 
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:py="http://genshi.edgewall.org/"
+    xmlns:xi="http://www.w3.org/2001/XInclude"
+    py:strip="">
+
+  <!--py:strip="" es lo que permite que master.html pueda ser incluida en otras paginas.-->
+  <xi:include href="header.html" />
+  <!--    <xi:include href="sidebars.html" />-->
+  <xi:include href="footer.html" />
+  <!--
+    lo que hace <head py:match="head" py:attrs="select('@*')"> es: toma todo el contenido dentro de las etiqueta
+    <head></head> y lo coloca dentro de las etiquetas <head></head> de la pagina que incluye a master.html.
+  -->
+
+  <head py:match="head" py:attrs="select('@*')">
+    <link rel="stylesheet" type="text/css" media="screen" href="${tg.url('/css/jquery.multiselect.css')}" />
+    <script type="text/javascript" src="${url('/javascript/jquery.js')}">
+    </script>
+    <script type="text/javascript" src="${url('/javascript/jquery.multiselect.js')}">
+    </script>
+    <script type="text/javascript">
+	    $(function() {$("#lider").multiselect();});
+
+            </script>
+            <script type="text/javascript" src="${url('/javascript/jquery.notice.js')}">
+            </script>
+            <script type="text/javascript" src="${url('/javascript/flexigrid.pack.js')}">
+            </script>
+            <script type="text/javascript" src="${url('/javascript/flexigrid.js')}">
+            </script>
+            <script type="text/javascript" src="${url('/javascript/sliding_effect.js')}">
+            </script>
+            <script type="text/javascript" src="${url('/javascript/add_more_attr.js')}">
+            </script>
+
+            <!--************************************************************************** -->
+            <!--
+              Esta seccion es requerida por genshi, es decir, necesita que dentro de las etiquetas <head></head> existan
+              las etiquetas <meta></meta> y <title></title>, como no usaremos esas etiquetas de este archivo utilizamos
+              py:replace para eliminar su contenido.
+            -->
+            <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
+            <title py:replace="''">
+              Your title goes here
+            </title>
+            <meta py:replace="select('*')"/>
+            <!--************************************************************************** -->
+
+            <!--==================================================================================== -->
+            <!--
+              En esta seccion se simplemente se traen las hojas de estilo de nuestra aplicacion. Lo que hay que notar el
+              la objeto global "tg", usando tg.url() obtenemos el path de nuestra aplicacion, al pasarle el parametro
+              '/css/style.css' estamos generando 'nuestraapp/css/style.css'
+            -->
+            <link rel="stylesheet" type="text/css" media="screen" href="${tg.url('/css/style.css')}" />
+            <link rel="stylesheet" type="text/css" media="screen" href="${tg.url('/css/admin.css')}" />
+            <link rel="stylesheet" type="text/css" media="screen" href="${tg.url('/css/flexigrid.css')}" />
+            <link rel="stylesheet" type="text/css" media="screen" href="${tg.url('/css/flexigrid.pack.css')}" />
+            <link rel="stylesheet" type="text/css" media="screen" href="${tg.url('/css/jquery.notice.css')}" />
+            <!--==================================================================================== -->
+          </head>
+          <!--************************************************************************** -->
+          <!--
+            <body py:match="body" py:attrs="select('@*')"> toma todo el contenido de las etiquetas <head></head> de este
+            archivo y lo coloca dentro de las etiquetas <head></head> de la pagina que incluye a este archivo NOTE: * El
+            archivo que inlcuye a este, es este caso,es index.html con la sentencia <xi:include href="master.html" /> *
+            Los archivos deben estar en el mismo directorio
+          -->
+          <body py:match="body" py:attrs="select('@*')">
+            <!--************************************************************************** -->
+            ${header()}
+            <!--
+              esta sentencia ejecuta la funcion macro "header()" definida en header.html, archivo localizado en el mismo
+              directorio que este archivo
+            -->
+            <ul id="mainmenu">
+              <!--
+                tg.auth_stack_enabled is a boolean that determines if the auth stack is present in the environment
+              -->
+              <!--
+              <span py:if="tg.auth_stack_enabled and not (page =='Menu')" py:strip="True">
+              -->
+              <span py:if="tg.auth_stack_enabled" py:strip="True">
+                <!-- py:strip="True" se encarga de remover las etiquetas, en este caso las etiquetas <span></span> -->
+                <li 
+                    py:if="tg.predicates.has_any_permission('AdministrarTodo', 'AdministrarUsuarios', 'AdministrarRoles', 'AdministrarPermisos', 'AdministrarProyectos', 'AdministrarFases', 'AdministrarTiposDeItem')"
+                    id="admin"
+                    class="first">
+
+
+                <a href="${tg.url('/administrar/')}" class="${('', 'active')[defined('page') and page=='Administrar']}">
+                  Administrar
+                </a>
+              </li>
+              <li py:if="tg.predicates.in_any_group('Administrador','Configurador')" class="">
+
+              <a href="${tg.url('/configurar/')}" class="${('', 'active')[defined('page') and page=='Configurar']}">
+                Configurar
+              </a>
+            </li>
+            <li py:if="tg.predicates.in_any_group('Administrador','Configurador','Desarrollador')" class="">
+
+            <a href="${tg.url('/desarrollar/')}" class="${('', 'active')[defined('page') and page=='Desarrollar']}">
+              Desarrollar
+            </a>
+          </li>
+
+          <li py:if="request.identity" id="login" class="loginlogout">
+          <a href="${tg.url('/logout_handler')}">
+            Logout
+          </a>
+        </li>
+        <li py:if="request.identity" id="Login" class="loginlogout">
+        <a href="#">
+          Logueado como: ${tg.identity['repoze.who.userid']}
+        </a>
+      </li>
+    </span>
+  </ul>
+  <div id="content">
+
+    <!--************************************************************************** -->
+    <!--
+      Aqui se asigna a la variable "flash" (en "flash=tg.flash_.....) el contenido del objeto tipo flash obtenido de
+      tg.flash_obj.render('flash', use_js=False)
+    -->
+    <py:with vars="flash=tg.flash_obj.render('flash', use_js=False)">
+      <div py:if="flash" py:content="XML(flash)" />
+    </py:with>
+    <!--************************************************************************** -->
+    <!--
+      py:replace="select('*|text()')" se encarga de colocar todo el contenido de las etiquetas <body></body> de
+      master.html en las etiquetas <body></body> del documento que llama a master.html
+    -->
+    <div py:replace="select('*|text()')"/>
+    <!-- End of main_content -->
+    ${footer()}
+  </div>
+</body>
+</html>
