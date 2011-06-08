@@ -21,11 +21,12 @@ class TipoItemViewForm(DisabledForm):
     
 tipoitem_view_form = TipoItemViewForm(DBSession) 
 
-class TipoItemAddForm(DojoAddRecordForm):
+class TipoItemAddForm(AddRecordForm):
     __model__ = TipoItem
-    __omit_fields__ = ['fecha_creacion', 'items', 'fases','campos_extra']
+    __omit_fields__ = ['fecha_creacion', 'items','campos_extra']
     btn = Button("add_more_attr", attrs=dict(onclick="javascript:add_more_atrr();",value='Agregar Atributos extras'))
     name = TextField
+    fase = HiddenField('fase_id')
     descripcion = TextArea
 tipoitem_add_form = TipoItemAddForm(DBSession)    
 

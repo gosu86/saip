@@ -11,7 +11,7 @@ from testando.model                 import DBSession
 from testando.model.proyecto        import Proyecto
 from testando.model.fase            import Fase,usuario_rol_fase_table
 from testando.model.auth            import Usuario
-
+from testando.model.tipoitem        import TipoItem
 from testando.lib.base                  import BaseController
 from testando.controllers.error         import ErrorController
 
@@ -43,9 +43,9 @@ class ConfigurarController(BaseController):
     fases.template='genshi:testando.templates.configurar.fases.index'
     fases.page='Configurar'
 
-    tiposDeItems=TiposDeItemController(DBSession)
-    tiposDeItems.template='genshi:testando.templates.configurar.tiposDeItems.index'
-    tiposDeItems.page='Configurar'
+    tiposDeItem=TiposDeItemController(DBSession)
+    tiposDeItem.template='genshi:testando.templates.configurar.tiposDeItems.index'
+    tiposDeItem.page='Configurar'
     
     usuarios=UsuariosController(DBSession)
     usuarios.template='genshi:testando.templates.configurar.usuarios.index'
@@ -143,7 +143,7 @@ class ConfigurarController(BaseController):
         nombre=kw['nombre']
         tmpl_context.proyectoId = hideMe()
         tmpl_context.proyectoNombre = hideMe()
-        if estado=='iniciado':
+        if estado=='Iniciado':
             iniciado=True
         else:
             iniciado=False
@@ -384,4 +384,105 @@ class ConfigurarController(BaseController):
         
         return dict(msg=msg,type=type,msg_p=msg_proyectos)
 
-    
+    #===========================================================================
+    # @expose('testando.templates.configurar.fases.vista_de_tiposDeItem')
+    # def vista_de_tiposDeItem(self,*args, **kw):
+    #    tiId=int(kw['fId'])
+    #    tiposDeItems=DBSession.query(TipoItem)filter)_by('id':tiId)
+    #===========================================================================
+        
+    @expose('json')    
+    @expose('testando.templates.configurar.fases.vista_de_tiposDeItem') 
+    def vista_de_tiposDeItem(self,*args, **kw):
+        fId=kw['fId']
+        #estado=kw['estado']
+        nombre=kw['nombre']
+        tmpl_context.faseId = hideMe()
+        tmpl_context.faseNombre = hideMe()
+        #=======================================================================
+        # if estado=='Iniciado':
+        #    iniciado=True
+        # else:
+        #    iniciado=False
+        #=======================================================================
+        return dict(page='Vista de Tipos de Item', faseId=fId,faseNombre=nombre)        
+        
+    @validate(validators={"page":validators.Int(), "rp":validators.Int()})
+    @expose('json')    
+    def tiposDeItem_asignados(self,fid=None, page='1', rp='25', sortname='id', sortorder='asc', qtype=None, query=None):
+        try:
+            offset = (int(page)-1) * int(rp)
+            
+            if (query):
+                d = {qtype:query,'fase_id':int(fid)}
+                tiposDeItem = DBSession.query(TipoItem).filter_by(**d)
+            else:
+                d = {'fase_id':int(fid)}
+                tiposDeItem = DBSession.query(TipoItem).filter_by(**d)
+                
+            total = tiposDeItem.count()
+            
+            column = getattr(TipoItem, sortname)
+            tiposDeItem = tiposDeItem.order_by(getattr(column,sortorder)()).offset(offset).limit(rp)
+            
+            rows = [{'id'  : tipoDeItem.id,
+                    'cell': [tipoDeItem.id,
+                            tipoDeItem.name,
+                            tipoDeItem.descripcion,
+                            tipoDeItem.complejidad]} for tipoDeItem in tiposDeItem]
+            result = dict(page=page, total=total, rows=rows)
+        except:
+            result = dict() 
+        return result
+        
+    #===========================================================================
+    # @validate(validators={"page":validators.Int(), "rp":validators.Int()})
+    # @expose('json')
+    # def tiposDeItem_del_sistema(self, fid=None, page='1', rp='25', sortname='id', sortorder='asc', qtype=None, query=None):
+    #    try:
+    #        offset = (int(page)-1) * int(rp)
+    #        if (query):
+    #            d = {qtype:query}
+    #            usuarios = DBSession.query(Usuario).filter_by(**d)
+    #        else:
+    #            usuarios = DBSession.query(Usuario)
+    #            
+    #           
+    #        if fid:
+    #            
+    #            column = getattr(Usuario, sortname)
+    #            usuarios = usuarios.order_by(getattr(column,sortorder)())                
+    #            u=self.get_usuarios(usuarios,fid,offset,rp)
+    #            total = usuarios.count()
+    #            usuarios=u
+    #        else:
+    #            total = usuarios.count() 
+    #            column = getattr(Usuario, sortname)
+    #            usuarios = usuarios.order_by(getattr(column,sortorder)()).offset(offset).limit(rp)
+    #              
+    #        rows = [{'id'  : usuario.id,
+    #                'cell': [usuario.id,
+    #                         usuario.name,
+    #                         self.roles_select(usuario.id)]} for usuario in usuarios
+    #                ]
+    #        result = dict(page=page, total=total, rows=rows)
+    #    except:
+    #        result = dict() 
+    #    return result        
+    #    
+    #===========================================================================
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        

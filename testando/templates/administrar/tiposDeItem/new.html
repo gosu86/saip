@@ -1,0 +1,16 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:py="http://genshi.edgewall.org/"
+      xmlns:xi="http://www.w3.org/2001/XInclude">
+
+<xi:include href="master.html" />
+<title>SAIP·Nueva ${model}</title>
+<head>
+</head>
+<body class="tundra">
+  <div style="float:left;" class="crud_add">
+    <h2 style="margin-top:1px;">Nueva $model</h2>
+     ${XML(tmpl_context.widget(value=value, action='/configurar/tiposDeItem'))}
+  </div>
+  <div style="height:0px; clear:both;"> &nbsp; </div>
+</body>
+</html>

@@ -21,12 +21,6 @@ usuario_rol_fase_table = Table('usuarios_roles_fases', metadata,
         onupdate="CASCADE", ondelete="CASCADE"), primary_key=True)
 )
 
-fase_tipoItem_table = Table('fases_tipos_items', metadata,
-    Column('fase_id', Integer, ForeignKey('fases.id',
-        onupdate="CASCADE", ondelete="CASCADE"), primary_key=True),
-    Column('tipo_item_id', Integer, ForeignKey('tipos_items.id',
-        onupdate="CASCADE", ondelete="CASCADE"), primary_key=True)
-)
 class Fase(DeclarativeBase):
     __tablename__ = 'fases'
     
@@ -49,10 +43,10 @@ class Fase(DeclarativeBase):
     #}
     
     #{ Relations
+    tiposDeItem       = relationship(TipoItem, backref="fase")
     proyecto_id = Column(Integer, ForeignKey('proyectos.id'))
     #proyecto (por backref en la relacion "fases" en el modelo proyecto.py)
     
-    tipos_item = relationship('TipoItem', secondary=fase_tipoItem_table, backref="fases")
     
     items = relationship(Item, order_by=Item.id, backref="fase")
     

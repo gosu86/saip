@@ -41,6 +41,7 @@ class FasesController(CrudRestController):
     @without_trailing_slash
     @expose('testando.templates.administrar.fases.new')
     def new(self, *args, **kw):
+        #proyecto_id se recibe en kw, y este se le asigna a value y en el template se le llena
         """Display a page to show a new record."""
         tmpl_context.widget = self.new_form
         return dict(value=kw, model=self.model.__name__)

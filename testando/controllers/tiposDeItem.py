@@ -34,7 +34,14 @@ class TiposDeItemController(CrudRestController):
     @expose()
     def get_one(self, *args, **kw):
         redirect('../')
-    
+        
+    @without_trailing_slash
+    @expose('testando.templates.administrar.tiposDeItem.new')
+    def new(self, *args, **kw):
+        """Display a page to show a new record."""
+        tmpl_context.widget = self.new_form
+        return dict(value=kw, model=self.model.__name__)
+        
     @expose('testando.templates.tipoitem.index')
     def get_all(self):
         override_template(self.get_all,self.template)    
@@ -104,5 +111,6 @@ class TiposDeItemController(CrudRestController):
                 campoExtra.tipo=tipo
                 campoExtra.tipo_item_id=ti.id
                 DBSession.add(campoExtra)
-                DBSession.flush()        
-        raise redirect('./')
+                DBSession.flush()
+        nombreFase=ti.fase.name
+        raise redirect('/configurar/vista_de_tiposDeItem/?fId='+kw['fase_id']+'&nombre='+nombreFase)
