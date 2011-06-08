@@ -1,0 +1,27 @@
+#Mon May 16 16:59:35 PYT 2011
+eclipse.preferences.version=1
+encoding//testando/__init__.py=utf-8
+encoding//testando/config/__init__.py=utf-8
+encoding//testando/config/app_cfg.py=utf-8
+encoding//testando/config/middleware.py=utf-8
+encoding//testando/controllers/__init__.py=utf-8
+encoding//testando/controllers/administrar.py=utf-8
+encoding//testando/controllers/configurar.py=utf-8
+encoding//testando/controllers/desarrollar.py=utf-8
+encoding//testando/controllers/error.py=utf-8
+encoding//testando/controllers/root.py=utf-8
+encoding//testando/lib/__init__.py=utf-8
+encoding//testando/lib/helpers.py=utf-8
+encoding//testando/model/__init__.py=utf-8
+encoding//testando/model/auth.py=utf-8
+encoding//testando/model/fase.py=utf-8
+encoding//testando/model/proyecto.py=utf-8
+encoding//testando/templates/__init__.py=utf-8
+encoding//testando/templates/administrar/__init__.py=utf-8
+encoding//testando/templates/configurar/__init__.py=utf-8
+encoding//testando/templates/desarrollar/__init__.py=utf-8
+encoding//testando/tests/__init__.py=utf-8
+encoding//testando/websetup/__init__.py=utf-8
+encoding//testando/websetup/bootstrap.py=utf-8
+encoding//testando/websetup/schema.py=utf-8
+encoding//testando/widgets/__init__.py=utf-8
