@@ -53,7 +53,7 @@ function doCommandTipoDeItem(com, grid)
 			{
 				var id = $(this).attr('id');
 				id = id.substring(id.lastIndexOf('row')+3);
-				window.location = location+id+"/edit/"
+				window.location = '/administrar/tiposDeItem/'+id+"/edit/";
 			});
 		}
 		else
@@ -63,7 +63,7 @@ function doCommandTipoDeItem(com, grid)
 	{
 		if ($('.trSelected', grid).length > 0)
 		{	
-			var nombre = $('.trSelected',"#tiposDeItemAdministrarFlexi").find('td[abbr="name"]').children().text()	
+			var nombre = $('.trSelected',"#faseNoIniVerTiposDeItemFlexi").find('td[abbr="name"]').children().text()	
 			$('.trSelected', grid).each(function()
 			{
 				var id = $(this).attr('id');
@@ -112,7 +112,7 @@ function deleteTDI(id)
     {
       type: 'POST',
       dataType: "json",
-      url: location+"/post_delete",
+      url: "/configurar/tiposDeItem"+"/post_delete",
       data: {id:id},
       success: function(data)
       {
@@ -123,7 +123,7 @@ function deleteTDI(id)
     	              stayTime: 5000,
     	              type: data.type
     	    	  });    	  
-    	  $("#tiposDeItemAdministrarFlexi").flexReload();
+    	  $("#faseNoIniVerTiposDeItemFlexi").flexReload();
       },
     });
 }
