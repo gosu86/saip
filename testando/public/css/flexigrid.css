@@ -689,3 +689,7 @@ div.pGroup {
 	/* common inner cell properties*/ {
 	overflow: hidden;
 }
+
+.ftitle{
+	font-size: 12px;
+}

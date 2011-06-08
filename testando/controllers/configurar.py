@@ -1,12 +1,16 @@
-from tg             import expose,redirect, validate,flash,tmpl_context, request
+from tg             import expose,redirect, validate,flash,tmpl_context, request,config
 from formencode        import validators
 from repoze.what.predicates import All
 from repoze.what.predicates import not_anonymous
 from repoze.what.predicates import in_any_group
 
+from sqlalchemy.sql import select
+from sqlalchemy.sql import and_, or_, not_
+
 from testando.model                 import DBSession
 from testando.model.proyecto        import Proyecto
-from testando.model.fase            import Fase
+from testando.model.fase            import Fase,usuario_rol_fase_table
+from testando.model.auth            import Usuario
 
 from testando.lib.base                  import BaseController
 from testando.controllers.error         import ErrorController
@@ -56,24 +60,6 @@ class ConfigurarController(BaseController):
     #lineasBase.page='configurar'
  
     error = ErrorController()
-    
-    @expose('testando.templates.configurar.index')    
-    def index(self, **kw):
-        return dict(page='Configurar')
-
-    @expose('testando.templates.configurar.seleccion_de_proyectos')    
-    def seleccion_de_proyectos(self, tipo=None,**kw):
-        log.debug('tipo: %s' %tipo)
-        configuracion=False
-        fase=False
-        lineabase=False
-        if tipo == 'configuracion':
-            configuracion=True
-        elif tipo == 'fases':
-            fase=True
-        elif tipo == 'lineasbase':
-            lineabase=True
-        return dict(page='Configurar',conf=configuracion,fases=fase,lineasbase=lineabase)
 
     def tiene_fases(self,p):
         if len(p.fases) > 0:
@@ -86,6 +72,15 @@ class ConfigurarController(BaseController):
             return 'si'
         else:
             return 'no'
+    
+    @expose('testando.templates.configurar.index')    
+    def index(self, **kw):
+        #return dict(page='Configurar')
+        redirect('seleccion_de_proyectos')
+
+    @expose('testando.templates.configurar.seleccion_de_proyectos')    
+    def seleccion_de_proyectos(self,**kw):
+        return dict(page='Configurar')
              
     @validate(validators={"page":validators.Int(), "rp":validators.Int()})
     @expose('json')
@@ -106,6 +101,9 @@ class ConfigurarController(BaseController):
             column = getattr(Proyecto, sortname)
             proyectos = proyectos.order_by(getattr(column,sortorder)()).offset(offset).limit(rp)
 
+            # botonIniciar = '<input type="submit" value="Iniciar" onClick=doCommandFases("Iniciar",$("#proyectosConfigurarFlexi"))>'
+            # botonVerFases = '<input type="submit" class="clickclass" value="Ver Fases">'
+            #-------------------------------- botones=botonIniciar+botonVerFases
             
             rows = [{'id'  : proyecto.id,
                     'cell': [proyecto.id,
@@ -136,26 +134,33 @@ class ConfigurarController(BaseController):
                 msg="El proyecto ya se encuentra Iniciado."
                 type="notice"
         return dict(msg=msg,nombre=nombre,type=type)    
-    
-    @expose('json')    
-    @expose('testando.templates.configurar.proyectos.asignacion_de_fases') 
-    def asignacion_de_fases(self, proyecto_Id,*args, **kw):
-        tmpl_context.proyectoId = hideMe()    
-        return dict(page='Asignar Fases', proyectoId=proyecto_Id)
 
     @expose('json')    
     @expose('testando.templates.configurar.proyectos.vista_de_fases') 
-    def vista_de_fases(self, proyecto_Id,*args, **kw):
-        tmpl_context.proyectoId = hideMe()    
-        return dict(page='Vista de Fases', proyectoId=proyecto_Id)
+    def vista_de_fases(self,*args, **kw):
+        pId=kw['pId']
+        estado=kw['estado']
+        nombre=kw['nombre']
+        tmpl_context.proyectoId = hideMe()
+        tmpl_context.proyectoNombre = hideMe()
+        if estado=='iniciado':
+            iniciado=True
+        else:
+            iniciado=False
+        return dict(page='Vista de Fases', proyectoId=pId, iniciado=iniciado,proyectoNombre=nombre)
     
     @validate(validators={"page":validators.Int(), "rp":validators.Int()})
     @expose('json')    
-    def fases_asignadas(self, page='1', rp='25', sortname='id', sortorder='asc', qtype=None, query=None):
+    def fases_asignadas(self,pid=None, page='1', rp='25', sortname='id', sortorder='asc', qtype=None, query=None):
         try:
             offset = (int(page)-1) * int(rp)
             
-            fases = DBSession.query(Fase).filter(Fase.proyecto_id==query)
+            if (query):
+                d = {qtype:query,'proyecto_id':int(pid)}
+                fases = DBSession.query(Fase).filter_by(**d)
+            else:
+                d = {'proyecto_id':int(pid)}
+                fases = DBSession.query(Fase).filter_by(**d)
                 
             total = fases.count()
             
@@ -171,73 +176,212 @@ class ConfigurarController(BaseController):
             result = dict(page=page, total=total, rows=rows)
         except:
             result = dict() 
-        return result    
-                    
+        return result
+    
+    def get_usuarios(self,usuarios,fid,offset,rp):
+        u=[]
+        id=int(fid)
+        cant=0
+        off=0
+        for usuario in usuarios:
+            if off < offset:
+                log.debug('continue')
+            else:
+                noEsta = True
+                for fase in usuario.fases:
+                    if fase.id == id:
+                        noEsta = False
+                if noEsta:
+                    cant=cant+1
+                    u.append(usuario)
+                if cant==rp:
+                    break
+            off=off+1
+        return u
+    
+    def roles_select(self,id,selected=None):
+
+            selectINI='<select id="'+str(id)+'">'
+            op1='<option value=1>Aprovador</option>'
+            op2='<option value=2>Desarrollador</option>'
+            op3='<option value=3>Aprovador y Desarrollador</option>'            
+            if selected==1:
+                log.debug('1')
+                op1='<option value=1 selected="true">Aprovador</option>'
+            elif selected==2:
+                log.debug('2')
+                op2='<option value=2 selected="true">Desarrollador</option>'
+                
+            elif selected==3:
+                log.debug('3')
+                op3='<option value=3 selected="true":>Aprovador y Desarrollador</option>'
+
+            selectFIN='</select>'
+            select=selectINI+op1+op2+op3+selectFIN
+            
+            return select
+
+        
     @validate(validators={"page":validators.Int(), "rp":validators.Int()})
     @expose('json')
-    def fases_disponibles(self, page='1', rp='25', sortname='id', sortorder='asc', qtype=None, query=None):
+    def usuarios_del_sistema(self, fid=None, page='1', rp='25', sortname='id', sortorder='asc', qtype=None, query=None):
         try:
             offset = (int(page)-1) * int(rp)
             if (query):
                 d = {qtype:query}
-                fases = DBSession.query(Fase).filter_by(**d)
+                usuarios = DBSession.query(Usuario).filter_by(**d)
             else:
-                d = {'estado':'inactivo','proyecto_id':None}
-                fases = DBSession.query(Fase).filter_by(**d)
-            
-            total = fases.count()
-            column = getattr(Fase, sortname)
-            fases = fases.order_by(getattr(column,sortorder)()).offset(offset).limit(rp)
-            
-            rows = [{'id'  : fase.id,
-                    'cell': [fase.id,
-                            fase.name,
-                            fase.descripcion,
-                            fase.estado,
-                            fase.orden]} for fase in fases]
+                usuarios = DBSession.query(Usuario)
+                
+               
+            if fid:
+                
+                column = getattr(Usuario, sortname)
+                usuarios = usuarios.order_by(getattr(column,sortorder)())                
+                u=self.get_usuarios(usuarios,fid,offset,rp)
+                total = usuarios.count()
+                usuarios=u
+            else:
+                total = usuarios.count() 
+                column = getattr(Usuario, sortname)
+                usuarios = usuarios.order_by(getattr(column,sortorder)()).offset(offset).limit(rp)
+                  
+            rows = [{'id'  : usuario.id,
+                    'cell': [usuario.id,
+                             usuario.name,
+                             self.roles_select(usuario.id)]} for usuario in usuarios
+                    ]
             result = dict(page=page, total=total, rows=rows)
         except:
             result = dict() 
         return result
+        
+    @expose('json')    
+    @expose('testando.templates.configurar.fases.vista_de_usuarios') 
+    def vista_de_usuarios(self,*args, **kw):
+        fId=kw['fId']
+        nombre=kw['nombre']
+        tmpl_context.faseId = hideMe()
+        tmpl_context.faseNombre = hideMe()
+        return dict(page='Vista de Usuarios', faseId=fId,faseNombre=nombre)
+    
+    def get_rol(self,uid,fid):
+        uid=int(uid)
+        fid=int(fid)
+        conn = config['pylons.app_globals'].sa_engine.connect()
+        se=select([usuario_rol_fase_table.c.rol_id],and_(usuario_rol_fase_table.c.usuario_id==uid, usuario_rol_fase_table.c.fases_id==fid))
+        log.debug('se = %s' %se)
+        
+        result=conn.execute(se)
+        row=result.fetchone() 
+        rol=int(row['rol_id'])
+        
+        log.debug('uid_id %s' %uid)
+        log.debug('rol_id %s' %rol)
+        log.debug('fid_id %s' %fid)
+        conn.close()
+        select_tag=self.roles_select(uid,rol) 
+        # log.debug('select = %s' %select)   
+        #=======================================================================
+        #sel=self.roles_select(uid,3)
+        return select_tag
+        
+    @validate(validators={"page":validators.Int(), "rp":validators.Int()})
+    @expose('json')    
+    def usuarios_asignados(self,fid=None, page='1', rp='25', sortname='id', sortorder='asc', qtype=None, query=None):
+        try:
+            offset = (int(page)-1) * int(rp)
+            
+            if (query):
+                d = {qtype:query}
+                usuarios = DBSession.query(Usuario).filter(Usuario.fases.any(id = fid)).filter_by(**d)
 
+            else:
+                d = {'id':int(fid)}
+                usuarios = DBSession.query(Usuario).filter(Usuario.fases.any(id = fid))
+                
+            total = usuarios.count()
+            
+            column = getattr(Usuario, sortname)
+            usuarios = usuarios.order_by(getattr(column,sortorder)()).offset(offset).limit(rp)
+            rows = [{'id'  : u.id,
+                    'cell': [u.id,
+                            u.name,
+                            self.get_rol(u.id,fid),
+                            ]} for u in usuarios]
+            log.debug('rows = %s' %rows) 
+            result = dict(page=page, total=total, rows=rows)
+        except:
+            result = dict() 
+        return result
+        
     @expose('json')
-    def asignar_fases(self,**kw):
-        ids    =    kw['ids']
-        ids    =    ids.split(",")
+    def agregar_usuarios(self,**kw):
+        idsyroles    =    kw['idsyroles']
+        idsyroles    =    idsyroles.split(";")
 
-        p_id    =    ids[0]
-        log.debug(" id == %s" % (p_id))
-        ids.remove(p_id)
-        ids.pop()
+        f_id    =    idsyroles[0]
+        idsyroles.remove(f_id)
+        idsyroles.pop()
         
-        cantidad    =    len(ids)
+        cantidad    =    len(idsyroles)
         
-        p_id    =    int(p_id)
-        
-        for id in ids:
-            fase = DBSession.query(Fase).filter(Fase.id==int(id)).first()
-            fase.proyecto_id=p_id
+        f_id    =    int(f_id)
+        f=DBSession.query(Fase).filter_by(id=f_id).first()
+        p=f.proyecto
+        conn = config['pylons.app_globals'].sa_engine.connect()
+        for idyrol in idsyroles:
+            idyrol=idyrol.split(',')
+            u_id = int(idyrol[0])
+            rol = int(idyrol[1])
+            ins=usuario_rol_fase_table.insert().values(usuario_id=u_id,rol_id=rol,fases_id=f_id)
+            ins.compile().params
+            log.debug('ins.params: %s' %ins.compile().params)
+            log.debug('con: %s' %conn)
+            conn.execute(ins)
+            u=DBSession.query(Usuario).filter_by(id=u_id).first()
+            p.usuarios.append(u)
             DBSession.flush()
-        msg    =    str(cantidad)    +    " fases asignadas con exito!"
+        conn.close()
+        
+            
+        msg    =    str(cantidad)    +    " usuarios agregados con exito!"
         type="succes"
         
         return dict(msg=msg,type=type)
     
     @expose('json')
-    def quitar_fases(self,**kw):
+    def quitar_usuarios(self,**kw):
         ids    =    kw['ids']
         ids    =    ids.split(",")
 
+        f_id    =    ids[0]
+        ids.remove(f_id)
         ids.pop()
-        cantidad    =    len(ids)
         
+        c1    =    len(ids)
+        c2=0
+        f_id    =    int(f_id)
+        f=DBSession.query(Fase).filter_by(id=f_id).first()
+        p=f.proyecto
         for id in ids:
-            fase = DBSession.query(Fase).filter(Fase.id==int(id)).first()
-            fase.proyecto_id=None
+            u_id = int(id)
+            u=DBSession.query(Usuario).filter_by(id=u_id).first()
+            f.usuarios.remove(u)
+            fases_del_usuario=DBSession.query(Fase).filter(Fase.usuarios.any(id = u_id))
+            fases_del_proyecto=fases_del_usuario.filter_by(proyecto_id=p.id)
+            if fases_del_proyecto.count()==0:
+                c2=c2+1
+                p.usuarios.remove(u)
             DBSession.flush()
-            
-        msg    =    str(cantidad)    +    " fases liberadas con exito!"
+        if c2>0:
+            msg_proyectos=str(c2)+" usuarios ya no forman parte de este proyecto."
+        else:
+            msg_proyectos=''
+        log.debug('msg_proyectos:= %s' %msg_proyectos)
+        msg    =    str(c1)    +    " usuarios quitados de la fase con exito!"
         type="succes"
         
-        return dict(msg=msg,type=type)
+        return dict(msg=msg,type=type,msg_p=msg_proyectos)
+
     
