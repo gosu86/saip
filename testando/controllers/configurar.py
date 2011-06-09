@@ -411,7 +411,8 @@ class ConfigurarController(BaseController):
                     'cell': [tipoDeItem.id,
                             tipoDeItem.name,
                             tipoDeItem.descripcion,
-                            tipoDeItem.complejidad]} for tipoDeItem in tiposDeItem]
+                            tipoDeItem.complejidad,
+                            (','.join([ce.name for ce in tipoDeItem.campos_extra]))]} for tipoDeItem in tiposDeItem]
             result = dict(page=page, total=total, rows=rows)
         except:
             result = dict() 
@@ -444,17 +445,18 @@ class ConfigurarController(BaseController):
                 tiposDeItem = DBSession.query(TipoItem).filter_by(**d)
             else:
                 tiposDeItem = DBSession.query(TipoItem).filter(TipoItem.fase_id!=fid)
-                log.debug('tiposDeItem: %s' %tiposDeItem)
+                #log.debug('tiposDeItem: %s' %tiposDeItem)
 
             total = tiposDeItem.count() 
             column = getattr(TipoItem, sortname)
             tiposDeItem = tiposDeItem.order_by(getattr(column,sortorder)()).offset(offset).limit(rp)
-            log.debug('tiposDeItem: %s' %tiposDeItem)                  
+            #log.debug('tiposDeItem: %s' %tiposDeItem)                  
             rows = [{'id'  : tipoDeItem.id,
                     'cell': [tipoDeItem.id,
                              tipoDeItem.name,
                              tipoDeItem.descripcion,
-                             tipoDeItem.complejidad]} for tipoDeItem in tiposDeItem
+                             tipoDeItem.complejidad,
+                             (','.join([ce.name for ce in tipoDeItem.campos_extra]))]} for tipoDeItem in tiposDeItem
                     ]
             result = dict(page=page, total=total, rows=rows)
         except:

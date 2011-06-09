@@ -1,4 +1,4 @@
-from tg             import expose,redirect, validate,flash,tmpl_context
+from tg             import expose,redirect, validate,flash,tmpl_context,config
 from tg.decorators  import override_template
 from tg.decorators  import without_trailing_slash
 from decorators import registered_validate, register_validators, catch_errors
@@ -6,6 +6,7 @@ from tgext.crud     import CrudRestController
 
 from testando.model             import DBSession
 from testando.model.fase        import Fase
+from testando.model.campoextra  import CampoExtra
 from testando.model.tipoitem        import TipoItem
 from testando.widgets.fase_w    import fase_new_form,fase_edit_filler,fase_edit_form
 from testando.widgets.myWidgets import hideMe
@@ -105,4 +106,34 @@ class FasesController(CrudRestController):
     @expose()
     def get_one(self, *args, **kw):
         redirect('../')
+        
+    @expose('json')
+    def importar_TiposDeItem(self,**kw):
+        ids    =    kw['ids']
+        ids    =    ids.split(",")
+        f_id    =    ids[0]
+        ids.remove(f_id)
+        ids.pop()
+        
+        cantidad    =    len(ids)
+        #log.debug('ins: %s' %str(ins))        
+        f_id    =    int(f_id)
+        conn = config['pylons.app_globals'].sa_engine.connect()
+        for id in ids:
+            id=int(id)
+            tdi=DBSession.query(TipoItem).filter_by(id=id).first()
+            ins=TipoItem.__table__.insert().values(name=tdi.name,descripcion=tdi.descripcion,complejidad=tdi.complejidad,fase_id=f_id)
+            ins.compile().params
+            conn.execute(ins)
+            for ce in tdi.campos_extra:
+                ins=CampoExtra.__table__.insert().values(name=ce.name, tipo=ce.tipo, tipo_item_id=tdi.id)
+                ins.compile().params
+                conn.execute(ins)                
+        conn.close()
+        
+            
+        msg    =    str(cantidad)    +    " tipos de item importados con exito!"
+        type="succes"
+        
+        return dict(msg=msg,type=type)        
         

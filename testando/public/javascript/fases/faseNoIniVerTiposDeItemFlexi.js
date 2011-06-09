@@ -9,6 +9,7 @@ $(function(){
 			{display: 'Nombre', name : 'name', width : 150, sortable : true, align: 'left'},
 			{display: 'Descripcion', name : 'descripcion', width : 150, sortable : true, align: 'left'},
 			{display: 'Complejidad', name : 'complejidad', width : 150, sortable : true, align: 'left'},
+			{display: 'Campos Extras', name : 'camposExtras', width : 150, sortable : true, align: 'left'},
 		],
 		
 		buttons : [
@@ -19,7 +20,7 @@ $(function(){
 			{separator: true},
 			{name: 'Borrar', bclass: 'delete', onpress : doCommandTipoDeItem},
 			{separator: true},
-			{name: 'Importar', bclass: 'import', onpress : doCommandTipoDeItem},
+			{name: 'Ver Tipos de Item del sistema', bclass: 'import', onpress : doCommandTipoDeItem},
 			{separator: true},			
 			
 		],
@@ -48,11 +49,12 @@ $(function(){
 							{display: 'Nombre', name : 'name', width : 150, sortable : true, align: 'left'},
 							{display: 'Descripcion', name : 'descripcion', width : 150, sortable : true, align: 'left'},
 							{display: 'Complejidad', name : 'complejidad', width : 150, sortable : true, align: 'left'},
+							{display: 'Campos Extras', name : 'camposExtras', width : 150, sortable : true, align: 'left'},
 				],
 				
 				buttons : [
 					{separator: true},
-					{name: 'Agregar a la Fase', bclass: 'add', onpress : doCommandTipoDeItem},
+					{name: 'Importar a la fase', bclass: 'add', onpress : doCommandTipoDeItem},
 				],
 				
 				searchitems : [
@@ -79,7 +81,10 @@ function doCommandTipoDeItem(com, grid)
 {
 	if (com == 'Crear')
 	{window.location = "/configurar/tiposDeItem/new/?fase_id="+$('input#fid').val();}
-	
+	else if (com=='Ver Tipos de Item del sistema')
+	{
+		$('div.DeSistema .flexigrid').toggleClass('hideBody');
+	}
 	else if ($('.trSelected', grid).length > 0)
 	{	
 		if (com == 'Editar')
@@ -102,7 +107,10 @@ function doCommandTipoDeItem(com, grid)
 				if(confirm('Seguro que desea BORRAR el tipo de item: "' + nombre + '" ?'))
 					{deleteTDI(id)}
 			});
-				
+		}
+		else if (com == 'Importar a la fase')
+		{
+			obtener_ids(grid,'importar')		
 		}
 	}
 	else
@@ -115,10 +123,11 @@ function deleteTDI(id)
     {
       type: 'POST',
       dataType: "json",
-      url: "/configurar/tiposDeItem"+"/post_delete",
+      url: "/configurar/tiposDeItem/post_delete",
       data: {id:id},
       success: function(data)
-      {
+      {	
+    	  $('#tiposDeItemListaFlexi').flexReload();
     	  jQuery.noticeAdd(
     	    	  {
     	              text: data.msg,
@@ -140,6 +149,40 @@ function get_nombre(){
 	nombre=$('.trSelected').find('td[abbr="name"]').text();
 	return nombre
 }
+
+function obtener_ids(grid,tipo){
+	faseId=$('input#fid').val();
+	ids=faseId+','
+	$('.trSelected', grid).each(function()
+	{
+		id = get_id(this) 
+		ids=ids+(id+',')
+	});
+	if (tipo=='importar')
+	{importar_tiposDeItem(ids)}
+}
+function importar_tiposDeItem(ids)
+{
+    $.ajax(
+    	    {
+    	      type: 'POST',
+    	      dataType: "json",
+    	      url: "/configurar/fases/importar_TiposDeItem",
+    	      data: {ids:ids},
+    	      success: function(data)
+    	      {
+    	    	  jQuery.noticeAdd(
+    	    	    	  {
+    	    	              text: data.msg,
+    	    	              stay: false,
+    	    	              stayTime: 5000,
+    	    	              type: data.type
+    	    	    	  });    	  
+    	    	  $("#faseNoIniVerTiposDeItemFlexi").flexReload();
+    	      },
+    	    });
+}
+
 function msg_falta_seleccion(){
 	jQuery.noticeAdd({
 	              text: "Debe seleccionar una Fase!",
