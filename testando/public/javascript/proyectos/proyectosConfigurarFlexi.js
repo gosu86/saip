@@ -16,15 +16,9 @@ $(function()
 
 		buttons : [
 			{separator: true},         
-			{name: 'Ver Detalle Completo', bclass: 'viewAll', onpress : doCommandFases},
-			{separator: true},
-			{name: 'Asignar Usuarios', bclass: 'addUsers', onpress : doCommandFases},
-			{separator: true},			
-			{name: 'Ver Usuarios', bclass: 'viewUsers', onpress : doCommandFases},
-			{separator: true},
-			{name: 'Asignar Fases', bclass: 'addPhases', onpress : doCommandFases},
-			{separator: true},			
-			{name: 'Ver Fases', bclass: 'viewPhases', onpress : doCommandFases},
+			{name: 'Detalle Completo', bclass: 'viewAll', onpress : doCommandFases},
+			{separator: true},		
+			{name: 'Fases', bclass: 'viewPhases', onpress : doCommandFases},
 			{separator: true},
 			{name: 'Iniciar', bclass: 'start', onpress : doCommandFases},
 			{separator: true},
@@ -47,13 +41,14 @@ $(function()
 		singleSelect: true
 	});
 });
+
 function doCommandFases(com, grid)
 {
 	if ($('.trSelected', grid).length > 0)
 	{	
-		if (com == 'Asignar Fases')
-			{asignar_fases(grid)}
-		else if (com == 'Ver Fases')
+		if (com == 'Detalle Completo')
+			{detalle_completo(grid)}
+		else if (com == 'Fases')
 			{ver_fases(grid)}
 		else if (com == 'Iniciar')
 			{iniciar(grid)}
@@ -62,51 +57,37 @@ function doCommandFases(com, grid)
 	{msg_falta_seleccion()}	
 }
 
-function asignar_fases(grid){
-	estado=$('.trSelected', grid).find('td[abbr="estado"]').text()
-	if (estado != "Iniciado")
+function detalle_completo(grid){
+	$('.trSelected', grid).each(function()
 	{
-		$('.trSelected', grid).each(function()
-		{
-			var id = $(this).attr('id');
-			id = id.substring(id.lastIndexOf('row')+3);
-			window.location = "/configurar/asignacion_de_fases/"+id
-		});	
-	}
-	else
-	{	
-		msg_proyecto_ya_iniciado()
-		msg_no_asignar()
-	}
+		id = get_id(this) 
+		estado=get_estado()
+		nombre=get_nombre()
+		window.location = "/configurar/detalle_completo/?pId="+id+"&estado="+estado+"&nombre="+nombre
+	});	
 }
 
 function ver_fases(grid){
-	fases=$('.trSelected',grid).find('td[abbr="fases"]').text()
-	if (fases == "si")
-	{
 		$('.trSelected', grid).each(function()
-		{
-			var id = $(this).attr('id');
-			id = id.substring(id.lastIndexOf('row')+3);
-			window.location = "/configurar/vista_de_fases/"+id
+		{	
+			id = get_id(this) 
+			estado=get_estado()
+			nombre=get_nombre()
+			window.location = "/configurar/vista_de_fases/?pId="+id+"&estado="+estado+"&nombre="+nombre
 		});	
-	}
-	else
-	{msg_no_posee_fases();}
 }
 
 function iniciar(grid){
 	$('.trSelected', grid).each(function()
 	{
-		estado=$('.trSelected',grid).find('td[abbr="estado"]').text()
+		estado=get_estado()
 		if (estado !=="Iniciado")
 		{			
-			var id = $(this).attr('id');
-			id = id.substring(id.lastIndexOf('row')+3);
-			fases=$('.trSelected',grid).find('td[abbr="fases"]').text()
+			id = get_id(this) 
+			fases=get_si_no('fases')
 			if (fases == "si")
 			{
-				usuarios=$('.trSelected',grid).find('td[abbr="usuarios"]').text()
+				usuarios=get_si_no('usuarios')
 				if(usuarios == "si")
 				{iniciarP(id)}
 				else
@@ -127,7 +108,7 @@ function iniciar(grid){
 	});
 }
 
-function iniciarP(id) {
+function iniciarP(id){
     $.ajax(
     {
       type: 'POST',
@@ -149,6 +130,34 @@ function iniciarP(id) {
       },
     });
 }
+
+function get_si_no(objeto){
+	result='no'
+	if (objeto == 'usuarios'){
+			result=$('.trSelected').find('td[abbr="usuarios"]').text();
+	}
+	else if (objeto == 'fases'){
+		result=$('.trSelected').find('td[abbr="fases"]').text();
+	}
+	return result
+}
+
+
+function get_id(tr){
+	var id = $(tr).attr('id');
+	id = id.substring(id.lastIndexOf('row')+3);
+	return id;
+}
+
+function get_nombre(){
+	nombre=$('.trSelected').find('td[abbr="name"]').text();
+	return nombre
+}
+
+function get_estado(grid){
+	estado=$('.trSelected').find('td[abbr="estado"]').text();
+	return estado
+} 
 
 function msg_falta_seleccion(){
 	jQuery.noticeAdd({
@@ -193,15 +202,6 @@ function msg_no_iniciar(){
 	jQuery.noticeAdd(
 	    	  {
 	              text: "El proyecto no se puede iniciar.",
-	              stay: false,
-	              stayTime: 3000,
-	              type: "error"
-	    	  });	
-}
-function msg_no_asignar(){
-	jQuery.noticeAdd(
-	    	  {
-	              text: "No se pueden asignar fases.",
 	              stay: false,
 	              stayTime: 3000,
 	              type: "error"

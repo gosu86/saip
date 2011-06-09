@@ -18,11 +18,18 @@
     <title>
       SAIP·${page}·Proyectos
     </title>
-    <script type="text/javascript" src="${url('/javascript/proyectos/proyectoVerFasesFlexi.js')}">
-    </script> 
+    <py:if test="iniciado">
+    <script type="text/javascript" src="${url('/javascript/proyectos/proyectoIniVerFasesFlexi.js')}">
+    </script>
+    </py:if>
+    <py:if test="not iniciado">
+    <script type="text/javascript" src="${url('/javascript/proyectos/proyectoNoIniVerFasesFlexi.js')}">
+    </script>
+   </py:if>
   </head>
   <body>
-    <div py:replace="tmpl_context.proyectoId(value=proyectoId)">Input Form</div>
+    <div py:replace="tmpl_context.proyectoId(id='pid',value=proyectoId)">Input Form</div>
+    <div py:replace="tmpl_context.proyectoNombre(id='proyectoNombre',value=proyectoNombre)">Input Form</div>
       <div class="TablaFases">
         <table id="proyectoVerFasesFlexi">
         </table>

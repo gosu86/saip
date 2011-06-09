@@ -2,10 +2,9 @@
 """Sample model module."""
 
 from sqlalchemy import *
-from sqlalchemy.orm import mapper, relation
-from sqlalchemy import Table, ForeignKey, Column
+from sqlalchemy.orm import mapper, relation,relationship, backref
+from sqlalchemy import Table, ForeignKey, Column,UniqueConstraint
 from sqlalchemy.types import Integer, Unicode
-from sqlalchemy.orm import relationship, backref
 from testando.model import DeclarativeBase, metadata, DBSession
 from datetime import datetime
 
@@ -17,8 +16,7 @@ from testando.model.auth import Usuario
 usuario_rol_fase_table = Table('usuarios_roles_fases', metadata,
     Column('usuario_id', Integer, ForeignKey('usuarios.id',
         onupdate="CASCADE", ondelete="CASCADE"), primary_key=True),
-    Column('rol_id', Integer, ForeignKey('roles.id',
-        onupdate="CASCADE", ondelete="CASCADE"), primary_key=True),
+    Column('rol_id', Integer,primary_key=True),
     Column('fases_id', Integer, ForeignKey('fases.id',
         onupdate="CASCADE", ondelete="CASCADE"), primary_key=True)
 )
@@ -58,5 +56,9 @@ class Fase(DeclarativeBase):
     
     items = relationship(Item, order_by=Item.id, backref="fase")
     
-    usuarios = relation('Usuario', secondary=usuario_rol_fase_table, backref='fases')   
+    usuarios = relation('Usuario', secondary=usuario_rol_fase_table, backref='fases')
+    
+    __table_args__ = (
+            UniqueConstraint('proyecto_id', 'orden'),{}
+            )      
     #}    

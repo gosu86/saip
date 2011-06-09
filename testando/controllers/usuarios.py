@@ -32,7 +32,7 @@ class UsuariosController(CrudRestController):
     def get_all(self):
         override_template(self.get_all,self.template)    
         return dict(page=self.page)
-             
+
     @validate(validators={"page":validators.Int(), "rp":validators.Int()})
     @expose('json')
     def fetch(self, page='1', rp='25', sortname='id', sortorder='asc', qtype=None, query=None):
@@ -43,9 +43,12 @@ class UsuariosController(CrudRestController):
                 usuarios = DBSession.query(Usuario).filter_by(**d)
             else:
                 usuarios = DBSession.query(Usuario)
-            total = usuarios.count()
-            column = getattr(Usuario, sortname)
-            usuarios = usuarios.order_by(getattr(column,sortorder)()).offset(offset).limit(rp)    
+ 
+                total = usuarios.count() 
+                column = getattr(Usuario, sortname)
+                usuarios = usuarios.order_by(getattr(column,sortorder)()).offset(offset).limit(rp)
+
+                    
             rows = [{'id'  : usuario.id,
                     'cell': [usuario.id,
                              usuario.name,

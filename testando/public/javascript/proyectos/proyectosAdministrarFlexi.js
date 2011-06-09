@@ -41,6 +41,22 @@ $(function()
 	});
 });
 
+function doCommandProyecto(com, grid)
+{
+	if (com == 'Crear') 
+	{window.location = location+"new/";}
+	else{
+		if ($('.trSelected', grid).length > 0){
+			if (com == 'Editar')
+			{editar(grid)}
+			else if (com == 'Borrar') 
+			{borrar(grid)}
+		}
+		else
+		{msg_falta_seleccion()}
+	}
+}
+
 function deleteP(id) {
     $.ajax(
     {
@@ -62,21 +78,6 @@ function deleteP(id) {
     	  
       },
     });
-}
-
-function doCommandProyecto(com, grid)
-{
-	if (com == 'Crear') 
-	{window.location = location+"new/";}
-	
-	if ($('.trSelected', grid).length > 0){
-		if (com == 'Editar')
-		{editar(grid)}
-		else if (com == 'Borrar') 
-		{borrar(grid)}
-	}
-	else
-	{msg_falta_seleccion()}
 }
 
 function editar(grid)

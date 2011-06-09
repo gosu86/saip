@@ -1,8 +1,8 @@
 $(function()
 {
-	$("#fasesAsignadasFlexi").flexigrid(
+	$("#proyectoVerFasesFlexi").flexigrid(
 	{
-		url: '/configurar/fases_asignadas',
+		url: '/configurar/fases_asignadas/?pid='+$('input#pid').val(),
 		dataType: 'json',
 		
 		colModel : [
@@ -15,7 +15,13 @@ $(function()
 		
 		buttons : [
 			{separator: true},
-			{name: 'Quitar', bclass: 'delete', onpress : doCommandAsignadas},
+			{name: 'Usuarios', bclass: 'addUsers', onpress : doCommandFases},
+			{separator: true},			
+			{name: 'Tipos de Items', bclass: 'addItemsType', onpress : doCommandFases},		
+			{separator: true},
+			{name: 'Items', bclass: 'addItemsType', onpress : doCommandFases},
+			{separator: true},
+			{name: 'Lineas Base', bclass: 'addItemsType', onpress : doCommandFases},
 			{separator: true},
 		],
 		
@@ -28,14 +34,13 @@ $(function()
 		sortorder: "asc",
 		usepager: true,
 		nowrap: false,
-		title: "Fases Asignadas",
+		title: "Fases del proyecto: "+$('#proyectoNombre').val() + " (iniciado)",
 		useRp: true,
 		rp: 5,
 		showTableToggleBtn: true,
+		showToggleBtn: true,
 		height: 'auto',
-		singleSelect: false,
-		query: $('input[type="hidden"]').val(),
-		qtype: 'proyecto_id',
+		singleSelect: true,
 	});
 });
 function deleteF(id) {
@@ -55,7 +60,7 @@ function deleteF(id) {
     	              type: data.type
     	    	  });
     	  
-    	  $("#fasesAsignadasFlexi").flexReload();
+    	  $("#proyectoVerFasesFlexi").flexReload();
       },
     });
 }
@@ -70,7 +75,7 @@ function liberar_fases(id) {
       data: {ids:id},
       success: function(data)
       { 
-    	  $("#fasesAsignadasFlexi").flexReload();
+    	  $("#proyectoVerFasesFlexi").flexReload();
     	  jQuery.noticeAdd(
     	    	  {
     	              text: data.msg,
@@ -78,15 +83,13 @@ function liberar_fases(id) {
     	              stayTime: 5000,
     	              type: data.type
     	    	  });
-    	  
-    	  $("#fasesDisponiblesFlexi").flexReload();
-    	 
+   	 
       },
     });
 }
 
 
-function doCommandAsignadas(com, grid) {
+function doCommandFases(com, grid) {
 	if (com == 'Quitar')
 	{
 		if ($('.trSelected', grid).length > 0)
