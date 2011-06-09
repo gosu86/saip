@@ -43,76 +43,58 @@ $(function()
 		singleSelect: true,
 	});
 });
-function deleteF(id) {
-    $.ajax(
-    {
-      type: 'POST',
-      dataType: "json",
-      url: location+"/post_delete",
-      data: {id:id},
-      success: function(data)
-      {
-    	  jQuery.noticeAdd(
-    	    	  {
-    	              text: data.msg,
-    	              stay: false,
-    	              stayTime: 5000,
-    	              type: data.type
-    	    	  });
-    	  
-    	  $("#proyectoVerFasesFlexi").flexReload();
-      },
-    });
-}
-
-
-function liberar_fases(id) {
-    $.ajax(
-    {
-      type: 'POST',
-      dataType: "json",
-      url: '/configurar/quitar_fases',
-      data: {ids:id},
-      success: function(data)
-      { 
-    	  $("#proyectoVerFasesFlexi").flexReload();
-    	  jQuery.noticeAdd(
-    	    	  {
-    	              text: data.msg,
-    	              stay: false,
-    	              stayTime: 5000,
-    	              type: data.type
-    	    	  });
-   	 
-      },
-    });
-}
-
 
 function doCommandFases(com, grid) {
-	if (com == 'Quitar')
+	if ($('.trSelected', grid).length > 0)
 	{
-		if ($('.trSelected', grid).length > 0)
-		{	
-			var ids=''
-			$('.trSelected', grid).each(function()
-			{	
-				var id = $(this).attr('id');
-				id = id.substring(id.lastIndexOf('row')+3);
-				ids=ids+(id+',')
-			});
-			liberar_fases(ids)			
-		}
-		else
-		{
-	    	  jQuery.noticeAdd(
-	    	    	  {
-	    	              text: "Seleccione almenos una fase para liberar!.",
-	    	              stay: false,
-	    	              stayTime: 3000,
-	    	              type: 'notice'
-	    	    	  });
-		}
+	if (com == 'Usuarios')
+		{ver_usuarios(grid);}		
+		else if (com == 'Tipos de Items')
+		{ver_tipos_de_item(grid);}
+		
 	}
+	else
+	{msg_falta_seleccion();}
 
+}
+function ver_usuarios(grid){
+	$('.trSelected', grid).each(function()
+	{	
+		id = get_id(this) 
+		nombre=get_nombre()
+		window.location = "/configurar/vista_de_usuarios/?fId="+id+"&nombre="+nombre
+	});	
+}
+
+function ver_tipos_de_item(grid){
+	$('.trSelected', grid).each(function()
+	{	
+		id = get_id(this) 
+		nombre=get_nombre()
+		estado=get_estado()
+		window.location = "/configurar/vista_de_tiposDeItem/?fId="+id+"&nombre="+nombre+"&estado="+estado
+	});	
+}
+
+function get_id(tr){
+	var id = $(tr).attr('id');
+	id = id.substring(id.lastIndexOf('row')+3);
+	return id;
+}
+ 
+function get_nombre(){
+	nombre=$('.trSelected').find('td[abbr="name"]').text();
+	return nombre
+}
+function get_estado(grid){
+	estado=$('.trSelected').find('td[abbr="estado"]').text();
+	return estado
+} 
+function msg_falta_seleccion(){
+	jQuery.noticeAdd({
+	              text: "Debe seleccionar una Fase!",
+	              stay: false,
+	              stayTime: 2500,
+	              type: "notice"
+	    	  });
 }

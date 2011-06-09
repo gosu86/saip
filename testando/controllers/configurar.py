@@ -377,17 +377,16 @@ class ConfigurarController(BaseController):
     @expose('testando.templates.configurar.fases.vista_de_tiposDeItem') 
     def vista_de_tiposDeItem(self,*args, **kw):
         fId=kw['fId']
-        #estado=kw['estado']
+        estado=kw['estado']
         nombre=kw['nombre']
         tmpl_context.faseId = hideMe()
         tmpl_context.faseNombre = hideMe()
-        #=======================================================================
-        # if estado=='Iniciado':
-        #    iniciado=True
-        # else:
-        #    iniciado=False
-        #=======================================================================
-        return dict(page='Vista de Tipos de Item', faseId=fId,faseNombre=nombre)        
+        if estado=='Inicial':
+            iniciado=True
+        else:
+            iniciado=False
+        
+        return dict(page='Vista de Tipos de Item', faseId=fId,faseNombre=nombre,iniciado=iniciado)        
         
     @validate(validators={"page":validators.Int(), "rp":validators.Int()})
     @expose('json')    
@@ -446,7 +445,7 @@ class ConfigurarController(BaseController):
             else:
                 tiposDeItem = DBSession.query(TipoItem).filter(TipoItem.fase_id!=fid)
                 #log.debug('tiposDeItem: %s' %tiposDeItem)
-
+            
             total = tiposDeItem.count() 
             column = getattr(TipoItem, sortname)
             tiposDeItem = tiposDeItem.order_by(getattr(column,sortorder)()).offset(offset).limit(rp)

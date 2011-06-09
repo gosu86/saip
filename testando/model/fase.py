@@ -32,7 +32,7 @@ class Fase(DeclarativeBase):
     
     descripcion = Column(UnicodeText(255))
     
-    estado = Column(Unicode(20), default='inicial')
+    estado = Column(Unicode(20), default='Inicial')
     
     orden = Column(SMALLINT)
     

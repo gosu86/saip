@@ -5,13 +5,16 @@
 <xi:include href="master.html" />
 <title>SAIP·Nuevo ${model}</title>
 <head>
-<script type="text/javascript" src="${url('/javascript/add_more_attr.js')}">
-</script>
+    <script type="text/javascript" src="${url('/javascript/jquery.multiselect.js')}">
+    </script>
+    <script type="text/javascript">
+	    $(function() {$("#lider").multiselect();});
+            </script>
 </head>
 <body class="tundra">
   <div style="float:left;" class="crud_add">
     <h2 style="margin-top:1px;">Nuevo $model</h2>
-     ${XML(tmpl_context.widget(value=value, action='/configurar/tiposDeItem'))}
+     ${XML(tmpl_context.widget(value=value, action='./'))}
   </div>
   <div style="height:0px; clear:both;"> &nbsp; </div>
 </body>

@@ -6,8 +6,14 @@
     <title>
       SAIP·${page}·Fases
     </title>
+    <py:if test="iniciado">
+    <script type="text/javascript" src="${url('/javascript/fases/faseIniVerTiposDeItemFlexi.js')}">
+    </script>
+    </py:if>
+    <py:if test="not iniciado">
     <script type="text/javascript" src="${url('/javascript/fases/faseNoIniVerTiposDeItemFlexi.js')}">
-    </script> 
+    </script>
+   </py:if>     
   </head>
   <body>
     <div py:replace="tmpl_context.faseId(id='fid',value=faseId)">Input Form</div>

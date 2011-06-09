@@ -12,6 +12,8 @@
 
   <xi:include href="master.html" />
   <head>
+            <script type="text/javascript" src="${url('/javascript/sliding_effect.js')}">
+            </script>  
     <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
     <title>
       SAIP - Administrar
@@ -45,16 +47,6 @@
 <li py:if="tg.predicates.has_any_permission('AdministrarProyectos','AdministrarTodo')" class="sliding-element">
 <a href="${tg.url('proyectos/')}" title="Proyectos">
   Proyectos
-</a>
-</li>
-<li py:if="tg.predicates.has_any_permission('AdministrarFases','AdministrarTodo')" class="sliding-element">
-<a href="${tg.url('fases/')}" title="Fases">
-  Fases
-</a>
-</li>
-<li py:if="tg.predicates.has_any_permission('AdministrarTiposDeItem','AdministrarTodo')" class="sliding-element">
-<a href="${tg.url('tiposDeItem/')}" title="Tipos de Item">
-  Tipos de Item
 </a>
 </li>
 </ul>

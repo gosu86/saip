@@ -30,7 +30,7 @@ class TipoItem(DeclarativeBase):
     #{ Relations
     
     #fase (por backref en la relacion "tipos_items" en el modelo fase.py)
-    
+    importado_id = Column(Integer)
     fase_id = Column(Integer, ForeignKey('fases.id'))
     
     items           = relationship(Item, order_by=Item.id, backref="tipo_item")

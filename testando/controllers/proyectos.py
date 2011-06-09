@@ -1,5 +1,5 @@
 from tg             import expose,redirect, validate,flash,tmpl_context
-from tg.decorators  import override_template
+from tg.decorators  import override_template,without_trailing_slash, with_trailing_slash
 
 from tgext.crud     import CrudRestController
 
@@ -11,9 +11,14 @@ from testando.model.auth        	import Usuario
 from testando.model.fase        	import Fase
 from testando.widgets.proyecto_w 	import proyecto_new_form,proyecto_edit_filler,proyecto_edit_form
 from testando.widgets.myWidgets 	import hideMe
-
+from decorators import registered_validate, register_validators, catch_errors
 from formencode		import validators
-
+errors = ()
+try:
+	from sqlalchemy.exc import IntegrityError, DatabaseError, ProgrammingError
+	errors =  (IntegrityError, DatabaseError, ProgrammingError)
+except ImportError:
+	pass
 import logging
 __all__ = ['ProyectosController']
 log = logging.getLogger(__name__)
@@ -30,6 +35,19 @@ class ProyectosController(CrudRestController):
 
 	template=''
 	page=''
+	
+	@without_trailing_slash
+	@expose('testando.templates.administrar.proyectos.new')
+	def new(self, *args, **kw):
+		"""Display a page to show a new record."""
+		tmpl_context.widget = self.new_form
+		return dict(value=kw, model=self.model.__name__)
+	@catch_errors(errors, error_handler=new)
+	@expose()
+	@registered_validate(error_handler=new)
+	def post(self, *args, **kw):
+		self.provider.create(self.model, params=kw)
+		raise redirect('./')		
 	@expose()
 	def put(self, *args, **kw):
 		"""update"""

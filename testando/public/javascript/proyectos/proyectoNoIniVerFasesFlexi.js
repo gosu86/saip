@@ -53,8 +53,8 @@ $(function()
 
 function doCommandFases(com, grid) {
 	if (com == 'Crear')
-	{window.location = "/configurar/fases/new/?proyecto_id="+$('input#pid').val();
-	}else if ($('.trSelected', grid).length > 0)
+	{window.location = "/configurar/fases/new/?proyecto_id="+$('input#pid').val();}
+	else if ($('.trSelected', grid).length > 0)
 	{
 		if (com == 'Editar')
 		{
@@ -122,7 +122,8 @@ function ver_tipos_de_item(grid){
 	{	
 		id = get_id(this) 
 		nombre=get_nombre()
-		window.location = "/configurar/vista_de_tiposDeItem/?fId="+id+"&nombre="+nombre
+		estado=get_estado()
+		window.location = "/configurar/vista_de_tiposDeItem/?fId="+id+"&nombre="+nombre+"&estado="+estado
 	});	
 }
 
@@ -131,12 +132,15 @@ function get_id(tr){
 	id = id.substring(id.lastIndexOf('row')+3);
 	return id;
 }
-
+ 
 function get_nombre(){
 	nombre=$('.trSelected').find('td[abbr="name"]').text();
 	return nombre
 }
-
+function get_estado(grid){
+	estado=$('.trSelected').find('td[abbr="estado"]').text();
+	return estado
+} 
 function msg_falta_seleccion(){
 	jQuery.noticeAdd({
 	              text: "Debe seleccionar una Fase!",

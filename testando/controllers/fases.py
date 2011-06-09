@@ -3,7 +3,7 @@ from tg.decorators  import override_template
 from tg.decorators  import without_trailing_slash
 from decorators import registered_validate, register_validators, catch_errors
 from tgext.crud     import CrudRestController
-
+from sqlalchemy.sql import and_, or_, not_
 from testando.model             import DBSession
 from testando.model.fase        import Fase
 from testando.model.campoextra  import CampoExtra
@@ -93,10 +93,10 @@ class FasesController(CrudRestController):
             d = {'id':id}
             fase = DBSession.query(Fase).filter_by(**d).first()            
             nombre=fase.name
-            if (fase.estado != 'activo'):
+            if (fase.estado == 'Inicial'):
                 DBSession.delete(fase)
                 DBSession.flush()
-                msg="la fase se ha eliminado con exito!."
+                msg="la fase "+nombre+" se ha eliminado con exito!."
                 type="succes"
             else:
                 msg="La fase NO se puede eliminar."
@@ -116,24 +116,40 @@ class FasesController(CrudRestController):
         ids.pop()
         
         cantidad    =    len(ids)
-        #log.debug('ins: %s' %str(ins))        
+    
         f_id    =    int(f_id)
         conn = config['pylons.app_globals'].sa_engine.connect()
+        names=''
         for id in ids:
             id=int(id)
             tdi=DBSession.query(TipoItem).filter_by(id=id).first()
-            ins=TipoItem.__table__.insert().values(name=tdi.name,descripcion=tdi.descripcion,complejidad=tdi.complejidad,fase_id=f_id)
-            ins.compile().params
-            conn.execute(ins)
-            for ce in tdi.campos_extra:
-                ins=CampoExtra.__table__.insert().values(name=ce.name, tipo=ce.tipo, tipo_item_id=tdi.id)
+            existeTDI=DBSession.query(TipoItem).filter(and_(TipoItem.fase_id==f_id,TipoItem.name==tdi.name))
+            if existeTDI.count() > 0:
+                names=names+tdi.name+', '
+            else:
+                ins=TipoItem.__table__.insert().values(name=tdi.name,descripcion=tdi.descripcion,complejidad=tdi.complejidad,fase_id=f_id)
                 ins.compile().params
-                conn.execute(ins)                
+                result=conn.execute(ins)
+                newTDIid=int(result.inserted_primary_key[0])
+                for ce in tdi.campos_extra:
+                    ins=CampoExtra.__table__.insert().values(name=ce.name, tipo=ce.tipo, tipo_item_id=newTDIid)
+                    ins.compile().params
+                    conn.execute(ins)                
         conn.close()
-        
-            
-        msg    =    str(cantidad)    +    " tipos de item importados con exito!"
-        type="succes"
-        
-        return dict(msg=msg,type=type)        
+
+        names=names.split(',')
+        names.pop()
+   
+        cantNames=len(names)        
+        cantidad=cantidad- cantNames       
+   
+        msg=''
+        type=""
+        error=''      
+        if cantidad > 0:    
+            msg    =    str(cantidad)    +    " tipos de item importados con exito!"
+            type="succes"
+        if cantNames > 0:
+            error = 'Los tipos de item '+str(names)+'no pudieron importarse, existem tipos de item con mismo nombre en la fase.'
+        return dict(msg=msg,type=type, error=error)        
         

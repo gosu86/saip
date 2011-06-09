@@ -9,19 +9,14 @@ $(function(){
 			{display: 'Nombre', name : 'name', width : 150, sortable : true, align: 'left'},
 			{display: 'Descripcion', name : 'descripcion', width : 150, sortable : true, align: 'left'},
 			{display: 'Complejidad', name : 'complejidad', width : 150, sortable : true, align: 'left'},
-			{display: 'Campos Extras', name : 'camposExtras', width : 150, sortable : true, align: 'left'},
+			{display: 'Campos Extras', name : 'camposExtras', width : 150, sortable : false, align: 'left'},
 		],
 		
 		buttons : [
 			{separator: true},
-			{name: 'Crear', bclass: 'add', onpress : doCommandTipoDeItem},
-			{separator: true},
-			{name: 'Editar', bclass: 'edit', onpress : doCommandTipoDeItem},
-			{separator: true},
-			{name: 'Borrar', bclass: 'delete', onpress : doCommandTipoDeItem},
-			{separator: true},
 			{name: 'Ver Tipos de Item del sistema', bclass: 'import', onpress : doCommandTipoDeItem},
-			{separator: true},			
+			{separator: true},
+			{name: 'Añadir Campos Extras', bclass: 'add', onpress : doCommandTipoDeItem},
 			
 		],
 		
@@ -32,7 +27,7 @@ $(function(){
 		sortname: "id",
 		sortorder: "asc",
 		usepager: true,
-		title: "Lista de Tipos De Item de la fase: "+$('#fNombre').val() + " (No iniciada)",
+		title: "Lista de Tipos De Item de la fase: "+$('#fNombre').val() + " (Iniciada)",
 		useRp: true,
 		rp: 10,
 		showTableToggleBtn: true,
@@ -79,9 +74,7 @@ $(function(){
 
 function doCommandTipoDeItem(com, grid)
 {
-	if (com == 'Crear')
-	{window.location = "/configurar/tiposDeItem/new/?fase_id="+$('input#fid').val();}
-	else if (com=='Ver Tipos de Item del sistema')
+	if (com=='Ver Tipos de Item del sistema')
 	{
 		$('div.DeSistema .flexigrid').toggleClass('hideBody');
 	}
@@ -112,34 +105,16 @@ function doCommandTipoDeItem(com, grid)
 		{
 			obtener_ids(grid,'importar')		
 		}
+		else if (comm=='Agregar Campos Extras')
+		{
+			agregar_campos_extras()
+		}
 	}
 	else
 	{msg_falta_seleccion()}
 }
 
-function deleteTDI(id)
-{
-    $.ajax(
-    {
-      type: 'POST',
-      dataType: "json",
-      url: "/configurar/tiposDeItem/post_delete",
-      data: {id:id},
-      success: function(data)
-      {	
-    	  $("#faseNoIniVerTiposDeItemFlexi").flexReload();
-    	  jQuery.noticeAdd(
-    	    	  {
-    	              text: data.msg,
-    	              stay: false,
-    	              stayTime: 5000,
-    	              type: data.type
-    	    	  });    	  
-    	  
-    	  $('#tiposDeItemListaFlexi').flexReload();
-      },
-    });
-}
+
 function get_id(tr){
 	var id = $(tr).attr('id');
 	id = id.substring(id.lastIndexOf('row')+3);
@@ -196,9 +171,15 @@ function importar_tiposDeItem(ids)
     	    });
 }
 
+function agregar_campos_extras()
+{
+	id = get_id(this) 
+	window.location = '/configurar/tiposDeItem/'+id+"/edit/?camposExtras=true";
+}
+
 function msg_falta_seleccion(){
 	jQuery.noticeAdd({
-	              text: "Debe seleccionar un tipo de item!",
+	              text: "Debe seleccionar una Fase!",
 	              stay: false,
 	              stayTime: 2500,
 	              type: "notice"

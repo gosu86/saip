@@ -47,9 +47,21 @@ class TiposDeItemController(CrudRestController):
         override_template(self.get_all,self.template)    
         return dict(page=self.page)
         #return dict()
-    
+        
+    @expose('tgext.crud.templates.edit')
+    def edit(self, *args, **kw):
+        """Display a page to edit the record."""
+        tmpl_context.widget = self.edit_form
+        pks = self.provider.get_primary_fields(self.model)
+        kw = {}
+        for i, pk in  enumerate(pks):
+            kw[pk] = args[i]
+        value = self.edit_filler.get_value(kw)
+        value['_method'] = 'PUT'
+        return dict(value=value, model=self.model.__name__, pk_count=len(pks))    
     @validate(validators={"page":validators.Int(), "rp":validators.Int()})
     @expose('json')
+    
     def fetch(self, page='1', rp='25', sortname='id', sortorder='asc', qtype=None, query=None):
         try:
             #____________________________________________
@@ -93,7 +105,7 @@ class TiposDeItemController(CrudRestController):
             nombre=tipoitem.name
             DBSession.delete(tipoitem)
             DBSession.flush()    
-            msg="la fase se ha eliminado con exito!."
+            msg="El tipo de Item "+nombre+" se ha eliminado con exito!."
             type="succes"
         return dict(msg=nombre, type=type)
             
