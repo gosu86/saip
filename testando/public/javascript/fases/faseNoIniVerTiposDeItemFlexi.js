@@ -38,6 +38,40 @@ $(function(){
 		height: 'auto',
 		singleSelect: true
 	});
+	$('#tiposDeItemListaFlexi').flexigrid(
+			{
+				url: '/configurar/tiposDeItem_del_sistema/?fid='+$('input#fid').val(),
+				dataType: 'json',
+				
+				colModel : [
+							{display: 'ID', name : 'id', width : 40, sortable : true, align: 'left', hide : true},
+							{display: 'Nombre', name : 'name', width : 150, sortable : true, align: 'left'},
+							{display: 'Descripcion', name : 'descripcion', width : 150, sortable : true, align: 'left'},
+							{display: 'Complejidad', name : 'complejidad', width : 150, sortable : true, align: 'left'},
+				],
+				
+				buttons : [
+					{separator: true},
+					{name: 'Agregar a la Fase', bclass: 'add', onpress : doCommandTipoDeItem},
+				],
+				
+				searchitems : [
+					{display: 'Nombre', name : 'name', isdefault: true}
+				],
+				
+				sortname: "id",
+				sortorder: "asc",
+				usepager: true,
+				nowrap: false,
+				title: "Tipos de Items del Sistema",
+				useRp: true,
+				rp: 5,
+				showTableToggleBtn: true,
+				showToggleBtn: true,
+				height: 'auto',
+				singleSelect: false,
+			});
+	$('div.DeSistema .flexigrid').addClass('hideBody');	
 });
 
 
@@ -45,65 +79,34 @@ function doCommandTipoDeItem(com, grid)
 {
 	if (com == 'Crear')
 	{window.location = "/configurar/tiposDeItem/new/?fase_id="+$('input#fid').val();}
-	else if (com == 'Editar')
-	{
-		if ($('.trSelected', grid).length > 0)
-		{	
+	
+	else if ($('.trSelected', grid).length > 0)
+	{	
+		if (com == 'Editar')
+		{
+		
 			$('.trSelected', grid).each(function()
 			{
-				var id = $(this).attr('id');
-				id = id.substring(id.lastIndexOf('row')+3);
-				window.location = '/administrar/tiposDeItem/'+id+"/edit/";
+				id = get_id(this) 
+				window.location = '/configurar/tiposDeItem/'+id+"/edit/";
 			});
+		
 		}
-		else
-		{alert("Debe seleccionar una fila para editar!");}
-	}
-	else if (com == 'Borrar') 
-	{
-		if ($('.trSelected', grid).length > 0)
-		{	
-			var nombre = $('.trSelected',"#faseNoIniVerTiposDeItemFlexi").find('td[abbr="name"]').children().text()	
+		else if (com == 'Borrar') 
+		{
 			$('.trSelected', grid).each(function()
 			{
-				var id = $(this).attr('id');
-				id = id.substring(id.lastIndexOf('row')+3);
+				id = get_id(this) 
+				nombre=get_nombre()
+				
 				if(confirm('Seguro que desea BORRAR el tipo de item: "' + nombre + '" ?'))
-				{deleteTDI(id)}
+					{deleteTDI(id)}
 			});
-		}
-		else
-		{    	  jQuery.noticeAdd(
-		    	  {
-		              text: "Debe seleccionar una fila para borrar!",
-		              stay: false,
-		              stayTime: 5000,
-		              type: 'notice'
-		    	  });
+				
 		}
 	}
-	else if (com == 'Ver')
-	{
-		if ($('.trSelected', grid).length > 0)
-		{	
-			var nombre = $('.trSelected',"#tiposDeItemAdministrarFlexi").find('td[abbr="name"]').children().text()	
-			$('.trSelected', grid).each(function()
-			{
-				var id = $(this).attr('id');
-				id = id.substring(id.lastIndexOf('row')+3);
-				window.location = location+'get_one/?id='+id
-			});
-		}
-		else
-		{    	  jQuery.noticeAdd(
-		    	  {
-		              text: "Debe seleccionar una fila para ver!",
-		              stay: false,
-		              stayTime: 5000,
-		              type: 'notice'
-		    	  });
-		}
-	}
+	else
+	{msg_falta_seleccion()}
 }
 
 function deleteTDI(id)
@@ -126,4 +129,22 @@ function deleteTDI(id)
     	  $("#faseNoIniVerTiposDeItemFlexi").flexReload();
       },
     });
+}
+function get_id(tr){
+	var id = $(tr).attr('id');
+	id = id.substring(id.lastIndexOf('row')+3);
+	return id;
+}
+
+function get_nombre(){
+	nombre=$('.trSelected').find('td[abbr="name"]').text();
+	return nombre
+}
+function msg_falta_seleccion(){
+	jQuery.noticeAdd({
+	              text: "Debe seleccionar una Fase!",
+	              stay: false,
+	              stayTime: 2500,
+	              type: "notice"
+	    	  });
 }

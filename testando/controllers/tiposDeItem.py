@@ -87,15 +87,15 @@ class TiposDeItemController(CrudRestController):
     @expose('json')
     def post_delete(self,**kw):
         id = kw['id']
-        log.debug("Inside post_fetch: id == %s" % (id))
         if (id != None):
             d = {'id':id}
             tipoitem = DBSession.query(TipoItem).filter_by(**d).first()            
             nombre=tipoitem.name
             DBSession.delete(tipoitem)
             DBSession.flush()    
-            #===================================================================
-        return dict(msg=nombre)
+            msg="la fase se ha eliminado con exito!."
+            type="succes"
+        return dict(msg=nombre, type=type)
             
     @expose()
     def post(self, *args, **kw):       

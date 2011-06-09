@@ -202,19 +202,19 @@ class ConfigurarController(BaseController):
     def roles_select(self,id,selected=None):
 
             selectINI='<select id="'+str(id)+'">'
-            op1='<option value=1>Aprovador</option>'
+            op1='<option value=1>Aprobador</option>'
             op2='<option value=2>Desarrollador</option>'
-            op3='<option value=3>Aprovador y Desarrollador</option>'            
+            op3='<option value=3>Aprobador y Desarrollador</option>'            
             if selected==1:
                 log.debug('1')
-                op1='<option value=1 selected="true">Aprovador</option>'
+                op1='<option value=1 selected="true">Aprobador</option>'
             elif selected==2:
                 log.debug('2')
                 op2='<option value=2 selected="true">Desarrollador</option>'
                 
             elif selected==3:
                 log.debug('3')
-                op3='<option value=3 selected="true":>Aprovador y Desarrollador</option>'
+                op3='<option value=3 selected="true":>Aprobador y Desarrollador</option>'
 
             selectFIN='</select>'
             select=selectINI+op1+op2+op3+selectFIN
@@ -270,20 +270,13 @@ class ConfigurarController(BaseController):
         fid=int(fid)
         conn = config['pylons.app_globals'].sa_engine.connect()
         se=select([usuario_rol_fase_table.c.rol_id],and_(usuario_rol_fase_table.c.usuario_id==uid, usuario_rol_fase_table.c.fases_id==fid))
-        log.debug('se = %s' %se)
         
         result=conn.execute(se)
         row=result.fetchone() 
         rol=int(row['rol_id'])
-        
-        log.debug('uid_id %s' %uid)
-        log.debug('rol_id %s' %rol)
-        log.debug('fid_id %s' %fid)
+
         conn.close()
         select_tag=self.roles_select(uid,rol) 
-        # log.debug('select = %s' %select)   
-        #=======================================================================
-        #sel=self.roles_select(uid,3)
         return select_tag
         
     @validate(validators={"page":validators.Int(), "rp":validators.Int()})
@@ -309,7 +302,6 @@ class ConfigurarController(BaseController):
                             u.name,
                             self.get_rol(u.id,fid),
                             ]} for u in usuarios]
-            log.debug('rows = %s' %rows) 
             result = dict(page=page, total=total, rows=rows)
         except:
             result = dict() 
@@ -336,8 +328,6 @@ class ConfigurarController(BaseController):
             rol = int(idyrol[1])
             ins=usuario_rol_fase_table.insert().values(usuario_id=u_id,rol_id=rol,fases_id=f_id)
             ins.compile().params
-            log.debug('ins.params: %s' %ins.compile().params)
-            log.debug('con: %s' %conn)
             conn.execute(ins)
             u=DBSession.query(Usuario).filter_by(id=u_id).first()
             p.usuarios.append(u)
@@ -378,18 +368,10 @@ class ConfigurarController(BaseController):
             msg_proyectos=str(c2)+" usuarios ya no forman parte de este proyecto."
         else:
             msg_proyectos=''
-        log.debug('msg_proyectos:= %s' %msg_proyectos)
         msg    =    str(c1)    +    " usuarios quitados de la fase con exito!"
         type="succes"
         
         return dict(msg=msg,type=type,msg_p=msg_proyectos)
-
-    #===========================================================================
-    # @expose('testando.templates.configurar.fases.vista_de_tiposDeItem')
-    # def vista_de_tiposDeItem(self,*args, **kw):
-    #    tiId=int(kw['fId'])
-    #    tiposDeItems=DBSession.query(TipoItem)filter)_by('id':tiId)
-    #===========================================================================
         
     @expose('json')    
     @expose('testando.templates.configurar.fases.vista_de_tiposDeItem') 
@@ -434,51 +416,77 @@ class ConfigurarController(BaseController):
         except:
             result = dict() 
         return result
+    
+    def get_tiposDeItem(self,tiposDeItem,fid,offset,rp):
+        tdi=[]
+        id=int(fid)
+        cant=0
+        off=0
+        for tipoDeItem in tiposDeItem:
+            if off < offset:
+                log.debug('continue')
+            elif tipoDeItem.fase_id != id:
+                    cant=cant+1
+                    tdi.append(tipoDeItem)
+                    if cant==rp:
+                        break
+            off=off+1
+        return tdi
         
-    #===========================================================================
-    # @validate(validators={"page":validators.Int(), "rp":validators.Int()})
-    # @expose('json')
-    # def tiposDeItem_del_sistema(self, fid=None, page='1', rp='25', sortname='id', sortorder='asc', qtype=None, query=None):
-    #    try:
-    #        offset = (int(page)-1) * int(rp)
-    #        if (query):
-    #            d = {qtype:query}
-    #            usuarios = DBSession.query(Usuario).filter_by(**d)
-    #        else:
-    #            usuarios = DBSession.query(Usuario)
-    #            
-    #           
-    #        if fid:
-    #            
-    #            column = getattr(Usuario, sortname)
-    #            usuarios = usuarios.order_by(getattr(column,sortorder)())                
-    #            u=self.get_usuarios(usuarios,fid,offset,rp)
-    #            total = usuarios.count()
-    #            usuarios=u
-    #        else:
-    #            total = usuarios.count() 
-    #            column = getattr(Usuario, sortname)
-    #            usuarios = usuarios.order_by(getattr(column,sortorder)()).offset(offset).limit(rp)
-    #              
-    #        rows = [{'id'  : usuario.id,
-    #                'cell': [usuario.id,
-    #                         usuario.name,
-    #                         self.roles_select(usuario.id)]} for usuario in usuarios
-    #                ]
-    #        result = dict(page=page, total=total, rows=rows)
-    #    except:
-    #        result = dict() 
-    #    return result        
-    #    
-    #===========================================================================
+    @validate(validators={"page":validators.Int(), "rp":validators.Int()})
+    @expose('json')
+    def tiposDeItem_del_sistema(self, fid=None, page='1', rp='25', sortname='id', sortorder='asc', qtype=None, query=None):
+        try:
+            fid=int(fid)
+            offset = (int(page)-1) * int(rp)
+            if (query):
+                d = {qtype:query}
+                tiposDeItem = DBSession.query(TipoItem).filter_by(**d)
+            else:
+                tiposDeItem = DBSession.query(TipoItem).filter(TipoItem.fase_id!=fid)
+                log.debug('tiposDeItem: %s' %tiposDeItem)
+
+            total = tiposDeItem.count() 
+            column = getattr(TipoItem, sortname)
+            tiposDeItem = tiposDeItem.order_by(getattr(column,sortorder)()).offset(offset).limit(rp)
+            log.debug('tiposDeItem: %s' %tiposDeItem)                  
+            rows = [{'id'  : tipoDeItem.id,
+                    'cell': [tipoDeItem.id,
+                             tipoDeItem.name,
+                             tipoDeItem.descripcion,
+                             tipoDeItem.complejidad]} for tipoDeItem in tiposDeItem
+                    ]
+            result = dict(page=page, total=total, rows=rows)
+        except:
+            result = dict() 
+        return result        
         
+
+    @expose('json')
+    def cambiar_roles(self,**kw):
+        idsyroles    =    kw['idsyroles']
+        idsyroles    =    idsyroles.split(";")
         
+        f_id    =    idsyroles[0]
+        idsyroles.remove(f_id)
+        idsyroles.pop()
         
+        cantidad    =    len(idsyroles)
         
+        f_id    =    int(f_id)
+        conn = config['pylons.app_globals'].sa_engine.connect()
+        for idyrol in idsyroles:
+            idyrol=idyrol.split(',')
+            u_id = int(idyrol[0])
+            rol = int(idyrol[1])
+            updt=usuario_rol_fase_table.update().where(and_(usuario_rol_fase_table.c.usuario_id==u_id, usuario_rol_fase_table.c.fases_id==f_id)).values(rol_id=rol)
+            conn.execute(updt)
+        conn.close()
+                    
+        msg    =    str(cantidad)    +    " roles cambiados con exito!"
+        type="succes"
         
-        
-        
-        
+        return dict(msg=msg,type=type)
         
         
         

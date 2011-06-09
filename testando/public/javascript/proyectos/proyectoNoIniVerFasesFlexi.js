@@ -53,9 +53,8 @@ $(function()
 
 function doCommandFases(com, grid) {
 	if (com == 'Crear')
-	{window.location = "/configurar/fases/new/?proyecto_id="+$('input#pid').val();}
-	
-	if ($('.trSelected', grid).length > 0)
+	{window.location = "/configurar/fases/new/?proyecto_id="+$('input#pid').val();
+	}else if ($('.trSelected', grid).length > 0)
 	{
 		if (com == 'Editar')
 		{

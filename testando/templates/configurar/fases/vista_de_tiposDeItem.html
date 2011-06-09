@@ -7,15 +7,19 @@
       SAIP·${page}·Fases
     </title>
     <script type="text/javascript" src="${url('/javascript/fases/faseNoIniVerTiposDeItemFlexi.js')}">
-    </script>
+    </script> 
   </head>
   <body>
     <div py:replace="tmpl_context.faseId(id='fid',value=faseId)">Input Form</div>
     <div py:replace="tmpl_context.faseNombre(id='fNombre',value=faseNombre)">Input Form</div>
-      <div class="TablaTiposDeItem">
+      <div class="TablaTiposDeItem DeFase">
         <table id="faseNoIniVerTiposDeItemFlexi">
         </table>
-      </div>      
+      </div>
+      <div class="TablaTiposDeItem DeSistema">
+        <table id="tiposDeItemListaFlexi">
+        </table>
+      </div>                
     <br />
   </body>
 </html>

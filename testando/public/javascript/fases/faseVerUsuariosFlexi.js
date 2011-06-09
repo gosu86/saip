@@ -100,7 +100,7 @@ function doCommandUsuarios(com, grid) {
 		}		
 		else if (com == 'Cambiar Rol')
 		{
-
+				obtener_ids(grid,'cambiar');
 		}
 	}
 	else
@@ -110,7 +110,29 @@ function doCommandUsuarios(com, grid) {
 
 } 
 
-
+function cambiar_roles(idsyroles){
+    $.ajax(
+    	    {
+    	      type: 'POST',
+    	      dataType: "json",
+    	      url: '/configurar/cambiar_roles',
+    	      data: {idsyroles:idsyroles},
+    	      success: function(data)
+    	      { 
+    	    	  $("#faseVerUsuariosFlexi").flexReload();
+    	    	  jQuery.noticeAdd(
+    	    	    	  {
+    	    	              text: data.msg,
+    	    	              stay: false,
+    	    	              stayTime: 2500,
+    	    	              type: data.type
+    	    	    	  });
+    	    		  
+    	    	  $('#usuariosListaFlexi').flexReload();
+    	    	 
+    	      },
+    	    });	
+}
 function obtener_ids(grid,tipo){
 		faseId=$('input#faseId').val();
 		ids=''
@@ -119,18 +141,17 @@ function obtener_ids(grid,tipo){
 		idsyroles=faseId+';'
 		$('.trSelected', grid).each(function()
 		{
-			var id = $(this).attr('id');
-			id = id.substring(id.lastIndexOf('row')+3);
+			id = get_id(this) 
 			ids=ids+(id+',')
 			rol=$('select#'+id).val()
 			idsyroles=idsyroles+(id+','+rol+';')
 		});
-		
 		if (tipo=='agregar')
 		{agregar_usuarios(idsyroles)}
-		else
+		else if(tipo=='quitar')
 		{quitar_usuarios(ids)}
-		
+		else if (tipo=='cambiar')
+		{cambiar_roles(idsyroles)}
 	}
 
 
