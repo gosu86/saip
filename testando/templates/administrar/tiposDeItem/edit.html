@@ -10,7 +10,14 @@ function set_to_delete(attr_id)
 {	$('input#attr_to_delete').val(attr_id+','+$('input#attr_to_delete').val())
 	$('table#'+attr_id).remove();
 }
-
+function set_to_modify(attr_id)
+{
+	id=","+attr_id+","
+	if ($('input#attr_to_modify').val().match(id) == null)
+	{
+		$('input#attr_to_modify').val(','+attr_id+','+$('input#attr_to_modify').val())
+	}
+}
 </script>
 <script type="text/javascript" src="${url('/javascript/add_more_attr.js')}">
 </script>
@@ -20,9 +27,9 @@ function set_to_delete(attr_id)
 
   <div style="float:left;" class="crud_edit">
     <h2 style="margin-top:1px;">Editar $model</h2>
-    <form class="required tableform" method="post" action="/configurar/tiposDeItem/">
+    <form class="required tableform" method="post" action="./">
     <div>
-    		<input type="hidden" value="" id="attr_to_create" class="hiddenfield" name="attr_to_create"/>
+    		<input type="hidden" value="" id="attr_to_modify" class="hiddenfield" name="attr_to_modify"/>
     		<input type="hidden" value="" id="attr_to_delete" class="hiddenfield" name="attr_to_delete"/>
     		<input type="hidden" value="" id="sprox_id" class="hiddenfield" name="sprox_id"/>
             <input type="hidden" value="PUT" id="_method" class="sproxmethodputhiddenfield" name="_method"/>
@@ -74,10 +81,10 @@ function set_to_delete(attr_id)
 			</tr>
 			<tr title="" class="odd" id="attr_container">
 				<td class="fieldcol">
-					<input type="text" name="attr_nombre[${attr.id}]" value="${attr.name}" class="textfield" id="attr_nombre"/>
+					<input type="text" name="attr_nombre[${attr.id}]" value="${attr.name}" class="textfield" id="attr_nombre" onchange="set_to_modify(${attr.id})"/>
 				</td>
 				<td class="fieldcol">
-					<select name="attr_tipo[${attr.id}]">
+					<select name="attr_tipo[${attr.id}]" onchange="set_to_modify(${attr.id})">
 						<option selected="${('', 'True')[attr.tipo=='Texto']}">Texto</option>
 						<option	selected="${('', 'True')[attr.tipo=='Fecha']}">Fecha</option>
 						<option	selected="${('', 'True')[attr.tipo=='Numero']}">Numero</option>

@@ -381,7 +381,7 @@ class ConfigurarController(BaseController):
         nombre=kw['nombre']
         tmpl_context.faseId = hideMe()
         tmpl_context.faseNombre = hideMe()
-        if estado=='Inicial':
+        if estado!='Inicial':
             iniciado=True
         else:
             iniciado=False

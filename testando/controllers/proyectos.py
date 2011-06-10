@@ -53,6 +53,7 @@ class ProyectosController(CrudRestController):
 		"""update"""
 		id=kw['name']
 		log.debug('id: %s' %id )
+		log.debug('ARGS: %s' %str(args))
 		pks = self.provider.get_primary_fields(self.model)
 		for i, pk in enumerate(pks):
 			if pk not in kw and i < len(args):
