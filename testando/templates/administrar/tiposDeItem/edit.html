@@ -1,0 +1,108 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:py="http://genshi.edgewall.org/"
+      xmlns:xi="http://www.w3.org/2001/XInclude">
+
+<xi:include href="master.html" />
+<title>Saip - Editar ${model}</title>
+<head>
+<script type="text/javascript">
+function set_to_delete(attr_id)
+{	$('input#attr_to_delete').val(attr_id+','+$('input#attr_to_delete').val())
+	$('table#'+attr_id).remove();
+}
+
+</script>
+<script type="text/javascript" src="${url('/javascript/add_more_attr.js')}">
+</script>
+</head>
+<body class="tundra">
+  <div style="height:0px;"> &nbsp; </div>
+
+  <div style="float:left;" class="crud_edit">
+    <h2 style="margin-top:1px;">Editar $model</h2>
+    <form class="required tableform" method="post" action="/configurar/tiposDeItem/">
+    <div>
+    		<input type="hidden" value="" id="attr_to_create" class="hiddenfield" name="attr_to_create"/>
+    		<input type="hidden" value="" id="attr_to_delete" class="hiddenfield" name="attr_to_delete"/>
+    		<input type="hidden" value="" id="sprox_id" class="hiddenfield" name="sprox_id"/>
+            <input type="hidden" value="PUT" id="_method" class="sproxmethodputhiddenfield" name="_method"/>
+    </div>
+    <table cellspacing="0" cellpadding="2" border="0">
+        <tbody><tr title="" class="even" id="name.container">
+            <td class="labelcol">
+                <label class="fieldlabel required" for="name" id="name.label">Name</label>
+            </td>
+            <td class="fieldcol">
+                <input type="text" value="${value['name']}" id="name" class="textfield required" name="name"/>
+            </td>
+        </tr><tr title="" class="odd" id="descripcion.container">
+            <td class="labelcol">
+                <label class="fieldlabel" for="descripcion" id="descripcion.label">Descripcion</label>
+            </td>
+            <td class="fieldcol">
+                <textarea cols="50" rows="2" class="textarea" name="descripcion" id="descripcion">${value['descripcion']}</textarea>
+            </td>
+        </tr><tr title="" class="even" id="complejidad.container">
+            <td class="labelcol">
+                <label class="fieldlabel" for="complejidad" id="complejidad.label">Complejidad</label>
+            </td>
+            <td class="fieldcol">
+                <input type="text" value="${value['complejidad']}" id="complejidad" class="textfield" name="complejidad"/>
+            </td>
+        </tr>
+        <tr title="" class="odd" id="add_more_attr.container">
+            <td class="labelcol">
+            </td>
+            <td class="">
+                <input type="button" onclick="javascript:add_more_atrr();" value="Agregar Atributos extras" id="add_more_attr" class="button"/>
+                <span styel="width:100px"></span>
+                <input type="button" onclick="javascript:location.reload(true);" value="Reestablecer todo" id="add_more_attr" class="button"/>
+            </td>
+        </tr>
+        <tr py:for="attr in attr_extra" title="" class="even" id="complejidad.container">
+        <td></td>
+        <td>
+			<table id="${attr.id}">
+			<tbody>
+			<tr title="" class="even" id="attr_label.container2">
+				<td class="labelcol">
+					<label for="attr_nombre" class="fieldlabel" id="attr_nombre_label">Nombre</label>
+				</td>
+				<td class="labelcol">
+					<label for="attr_tipo" class="fieldlabel" id="attr_tipo.label">Tipo</label>
+				</td>
+			</tr>
+			<tr title="" class="odd" id="attr_container">
+				<td class="fieldcol">
+					<input type="text" name="attr_nombre[${attr.id}]" value="${attr.name}" class="textfield" id="attr_nombre"/>
+				</td>
+				<td class="fieldcol">
+					<select name="attr_tipo[${attr.id}]">
+						<option selected="${('', 'True')[attr.tipo=='Texto']}">Texto</option>
+						<option	selected="${('', 'True')[attr.tipo=='Fecha']}">Fecha</option>
+						<option	selected="${('', 'True')[attr.tipo=='Numero']}">Numero</option>
+					</select>
+				</td>
+				<td>
+					<input type="button" class="button" id="remove_this_attr" value="quitar" onclick="set_to_delete(${attr.id})"/>
+				</td>
+			</tr>
+			</tbody>
+			</table>
+		</td>
+        </tr>        
+        <tr title="" class="odd" id="submit.container">
+            <td class="labelcol">
+            </td>
+            <td class="fieldcol">
+                <input type="submit" value="Submit" class="submitbutton"/>
+            </td>
+        </tr>
+    </tbody>
+    </table>
+	</form>
+  </div>
+  <div style="height:0px; clear:both;"> &nbsp; </div>
+
+</body>
+</html>

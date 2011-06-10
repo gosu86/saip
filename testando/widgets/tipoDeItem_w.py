@@ -23,7 +23,7 @@ tipoitem_view_form = TipoItemViewForm(DBSession)
 
 class TipoItemAddForm(AddRecordForm):
     __model__ = TipoItem
-    __omit_fields__ = ['fecha_creacion', 'items','campos_extra']
+    __omit_fields__ = ['fecha_creacion', 'items','campos_extra','importado_id']
     btn = Button("add_more_attr", attrs=dict(onclick="javascript:add_more_atrr();",value='Agregar Atributos extras'))
     name = TextField
     fase = HiddenField('fase_id')
@@ -37,6 +37,6 @@ tipoitem_edit_filler=TipoItemEditFiller(DBSession)
 class TipoItemEditForm(DojoEditableForm):
     __model__ = TipoItem
     name = TextField
-    __omit_fields__ = ['fecha_creacion', 'items', 'fases']
+    __omit_fields__ = ['fecha_creacion', 'items', 'fases','importado_id','fase','campos_extra']
     __field_attrs__ = {'descripcion':{'rows':'2'}}
 tipoitem_edit_form=TipoItemEditForm(DBSession)

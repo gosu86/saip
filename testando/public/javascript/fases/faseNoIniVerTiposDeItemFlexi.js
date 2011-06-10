@@ -9,7 +9,7 @@ $(function(){
 			{display: 'Nombre', name : 'name', width : 150, sortable : true, align: 'left'},
 			{display: 'Descripcion', name : 'descripcion', width : 150, sortable : true, align: 'left'},
 			{display: 'Complejidad', name : 'complejidad', width : 150, sortable : true, align: 'left'},
-			{display: 'Campos Extras', name : 'camposExtras', width : 150, sortable : true, align: 'left'},
+			{display: 'Campos Extras', name : 'camposExtras', width : 150, sortable : true, align: 'left'},			
 		],
 		
 		buttons : [
@@ -34,7 +34,7 @@ $(function(){
 		usepager: true,
 		title: "Lista de Tipos De Item de la fase: "+$('#fNombre').val() + " (No iniciada)",
 		useRp: true,
-		rp: 10,
+		rp: 5,
 		showTableToggleBtn: true,
 		height: 'auto',
 		singleSelect: true
@@ -50,6 +50,8 @@ $(function(){
 							{display: 'Descripcion', name : 'descripcion', width : 150, sortable : true, align: 'left'},
 							{display: 'Complejidad', name : 'complejidad', width : 150, sortable : true, align: 'left'},
 							{display: 'Campos Extras', name : 'camposExtras', width : 150, sortable : true, align: 'left'},
+							{display: 'Fase', name : 'faseName', width : 150, sortable : false, align: 'left'},
+							{display: 'Proyecto', name : 'proyectoName', width : 150, sortable : false, align: 'left'},							
 				],
 				
 				buttons : [

@@ -12,6 +12,14 @@ from formencode import validators
 import logging
 from tw.forms import TextField
 from string import find, replace
+from decorators import registered_validate, register_validators, catch_errors
+
+errors = ()
+try:
+    from sqlalchemy.exc import IntegrityError, DatabaseError, ProgrammingError
+    errors =  (IntegrityError, DatabaseError, ProgrammingError)
+except ImportError:
+    pass
 #===============================================================================
 log = logging.getLogger(__name__)
 class TiposDeItemController(CrudRestController):
@@ -42,14 +50,15 @@ class TiposDeItemController(CrudRestController):
         tmpl_context.widget = self.new_form
         return dict(value=kw, model=self.model.__name__)
         
-    @expose('testando.templates.tipoitem.index')
+    @expose('testando.templates.administrar.tiposDeItem.index')
     def get_all(self):
+        log.debug('get_all -> kw = %s' %str(kw))
         override_template(self.get_all,self.template)    
         return dict(page=self.page)
         #return dict()
-        
     @expose('tgext.crud.templates.edit')
     def edit(self, *args, **kw):
+        log.debug('edit -> kw = %s' %str(kw))
         """Display a page to edit the record."""
         tmpl_context.widget = self.edit_form
         pks = self.provider.get_primary_fields(self.model)
@@ -58,10 +67,68 @@ class TiposDeItemController(CrudRestController):
             kw[pk] = args[i]
         value = self.edit_filler.get_value(kw)
         value['_method'] = 'PUT'
-        return dict(value=value, model=self.model.__name__, pk_count=len(pks))    
+        return dict(value=value, model=self.model.__name__, pk_count=len(pks))        
+#===============================================================================
+#    @expose('testando.templates.administrar.tiposDeItem.edit')
+#    def edit(self, *args, **kw):
+#        log.debug('edit -> kw = %s' %str(kw))
+#        """Display a page to edit the record."""
+# #        tmpl_context.widget = self.edit_form
+#        pks = self.provider.get_primary_fields(self.model)
+#        kw = {}
+#        for i, pk in  enumerate(pks):
+#            kw[pk] = args[i]
+#        value = self.edit_filler.get_value(kw)
+#        tdi=DBSession.query(TipoItem).filter_by(id=int(kw[pk])).first()
+#        attr_extra=tdi.campos_extra
+#        log.debug('attr_extra = %s' %attr_extra)
+#        value['_method'] = 'PUT'
+#        log.debug('value = %s' %value)
+#        return dict(value=value, model="Tipo De Item", attr_extra=attr_extra,pk_count=len(pks))
+#===============================================================================
+    
+    #===========================================================================
+    # @expose()
+    # @registered_validate(error_handler=edit)
+    # @catch_errors(errors, error_handler=edit)
+    # def put(self, *args, **kw):
+    #    """update"""
+    #    log.debug('put -> kw = %s' %str(kw))
+    #    pks = self.provider.get_primary_fields(self.model)
+    #    log.debug('put -> pks = %s' %str(pks))
+    #    for i, pk in enumerate(pks):
+    #        log.debug('put -> pk = %s' %str(pk))
+    #        log.debug('put -> i = %s' %str(i))
+    #        log.debug('put -> len(args) = %s' %str(len(args)))
+    #        if pk not in kw and i < len(args):
+    #            kw[pk] = args[i]
+    #            log.debug('put -> kw[pk] = %s' %str(kw[pk]))
+    #    tdi=DBSession.query(TipoItem).filter_by(id=int(kw[pk])).first()
+    #    tdi.name=kw['name']
+    #    tdi.descripcion=kw['descripcion']
+    #    tdi.complejidad=kw['complejidad']
+    #    DBSession.flush()
+    #    estadoFase=tdi.fase.estado
+    #    redirect('/configurar/vista_de_tiposDeItem/?fId='+str(tdi.fase_id)+'&nombre='+tdi.fase.name+'&estado='+estadoFase)
+    #===========================================================================
+
+    @expose()
+    @registered_validate(error_handler=edit)
+    @catch_errors(errors, error_handler=edit)
+    def put(self, *args, **kw):
+        log.debug('update ctrl -> kw = %s' %str(kw))
+        """update"""
+        pks = self.provider.get_primary_fields(self.model)
+        for i, pk in enumerate(pks):
+            if pk not in kw and i < len(args):
+                kw[pk] = args[i]
+                log.debug('put -> kw[pk] = %s' %str(kw[pk]))
+                
+        self.provider.update(self.model, params=kw)
+        redirect('../' * len(pks))
+                
     @validate(validators={"page":validators.Int(), "rp":validators.Int()})
     @expose('json')
-    
     def fetch(self, page='1', rp='25', sortname='id', sortorder='asc', qtype=None, query=None):
         try:
             #____________________________________________
@@ -110,12 +177,13 @@ class TiposDeItemController(CrudRestController):
         return dict(msg=nombre, type=type)
             
     @expose()
-    def post(self, *args, **kw):       
+    def post(self, *args, **kw):
+        log.debug('post -> kw = %s' %str(kw))       
         ti=self.provider.create(self.model, params=kw)
         keys=kw.keys()
         for key_nombre in keys:
-            if find(key_nombre,'nombre') >= 0:
-                key_tipo=replace(key_nombre,'nombre','tipo')
+            if find(key_nombre,'new_attr_nombre') >= 0:
+                key_tipo=replace(key_nombre,'new_attr_nombre','new_attr_tipo')
                 nombre=kw[key_nombre]
                 tipo=kw[key_tipo]
                 campoExtra=CampoExtra()
@@ -125,4 +193,6 @@ class TiposDeItemController(CrudRestController):
                 DBSession.add(campoExtra)
                 DBSession.flush()
         nombreFase=ti.fase.name
-        raise redirect('/configurar/vista_de_tiposDeItem/?fId='+kw['fase_id']+'&nombre='+nombreFase)
+        estadoFase=ti.fase.estado
+        raise redirect('/configurar/vista_de_tiposDeItem/?fId='+kw['fase_id']+'&nombre='+nombreFase+'&estado='+estadoFase)
+

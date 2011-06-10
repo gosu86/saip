@@ -971,6 +971,8 @@
 			});
 			$('.pAll', g.pDiv).click(function () {
 				$('input[name=q]', g.sDiv).val('');
+				p.sortname='id';
+				p.sortorder='asc';
 				p.query = '';
 				g.doSearch();				
 			});			

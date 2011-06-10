@@ -44,7 +44,7 @@ class ConfigurarController(BaseController):
     fases.page='Configurar'
 
     tiposDeItem=TiposDeItemController(DBSession)
-    tiposDeItem.template='genshi:testando.templates.configurar.tiposDeItems.index'
+    tiposDeItem.template='genshi:testando.templates.configurar.tiposDeItem.index'
     tiposDeItem.page='Configurar'
     
     usuarios=UsuariosController(DBSession)
@@ -455,7 +455,10 @@ class ConfigurarController(BaseController):
                              tipoDeItem.name,
                              tipoDeItem.descripcion,
                              tipoDeItem.complejidad,
-                             (','.join([ce.name for ce in tipoDeItem.campos_extra]))]} for tipoDeItem in tiposDeItem
+                             (','.join([ce.name for ce in tipoDeItem.campos_extra])),
+                             tipoDeItem.fase.name,
+                             tipoDeItem.fase.proyecto.name]
+                             } for tipoDeItem in tiposDeItem
                     ]
             result = dict(page=page, total=total, rows=rows)
         except:
