@@ -59,6 +59,9 @@ class TiposDeItemController(CrudRestController):
 
     @expose('testando.templates.administrar.tiposDeItem.edit')
     def edit(self, *args, **kw):
+        log.debug("len(kw) %s" %len(kw))
+        if len(kw)>0:
+            override_template(self.edit,'genshi:testando.templates.administrar.tiposDeItem.agregar_attr')
         log.debug('edit -> kw = %s' %str(kw))
         """Display a page to edit the record."""
     #        tmpl_context.widget = self.edit_form
@@ -80,45 +83,42 @@ class TiposDeItemController(CrudRestController):
         """update"""
         log.debug('put -> kw = %s' %str(kw))
         log.debug('ARGS %s' %str(args))
+        
         pks = self.provider.get_primary_fields(self.model)
         log.debug('put -> pks = %s' %str(pks))
+        
         for i, pk in enumerate(pks):
-            log.debug('put -> pk = %s' %str(pk))
-            log.debug('put -> i = %s' %str(i))
-            log.debug('put -> len(args) = %s' %str(len(args)))
             if pk not in kw and i < len(args):
                 kw[pk] = args[i]
                 log.debug('put -> kw[pk] = %s' %str(kw[pk]))
-                
-        tdi=DBSession.query(TipoItem).filter_by(id=int(kw[pk])).first()
-        tdi.name=kw['name']
-        tdi.descripcion=kw['descripcion']
-        tdi.complejidad=kw['complejidad']
-        attr_ids = kw['attr_to_modify'].split(',')
+        tdi=DBSession.query(TipoItem).filter_by(id=int(kw[pk])).first()                
+        if kw.has_key('name'):                        
+            tdi.name=kw['name']
+            tdi.descripcion=kw['descripcion']
+            tdi.complejidad=kw['complejidad']
         
-        log.debug('ids %s' %attr_ids)
-        attr_ids.pop()
-        
-        if len(attr_ids)>0:
-            for id in attr_ids:
-                if id != '':
+            attr_ids = kw['attr_to_modify'].split(',')        
+            log.debug('attr_to_modify %s' %attr_ids)
+            
+            if (len(attr_ids)>0  and attr_ids[0] != ''):
+                for id in attr_ids:
                     id=int(id)
                     ae=DBSession.query(CampoExtra).filter_by(id=id).first()
-                    #impove with:kw['attr_nombre['+str(id)+']']
-                    keys=kw.keys()
-                    for key_nombre in keys:
-                        if find(key_nombre,'attr_nombre['+str(id)+']') >= 0:
-                            key_tipo=replace(key_nombre,'attr_nombre['+str(id)+']','attr_tipo['+str(id)+']')
-                            nombre=kw[key_nombre]
-                            tipo=kw[key_tipo]
-                            ae.name=nombre
-                            ae.tipo=tipo
-                            DBSession.flush()
+                    nombre=kw['attr_nombre['+str(id)+']']
+                    tipo=kw['attr_tipo['+str(id)+']']
+                    ae.name=nombre
+                    ae.tipo=tipo
+    
+            attr_ids = kw['attr_to_delete'].split(',')
+            log.debug('attr_to_delete %s' %attr_ids)
+    
+            if (len(attr_ids)>0 and attr_ids[0] != ''):
+                for id in attr_ids:       
+                        id=int(id)
+                        ae=DBSession.query(CampoExtra).filter_by(id=id).first()
+                        DBSession.delete(ae)
+            DBSession.flush()             
 
-            
-            
-        DBSession.flush()
-        
         keys=kw.keys()
         for key_nombre in keys:
             if find(key_nombre,'new_attr_nombre') >= 0:
@@ -135,23 +135,6 @@ class TiposDeItemController(CrudRestController):
         
         estadoFase=tdi.fase.estado
         redirect('/configurar/vista_de_tiposDeItem/?fId='+str(tdi.fase_id)+'&nombre='+tdi.fase.name+'&estado='+estadoFase)
-
-    #===========================================================================
-    # @expose()
-    # @registered_validate(error_handler=edit)
-    # @catch_errors(errors, error_handler=edit)
-    # def put(self, *args, **kw):
-    #    log.debug('update ctrl -> kw = %s' %str(kw))
-    #    """update"""
-    #    pks = self.provider.get_primary_fields(self.model)
-    #    for i, pk in enumerate(pks):
-    #        if pk not in kw and i < len(args):
-    #            kw[pk] = args[i]
-    #            log.debug('put -> kw[pk] = %s' %str(kw[pk]))
-    #            
-    #    self.provider.update(self.model, params=kw)
-    #    redirect('../' * len(pks))
-    #===========================================================================
                 
     @validate(validators={"page":validators.Int(), "rp":validators.Int()})
     @expose('json')
@@ -200,9 +183,11 @@ class TiposDeItemController(CrudRestController):
             DBSession.flush()    
             msg="El tipo de Item "+nombre+" se ha eliminado con exito!."
             type="succes"
-        return dict(msg=nombre, type=type)
+        return dict(msg=msg, type=type)
             
     @expose()
+    #@registered_validate(error_handler=new)
+    #@catch_errors(errors, error_handler=new)    
     def post(self, *args, **kw):
         log.debug('post -> kw = %s' %str(kw))       
         ti=self.provider.create(self.model, params=kw)

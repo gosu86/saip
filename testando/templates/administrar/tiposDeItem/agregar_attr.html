@@ -22,32 +22,6 @@ $().ready(function() {
 	});
 	});
 </script>
-<script type="text/javascript">
-var DArray = new Array();
-var MArray = new Array();
-function set_to_delete(attr_id)
-{	
-	DArray.push(attr_id)
-	$('input#attr_to_delete').val(DArray.toString())
-	MIndex=MArray.indexOf(parseInt(attr_id))
-	if (MIndex &gt; -1)
-	{
-		MArray.splice(MIndex,1)
-		$('input#attr_to_modify').val(MArray.toString())
-	}
-	
-	$('table#'+attr_id).remove();
-}
-
-function set_to_modify(attr_id)
-{	
-	if (MArray.indexOf(attr_id) &lt; 0)
-	{
-		MArray.push(attr_id)
-		$('input#attr_to_modify').val(MArray.toString())
-	}
-}
-</script>
 <script type="text/javascript" src="${url('/javascript/add_more_attr.js')}">
 </script>
 </head>
@@ -55,11 +29,9 @@ function set_to_modify(attr_id)
   <div style="height:0px;"> &nbsp; </div>
 
   <div style="float:left;" class="crud_edit">
-    <h2 style="margin-top:1px;">Editar $model</h2>
+    <h2 style="margin-top:1px;">Agregar Campos Extra al Tipo De Item</h2>
     <form class="required tableform" method="post" action="./">
     <div>
-    		<input type="hidden" value="" id="attr_to_modify" class="hiddenfield" name="attr_to_modify"/>
-    		<input type="hidden" value="" id="attr_to_delete" class="hiddenfield" name="attr_to_delete"/>
     		<input type="hidden" value="" id="sprox_id" class="hiddenfield" name="sprox_id"/>
             <input type="hidden" value="PUT" id="_method" class="sproxmethodputhiddenfield" name="_method"/>
     </div>
@@ -69,21 +41,21 @@ function set_to_modify(attr_id)
                 <label class="fieldlabel required" for="name" id="name.label">Name</label>
             </td>
             <td class="fieldcol">
-                <input type="text" value="${value['name']}" id="name" class="textfield required" name="name"/>
+                <input Disabled='TRUE' type="text" value="${value['name']}" id="name" class="textfield required" name="name"/>
             </td>
         </tr><tr title="" class="odd" id="descripcion.container">
             <td class="labelcol">
                 <label class="fieldlabel" for="descripcion" id="descripcion.label">Descripcion</label>
             </td>
             <td class="fieldcol">
-                <textarea cols="50" rows="2" class="textarea" name="descripcion" id="descripcion">${value['descripcion']}</textarea>
+                <textarea Disabled='TRUE' cols="50" rows="2" class="textarea" name="descripcion" id="descripcion">${value['descripcion']}</textarea>
             </td>
         </tr><tr title="" class="even" id="complejidad.container">
             <td class="labelcol">
                 <label class="fieldlabel" for="complejidad" id="complejidad.label">Complejidad</label>
             </td>
             <td class="fieldcol">
-                <input type="text" value="${value['complejidad']}" id="complejidad" class="textfield" name="complejidad"/>
+                <input Disabled='TRUE' type="text" value="${value['complejidad']}" id="complejidad" class="textfield" name="complejidad"/>
             </td>
         </tr>
         <tr title="" class="odd" id="add_more_attr.container">
@@ -110,17 +82,14 @@ function set_to_modify(attr_id)
 			</tr>
 			<tr title="" class="odd" id="attr_container">
 				<td class="fieldcol">
-					<input onBlur='checkIfUnique(this)' type="text" name="attr_nombre[${attr.id}]" value="${attr.name}" class="textfield required" id="attr_nombre" onchange="set_to_modify(${attr.id})"/>
+					<input Disabled='TRUE' type="text" name="attr_nombre[${attr.id}]" value="${attr.name}" class="textfield required" id="attr_nombre"/>
 				</td>
 				<td class="fieldcol">
-					<select name="attr_tipo[${attr.id}]" onchange="set_to_modify(${attr.id})">
+					<select Disabled='TRUE' name="attr_tipo[${attr.id}]">
 						<option selected="${('', 'True')[attr.tipo=='Texto']}">Texto</option>
 						<option	selected="${('', 'True')[attr.tipo=='Fecha']}">Fecha</option>
 						<option	selected="${('', 'True')[attr.tipo=='Numero']}">Numero</option>
 					</select>
-				</td>
-				<td>
-					<input type="button" class="button" id="remove_this_attr" value="quitar" onclick="set_to_delete(${attr.id})"/>
 				</td>
 			</tr>
 			</tbody>

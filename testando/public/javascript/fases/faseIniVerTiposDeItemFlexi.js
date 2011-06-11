@@ -16,7 +16,7 @@ $(function(){
 			{separator: true},
 			{name: 'Ver Tipos de Item del sistema', bclass: 'import', onpress : doCommandTipoDeItem},
 			{separator: true},
-			{name: 'Añadir Campos Extras', bclass: 'add', onpress : doCommandTipoDeItem},
+			{name: 'Agregar Campos Extras', bclass: 'add', onpress : doCommandTipoDeItem},
 			
 		],
 		
@@ -82,34 +82,14 @@ function doCommandTipoDeItem(com, grid)
 	}
 	else if ($('.trSelected', grid).length > 0)
 	{	
-		if (com == 'Editar')
-		{
-		
-			$('.trSelected', grid).each(function()
-			{
-				id = get_id(this) 
-				window.location = '/configurar/tiposDeItem/'+id+"/edit/";
-			});
-		
-		}
-		else if (com == 'Borrar') 
-		{
-			$('.trSelected', grid).each(function()
-			{
-				id = get_id(this) 
-				nombre=get_nombre()
-				
-				if(confirm('Seguro que desea BORRAR el tipo de item: "' + nombre + '" ?'))
-					{deleteTDI(id)}
-			});
-		}
-		else if (com == 'Importar a la fase')
+		if (com == 'Importar a la fase')
 		{
 			obtener_ids(grid,'importar')		
 		}
-		else if (comm=='Agregar Campos Extras')
+		else if (com=='Agregar Campos Extras')
 		{
-			agregar_campos_extras()
+			id = get_id($('.trSelected')) 
+			agregar_campos_extras(id)
 		}
 	}
 	else
@@ -173,15 +153,14 @@ function importar_tiposDeItem(ids)
     	    });
 }
 
-function agregar_campos_extras()
+function agregar_campos_extras(tr)
 {
-	id = get_id(this) 
 	window.location = '/configurar/tiposDeItem/'+id+"/edit/?camposExtras=true";
 }
 
 function msg_falta_seleccion(){
 	jQuery.noticeAdd({
-	              text: "Debe seleccionar una Fase!",
+	              text: "Debe seleccionar un tipo de item!",
 	              stay: false,
 	              stayTime: 2500,
 	              type: "notice"

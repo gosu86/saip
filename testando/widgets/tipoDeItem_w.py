@@ -11,13 +11,16 @@ from tw.forms import TableForm, TextField, TextArea,HiddenField,Button
 from tw.core import WidgetsList
 from tw.forms.validators import Int, NotEmpty, DateConverter
 from tw.forms.fields import TableFieldSet
-
+from formencode import validators
+from formencode.compound import All
 class TipoItemViewForm(DisabledForm):
     __model__ = TipoItem
     name = TextField
     descripcion = TextArea
     campos_extra=[]
     __field_attrs__ = {'descripcion':{'rows':'2','disabled':'disabled'},'name':{'disabled':'disabled'}}
+    complejidad = TextField('complejidad',validator=All(validators.Int(messages={'integer': 'Orden debe ser un numero entero.'}),
+                                                validators.NotEmpty(messages={'empty': 'Orden no puede estar vacio.'})))
     
 tipoitem_view_form = TipoItemViewForm(DBSession) 
 

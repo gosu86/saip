@@ -1,4 +1,36 @@
 var index = $('tr').size()
+function checkIfUnique(input){
+	cant=0
+
+	$('input#attr_nombre').each(function(){
+	    if ($(input).val() == $(this).val()){
+	    	cant=cant+1;
+	    }
+	});
+	
+	$('input#new_attr_nombre').each(function(){
+	    if ($(input).val() == $(this).val()){
+	    	cant=cant+1;
+	    }
+	});	
+	
+	
+	if (cant > 1) {
+		jQuery.noticeAdd({
+              text: "Ya existe un atributo extra con el nombre: "+$(input).val(),
+              stay: true,
+              type: "error"
+    	  });
+		$(input).css({'background-color': 'red'});
+		$(input).val('')
+		$('input.submitbutton').addClass('cancel')
+	}
+	else
+	{
+		$(input).css({'background-color': ''});
+	}	
+}
+
 function add_more_atrr()
 {	index=index+1
 	var newRow = $(
@@ -14,7 +46,7 @@ function add_more_atrr()
 		
 		'<tr id="new_attr_container" class="odd" title="">'+
 			'<td class="fieldcol">'+
-				'<input id="new_attr_nombre" class="textfield" type="text" value="" name="new_attr_nombre['+index+']">'+
+				'<input onBlur=checkIfUnique(this) id="new_attr_nombre" class="textfield required" type="text" value="" name="new_attr_nombre['+index+']">'+
 			'</td>'+
 			'<td class="fieldcol">'+
 				'<select name="new_attr_tipo['+index+']">'+

@@ -411,7 +411,7 @@ class ConfigurarController(BaseController):
                             tipoDeItem.name,
                             tipoDeItem.descripcion,
                             tipoDeItem.complejidad,
-                            (','.join([ce.name for ce in tipoDeItem.campos_extra]))]} for tipoDeItem in tiposDeItem]
+                            (', </br>'.join([(ce.name+': '+ce.tipo) for ce in tipoDeItem.campos_extra]))]} for tipoDeItem in tiposDeItem]
             result = dict(page=page, total=total, rows=rows)
         except:
             result = dict() 
@@ -455,11 +455,10 @@ class ConfigurarController(BaseController):
                              tipoDeItem.name,
                              tipoDeItem.descripcion,
                              tipoDeItem.complejidad,
-                             (','.join([ce.name for ce in tipoDeItem.campos_extra])),
+                             (', </br>'.join([(ce.name+': '+ce.tipo) for ce in tipoDeItem.campos_extra])),
                              tipoDeItem.fase.name,
                              tipoDeItem.fase.proyecto.name]
-                             } for tipoDeItem in tiposDeItem
-                    ]
+                             } for tipoDeItem in tiposDeItem ]
             result = dict(page=page, total=total, rows=rows)
         except:
             result = dict() 

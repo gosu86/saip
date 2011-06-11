@@ -7,6 +7,23 @@
 <head>
 <script type="text/javascript" src="${url('/javascript/add_more_attr.js')}">
 </script>
+<script type="text/javascript">
+$().ready(function() {
+	$(".tableform").validate({
+		rules: {
+			name: "required",
+			descripcion:{
+				required: true,
+				minlength: 2
+			},
+		messages: {
+			firstname: "Por favor... Ingrese el un nombre para el tipo de item",
+			descripcion: "Por favor... Ingrese una descripcion para el tipo de item",
+		}
+		}
+	});
+	});
+</script>
 </head>
 <body class="tundra">
   <div style="float:left;" class="crud_add">

@@ -26,7 +26,7 @@ class FaseEditFiller(EditFormFiller):
    
 class FaseEditForm(DojoEditableForm):
     __model__       = Fase
-    __omit_fields__ = ['estado','fecha_creacion', 'tipos_item','usuarios','items']
+    __omit_fields__ = ['estado','fecha_creacion', 'tiposDeItem','usuarios','items']
     __field_attrs__ = {'descripcion':{'rows':'2','cols':'30'}}
     proyecto = HiddenField
     name = TextField
