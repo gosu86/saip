@@ -63,7 +63,7 @@ function detalle_completo(grid){
 		id = get_id(this) 
 		estado=get_estado()
 		nombre=get_nombre()
-		window.location = "/configurar/detalle_completo/?pId="+id+"&estado="+estado+"&nombre="+nombre
+		window.location = "/configurar/detalle_completo/?pid="+id
 	});	
 }
 
@@ -73,7 +73,7 @@ function ver_fases(grid){
 			id = get_id(this) 
 			estado=get_estado()
 			nombre=get_nombre()
-			window.location = "/configurar/vista_de_fases/?pId="+id+"&estado="+estado+"&nombre="+nombre
+			window.location = "/configurar/vista_de_fases/?pid="+id
 		});	
 }
 
@@ -85,10 +85,10 @@ function iniciar(grid){
 		{			
 			id = get_id(this) 
 			fases=get_si_no('fases')
-			if (fases == "si")
+			if (fases != "no")
 			{
 				usuarios=get_si_no('usuarios')
-				if(usuarios == "si")
+				if(usuarios != "no")
 				{iniciarP(id)}
 				else
 				{				

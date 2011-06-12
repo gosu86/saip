@@ -1,9 +1,9 @@
 $(function()
-{	var p=$('input[type="hidden"]').val()
+{	var pid=$('input[type="hidden"]').val()
 	$("#fasesDesarrollarFlexi").flexigrid(
 	{
 		
-		url: '/desarrollar/fases/lista_de_fases/?pid='+p,
+		url: '/desarrollar/fases/lista_de_fases/?pid='+pid,
 		dataType: 'json',
 		
 		colModel : [

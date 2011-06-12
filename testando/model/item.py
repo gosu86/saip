@@ -8,7 +8,9 @@ from datetime import datetime
 
 # modelos relacionados
 #from testando.model.tipoitem import TipoItem
-from testando.model.campoextra import CampoExtra
+from testando.model.atributoextranumero import AtributoExtraNumero
+from testando.model.atributoextratexto  import AtributoExtraTexto
+from testando.model.atributoextrafecha  import AtributoExtraFecha
 
 class Item(DeclarativeBase):
     __tablename__ = 'items'
@@ -39,7 +41,11 @@ class Item(DeclarativeBase):
     
     fase_id         =   Column(Integer, ForeignKey('fases.id'))
 
-    campos_extra    =   relationship(CampoExtra, order_by=CampoExtra.id, backref="item")
+    atributos_extra_numero   =   relationship(AtributoExtraNumero, order_by=AtributoExtraNumero.id, backref="item")
+    
+    atributos_extra_texto    =   relationship(AtributoExtraTexto, order_by=AtributoExtraTexto.id, backref="item")
+    
+    atributos_extra_fecha    =   relationship(AtributoExtraFecha, order_by=AtributoExtraFecha.id, backref="item")
 
     padre_id        =   Column(Integer, ForeignKey('items.id'))
     padre           =   relationship("Item",

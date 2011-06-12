@@ -49,7 +49,7 @@ class RolesController(CrudRestController):
 		rows = [{'id'  : rol.id,
 				'cell': [rol.id,
 						 rol.name,
-						(', '.join([p.permiso_name for p in rol.permisos]))
+						(', </br>'.join([p.permiso_name for p in rol.permisos]))
 						]} for rol in roles
 				]
 		result = dict(page=page, total=total, rows=rows)

@@ -7,7 +7,12 @@ from testando.model         import DBSession
 from testando.model.item    import Item
 from testando.widgets.item_w import *
 
+from tg.decorators import *
 from formencode import validators
+from tw.forms import TextField
+from string import find, replace
+from decorators import registered_validate, register_validators, catch_errors
+
 import logging
 from repoze.what.predicates import has_permission, not_anonymous, All
 #===============================================================================
@@ -27,6 +32,14 @@ class ItemsController(CrudRestController):
     def get_all(self):
         override_template(self.get_all,self.template)    
         return dict(page=self.page)
+
+    @without_trailing_slash
+    @expose('testando.templates.desarrollar.items.new')
+    def new(self, *args, **kw):
+        """Display a page to show a new record."""
+        tmpl_context.widget = self.new_form
+        return dict(value=kw, model=self.model.__name__)
+
     
     @validate(validators={"page":validators.Int(), "rp":validators.Int()})
     @expose('json')

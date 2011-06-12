@@ -31,7 +31,7 @@
             <ul id="mainmenu">
                   <span py:if="tg.auth_stack_enabled" py:strip="True">
                 <li 
-                    py:if="tg.predicates.has_any_permission('AdministrarTodo', 'AdministrarUsuarios', 'AdministrarRoles', 'AdministrarPermisos', 'AdministrarProyectos', 'AdministrarFases', 'AdministrarTiposDeItem')"
+                    py:if="tg.predicates.has_any_permission('AdministrarTodo', 'AdministrarUsuarios', 'AdministrarRoles', 'AdministrarPermisos', 'AdministrarProyectos')"
                     id="admin"
                     class="first">
 
@@ -40,13 +40,13 @@
                   Administrar
                 </a>
               </li>
-              <li py:if="tg.predicates.in_any_group('Administrador','Configurador')" class="">
+              <li py:if="tg.predicates.in_group('Configuradores')" class="">
 
               <a href="${tg.url('/configurar/')}" class="${('', 'active')[defined('page') and page=='Configurar']}">
                 Configurar
               </a>
             </li>
-            <li py:if="tg.predicates.in_any_group('Administrador','Configurador','Desarrollador')" class="">
+            <li py:if="tg.predicates.in_group('Desarrolladores')" class="">
 
             <a href="${tg.url('/desarrollar/')}" class="${('', 'active')[defined('page') and page=='Desarrollar']}">
               Desarrollar

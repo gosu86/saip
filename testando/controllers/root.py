@@ -88,8 +88,12 @@ class RootController(BaseController):
             login_counter = request.environ['repoze.who.logins'] + 1
             log.debug("<-- post_login --> login counter: %s",login_counter)
             redirect('/login', came_from=came_from, __logins=login_counter)
-            
+
         current_user=request.identity['user']
+        p=len(current_user.proyectos)
+        f=len(current_user.fases)
+        log.debug("p: %s",p)
+        log.debug("f: %s",f)
         if current_user.estado == 'Eliminado':
             flash(_('Acceso Denegado'), 'warning')
             redirect('/logout_handler')

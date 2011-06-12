@@ -164,16 +164,22 @@ function agregar_usuarios(idsyroles) {
       data: {idsyroles:idsyroles},
       success: function(data)
       { 
-    	  $("#faseVerUsuariosFlexi").flexReload();
-    	  jQuery.noticeAdd(
-    	    	  {
-    	              text: data.msg,
-    	              stay: false,
-    	              stayTime: 2500,
-    	              type: data.type
-    	    	  });
-    		  
-    	  $('#usuariosListaFlexi').flexReload();
+    	  if (data.reload){
+    		  location.reload(true);	  
+    	  }
+    	  else
+    	  {
+        	  $("#faseVerUsuariosFlexi").flexReload();
+        	  jQuery.noticeAdd(
+        	    	  {
+        	              text: data.msg,
+        	              stay: false,
+        	              stayTime: 2500,
+        	              type: data.type
+        	    	  });
+        		  
+        	  $('#usuariosListaFlexi').flexReload();
+    	  }
     	 
       },
     });
@@ -188,25 +194,32 @@ function quitar_usuarios(ids) {
       data: {ids:ids},
       success: function(data)
       { 
-    	  $("#faseVerUsuariosFlexi").flexReload();
-    	  jQuery.noticeAdd(
-    	    	  {
-    	              text: data.msg,
-    	              stay: false,
-    	              stayTime: 2500,
-    	              type: data.type
-    	    	  });
-    	  if (data.msg_p.length > 1)
-    	  {
-        	  jQuery.noticeAdd(
-        	    	  {
-        	              text: data.msg_p,
-        	              stay: false,
-        	              stayTime: 4500,
-        	              type: 'notice'
-        	    	  });    		  
-    	  }    	  
-    	  $('#usuariosListaFlexi').flexReload();
+    	  
+    	  if (data.reload){
+    		  location.reload(true);	  
+    	  }
+    	  else
+    	  {    	  
+	    	  $("#faseVerUsuariosFlexi").flexReload();
+	    	  jQuery.noticeAdd(
+	    	    	  {
+	    	              text: data.msg,
+	    	              stay: false,
+	    	              stayTime: 2500,
+	    	              type: data.type
+	    	    	  });
+	    	  if (data.msg_p.length > 1)
+	    	  {
+	        	  jQuery.noticeAdd(
+	        	    	  {
+	        	              text: data.msg_p,
+	        	              stay: false,
+	        	              stayTime: 4500,
+	        	              type: 'notice'
+	        	    	  });    		  
+	    	  }    	  
+	    	  $('#usuariosListaFlexi').flexReload();
+    	  }
     	 
       },
     });
@@ -269,7 +282,7 @@ function get_nombre(){
 
 function msg_falta_seleccion(){
 	jQuery.noticeAdd({
-	              text: "Debe seleccionar una Fase!",
+	              text: "Debe seleccionar al menos un usuario!",
 	              stay: false,
 	              stayTime: 2500,
 	              type: "notice"

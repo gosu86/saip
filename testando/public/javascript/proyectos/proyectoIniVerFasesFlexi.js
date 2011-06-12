@@ -10,7 +10,10 @@ $(function()
 			{display: 'Nombre', name : 'name', width : 150, sortable : true, align: 'left'},
 			{display: 'Descripcion', name : 'descripcion', width : 150, sortable : false, align: 'left'},			
 			{display: 'Estado', name : 'estado', width : 150, sortable : true, align: 'left'},
-			{display: 'Orden', name : 'orden', width : 150, sortable : true, align: 'left'}
+			{display: 'Orden', name : 'orden', width : 50, sortable : true, align: 'left'},
+			{display: 'Usuarios', name : 'usuarios', width : 50, sortable : true, align: 'left'},
+			{display: 'Tipos de Items', name : 'tiposdeitem', width : 80, sortable : true, align: 'left'},
+			{display: 'Items', name : 'items', width : 50, sortable : true, align: 'left'},
 		],
 		
 		buttons : [
@@ -62,7 +65,7 @@ function ver_usuarios(grid){
 	{	
 		id = get_id(this) 
 		nombre=get_nombre()
-		window.location = "/configurar/vista_de_usuarios/?fId="+id+"&nombre="+nombre
+		window.location = "/configurar/vista_de_usuarios/?fid="+id
 	});	
 }
 
@@ -72,7 +75,7 @@ function ver_tipos_de_item(grid){
 		id = get_id(this) 
 		nombre=get_nombre()
 		estado=get_estado()
-		window.location = "/configurar/vista_de_tiposDeItem/?fId="+id+"&nombre="+nombre+"&estado="+estado
+		window.location = "/configurar/vista_de_tiposDeItem/?fid="+id
 	});	
 }
 

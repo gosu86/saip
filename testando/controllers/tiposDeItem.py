@@ -30,15 +30,7 @@ class TiposDeItemController(CrudRestController):
     new_form = tipoitem_add_form
     template=''
     page=''
-#===============================================================================
-#===============================================================================
-#    @expose('testando.templates.administrar.tiposDeItem.get_one')
-#    def get_one(self, *args, **kw):
-# 
-#        tmpl_context.form = tipoitem_view_form
-#        value = {'name':'nombre'}
-#        return dict(value=value)
-#===============================================================================
+
     @expose()
     def get_one(self, *args, **kw):
         redirect('../')
@@ -51,7 +43,7 @@ class TiposDeItemController(CrudRestController):
         return dict(value=kw, model=self.model.__name__)
         
     @expose('testando.templates.administrar.tiposDeItem.index')
-    def get_all(self):
+    def get_all(self, **kw):
         log.debug('get_all -> kw = %s' %str(kw))
         override_template(self.get_all,self.template)    
         return dict(page=self.page)
@@ -131,10 +123,8 @@ class TiposDeItemController(CrudRestController):
                 campoExtra.tipo_item_id=tdi.id
                 DBSession.add(campoExtra)
         DBSession.flush()
-                        
-        
-        estadoFase=tdi.fase.estado
-        redirect('/configurar/vista_de_tiposDeItem/?fId='+str(tdi.fase_id)+'&nombre='+tdi.fase.name+'&estado='+estadoFase)
+
+        redirect('/configurar/vista_de_tiposDeItem/?fid='+str(tdi.fase_id))
                 
     @validate(validators={"page":validators.Int(), "rp":validators.Int()})
     @expose('json')
@@ -203,7 +193,6 @@ class TiposDeItemController(CrudRestController):
                 campoExtra.tipo_item_id=ti.id
                 DBSession.add(campoExtra)
                 DBSession.flush()
-        nombreFase=ti.fase.name
-        estadoFase=ti.fase.estado
-        raise redirect('/configurar/vista_de_tiposDeItem/?fId='+kw['fase_id']+'&nombre='+nombreFase+'&estado='+estadoFase)
+
+        raise redirect('/configurar/vista_de_tiposDeItem/?fid='+kw['fase_id'])
 

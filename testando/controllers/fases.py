@@ -52,9 +52,7 @@ class FasesController(CrudRestController):
     @registered_validate(error_handler=new)
     def post(self, *args, **kw):
         fase=self.provider.create(self.model, params=kw)
-        nombreProyecto=fase.proyecto.name
-        estadoProyecto=fase.proyecto.estado
-        raise redirect('/configurar/vista_de_fases/?pId='+kw['proyecto_id']+'&estado='+estadoProyecto+'&nombre='+nombreProyecto)    
+        raise redirect('/configurar/vista_de_fases/?pid='+kw['proyecto_id'])    
 
     @expose('tgext.crud.templates.edit')
     def edit(self, *args, **kw):
@@ -81,9 +79,7 @@ class FasesController(CrudRestController):
 
         fase=self.provider.update(self.model, params=kw)
         pid=fase.proyecto.id
-        nombreProyecto=fase.proyecto.name
-        estadoProyecto=fase.proyecto.estado
-        redirect('/configurar/vista_de_fases/?pId='+str(pid)+'&estado='+estadoProyecto+'&nombre='+nombreProyecto)
+        redirect('/configurar/vista_de_fases/?pid='+str(pid))
             
     @validate(validators={"id":validators.Int()})
     @expose('json')

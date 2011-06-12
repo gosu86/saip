@@ -16,18 +16,18 @@
   <head>
     <meta content="text/html; charset=UTF-8" http-equiv="content-type" py:replace="''"/>
     <title>
-      SAIP - Proyectos
+      SAIP·${page}·Proyectos
     </title>
-	<script type="text/javascript" src="${url('/javascript/jquery.js')}">
-    </script>    
-    <script type="text/javascript" src="${url('/javascript/proyectos/proyectoAdministrarFlexi.js')}">
+    <script type="text/javascript" src="${url('/javascript/proyectos/proyectoDesarrollarVerFasesFlexi.js')}">
     </script>
   </head>
   <body>
-      <div class="TablaProyectos">
-        <table id="tablaProyectosFlexi">
+    <div py:replace="tmpl_context.proyectoId(id='pid',value=proyectoId)">Input Form</div>
+    <div py:replace="tmpl_context.proyectoNombre(id='proyectoNombre',value=proyectoNombre)">Input Form</div>
+      <div class="TablaFases">
+        <table id="proyectoDesarrollarVerFasesFlexi">
         </table>
-      </div>
+      </div>      
     <br />
   </body>
 </html>

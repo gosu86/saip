@@ -11,8 +11,8 @@ class RolNewForm(DojoAddRecordForm):
     __omit_fields__ = ['fecha_creacion']
     __field_order__ = ['name','rol_name','permisos']
     
-    name        = TextField('name',label_text='Nombre ')
-    rol_name    = TextField('rol_name',label_text='Nombre Descriptivo')
+    name        = TextField('name',label_text='Nombre Descriptivo: ')
+    rol_name    = TextField('rol_name',label_text='Nombre: ')
 #============================================================
 
 class RolEditFiller(EditFormFiller):
@@ -25,8 +25,8 @@ class RolEditForm(DojoEditableForm):
     __omit_fields__ = ['fecha_creacion']
     __field_order__ = ['name','rol_name','permisos']
     
-    name        = TextField('name',label_text='Nombre ')
-    
+    name        = TextField('name',label_text='Nombre Descriptivo: ')
+    rol_name    = TextField('rol_name',label_text='Nombre: ')    
 #============================================================
 
 rol_new_form = RolNewForm(DBSession)

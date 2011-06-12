@@ -8,6 +8,7 @@ from repoze.what.predicates import All,not_anonymous,has_any_permission
 from testando.model             	import DBSession
 from testando.model.proyecto        import Proyecto
 from testando.model.auth        	import Usuario
+from testando.model.auth        	import Rol
 from testando.model.fase        	import Fase
 from testando.widgets.proyecto_w 	import proyecto_new_form,proyecto_edit_filler,proyecto_edit_form
 from testando.widgets.myWidgets 	import hideMe
@@ -46,7 +47,10 @@ class ProyectosController(CrudRestController):
 	@expose()
 	@registered_validate(error_handler=new)
 	def post(self, *args, **kw):
-		self.provider.create(self.model, params=kw)
+		p=self.provider.create(self.model, params=kw)
+		r=DBSession.query(Rol).filter(Rol.name=='Configuradores').first()
+		p.lider.roles.append(r)
+		DBSession.flush()
 		raise redirect('./')		
 	@expose()
 	def put(self, *args, **kw):
@@ -135,5 +139,6 @@ class ProyectosController(CrudRestController):
 							(', '.join([f.name for f in proyecto.fases]))]} for proyecto in proyectos]
 			result = dict(page=page, total=total, rows=rows)
 		except:
-			result = dict() 
+			result = dict()
+		log.debug("RESULT == %s" % result) 
 		return result		

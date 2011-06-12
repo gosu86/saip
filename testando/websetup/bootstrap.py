@@ -26,43 +26,92 @@ def bootstrap(command, conf, vars):
         u.usuario_name = u'admin'
         u.name = u'Administrador'
         u.email = u'administrador@saip.com'
-        u.password = u'pass'
-    
+        u.password = u'pass'    
         model.DBSession.add(u)
     
-        r = model.Rol()
-        r.rol_name = u'Administrador'
-        r.name = u'Rol Administrador del sistema'
-    
-        r.usuarios.append(u)
-    
-        model.DBSession.add(r)
+        ra = model.Rol()
+        ra.rol_name = u'Administradores'
+        ra.name = u'Administradores del sistema'    
+        model.DBSession.add(ra)
         
-        permisos = ["AdministrarUsuarios","AdministrarRoles","AdministrarPermisos","AdministrarFases","AdministrarProyectos","AdministrarTiposDeItem","AdministrarTodo"]
-        for nombre_permiso in permisos:            
+        ra.usuarios.append(u)
+          
+        rde = model.Rol()
+        rde.rol_name = u'Desarrolladores'
+        rde.name = u'Desarrolladores de Items'
+        model.DBSession.add(rde)
+
+        rco = model.Rol()
+        rco.rol_name = u'Configuradores'
+        rco.name = u'Configuradores de Items'
+        model.DBSession.add(rco)
+            
+        ra = model.Rol()
+        ra.rol_name = u'Administrador'
+        ra.name = u'Administrador del sistema'    
+        model.DBSession.add(ra)
+        
+        ra.usuarios.append(u)         
+        
+        permisos_administrar    = ["AdministrarUsuarios","AdministrarRoles","AdministrarPermisos","AdministrarProyectos","AdministrarTodo"]
+        permisos_configurar     = ["ConfigurarFases","ConfigurarProyectos","ConfigurarTiposDeItem","ConfigurarLineasBase","ConfigurarTodo"]
+        permisos_desarrollar_y_aprobar    = ["DesarrollarItems","AprobarItems"]
+        
+        for nombre_permiso in permisos_administrar:            
             p = model.Permiso()
             p.permiso_name = unicode(nombre_permiso)
             p.descripcion = unicode('Da el permiso para '+space_out_camel_case(nombre_permiso))
-            p.roles.append(r)   
+            p.roles.append(ra)   
             model.DBSession.add(p)
-    
-        u1 = model.Usuario()
-        u1.usuario_name = u'desarrollador'
-        u1.name = u'Desarrollador'
-        u1.email = u'desarrollador@saip.com'
-        u1.password = u'dpass'
+
+        r = model.Rol()
+        r.rol_name = u'Lider'
+        r.name = u'Lider de Proyecto'
+        model.DBSession.add(r)
+                 
+        for nombre_permiso in permisos_configurar:            
+            p = model.Permiso()
+            p.permiso_name = unicode(nombre_permiso)
+            p.descripcion = unicode('Da el permiso para '+space_out_camel_case(nombre_permiso))
+            p.roles.append(r)
+            p.roles.append(ra)   
+            model.DBSession.add(p)
+
+        rapde = model.Rol()
+        rapde.rol_name = u'Aprob. y Des.'
+        rapde.name = u'Aprobador y Desarrollador de Items'
+        model.DBSession.add(rapde)
+
+        rap = model.Rol()
+        rap.rol_name = u'Aprobador'
+        rap.name = u'Aprobador de Items'
+        model.DBSession.add(rap)
         
-        model.DBSession.add(u1)
+        rde = model.Rol()
+        rde.rol_name = u'Desarrollador'
+        rde.name = u'Desarrollador de Items'
+        model.DBSession.add(rde)
+        c=0
+        for nombre_permiso in permisos_desarrollar_y_aprobar:            
+            p = model.Permiso()
+            p.permiso_name = unicode(nombre_permiso)
+            p.descripcion = unicode('Da el permiso para '+space_out_camel_case(nombre_permiso))
+            p.roles.append(rapde)
+            p.roles.append(ra)
+            if c==0:
+                p.roles.append(rde)
+            else:
+                p.roles.append(rap)
+            c=c+1
+            model.DBSession.add(p)
+        model.DBSession.flush()
         
-        #=======================================================================
-        # r = model.Rol()
-        # r.rol_name = u'usuario'
-        # r.name = u'Rol usuario del sistema'
-        # 
-        # model.DBSession.add(r) 
-        #=======================================================================
-        
-        
+        p               =   model.Proyecto()
+        p.name          =   "El proyecto"
+        p.descripcion   =   "Este es un proyecto de prueba"
+        p.empresa       =   "La empresa S.A."
+        p.lider_id      =   u.id   
+        model.DBSession.add(p)        
         model.DBSession.flush()
         transaction.commit()
     except IntegrityError:

@@ -13,7 +13,7 @@ from formencode.validators import Email,MinLength
 
 class UsuarioNewForm(DojoAddRecordForm):
     __model__          =   Usuario
-    __omit_fields__    =   ['id','fecha_creacion','roles','estado','proyectos','fases']
+    __omit_fields__    =   ['id','fecha_creacion','roles','estado','proyectos','fases','mis_proyectos']
     __field_order__    =   ['name','apellido','email','usuario_name','_password','fecha_creacion']
     __field_attrs__    =   {'name':{'label':'Nombre:'}}
     __require_fields__ =   ['apellido','usuario_name','_password']
@@ -29,7 +29,7 @@ class UsuarioEditFiller(EditFormFiller):
    
 class UsuarioEditForm(DojoEditableForm):
     __model__       =   Usuario
-    __omit_fields__ =   ['fecha_creacion','id','proyectos','fases','roles']
+    __omit_fields__ =   ['fecha_creacion','id','proyectos','fases','roles','mis_proyectos']
     __field_order__ =   ['name','apellido','email','usuario_name','_password','password','roles']
     __field_attrs__ =   {'roles':{'label_text':'Roles de Sistema:'}}
     

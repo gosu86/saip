@@ -53,7 +53,7 @@ class PermisosController(CrudRestController):
 					'cell': [permiso.id,
 							permiso.permiso_name,
 							permiso.descripcion,
-							(', '.join([r.name for r in permiso.roles]))
+							(', </br> '.join([r.name for r in permiso.roles]))
 							]} for permiso in permisos
 					]
 			result = dict(page=page, total=total, rows=rows)
