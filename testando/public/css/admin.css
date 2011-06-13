@@ -54,7 +54,7 @@ a.edit_link{
 }
 
 /* admin add/edit view */
-.crud_edit label, .crud_add label{
+.crud_edit .labelcol, .crud_add .labelcol{
     font-size: 12px;
     color: white;
 }

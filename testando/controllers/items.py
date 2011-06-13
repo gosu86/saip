@@ -45,9 +45,20 @@ class ItemsController(CrudRestController):
         tdiid=int(kw['tdiid'])
         tdi=DBSession.query(TipoItem).filter_by(id=tdiid).first()
         fase_id=tdi.fase_id
+        fase_orden=tdi.fase.orden
         tipo_item_id=tdi.id
         attr_extra=tdi.campos_extra
-        return dict(page="Desarrollar",attr_extra=attr_extra,fase_id=fase_id,tipo_item_id=tipo_item_id)
+        posibles_antecesores=False
+        if fase_orden > 1:
+            posibles_antecesores=DBSession.query(Item).filter(Item.fase_id==1)
+        posibles_padres=DBSession.query(Item).filter(and_(Item.fase_id==fase_id,Item.tipo_item_id==tdiid))
+        return dict(page="Desarrollar",
+                    attr_extra=attr_extra,
+                    fase_id=fase_id,
+                    fase_orden=fase_orden,
+                    tipo_item_id=tipo_item_id,
+                    posibles_padres=posibles_padres,
+                    posibles_antecesores=posibles_antecesores)
     
     @expose()
     #@registered_validate(error_handler=new)

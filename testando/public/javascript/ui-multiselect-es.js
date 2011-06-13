@@ -5,7 +5,7 @@
  */
 
 $.extend($.ui.multiselect.locale, {
-	addAll:'Agregar todos',
-	removeAll:'Remover todos',
-	itemsCount:'Objetos seleccionados'
+	addAll:'<span class="ui-corner-all ui-icon ui-icon-plus"></span>Todos',
+	removeAll:'<span class="ui-corner-all ui-icon ui-icon-minus"></span>Todos',
+	itemsCount:'Items seleccionados'
 });

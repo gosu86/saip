@@ -12,21 +12,30 @@
 </script>
 <script type="text/javascript" src="${url('/javascript/ui.multiselect.js')}" >
 </script>
-
+<script type="text/javascript" src="${url('/javascript/ui-multiselect-es.js')}" >
+</script>
 <script type="text/javascript">
 $().ready(function() {
 	$(".tableform").validate({
 			rules: {
 				descripcion: "required",
 				complejidad: "required",
-			}
-		
+				"padres[]":"required",
+				"antecesores[]":"required"
+			},
+			messages: {
+			"padres[]": "Por favor, seleccione una relacion en la misma fase.",
+			"antecesores[]": "Por favor, seleccione una realcion en la fase anterior.",
+
+			},
+		errorClass: "fielderror"
 	});
 
 $('input#Fecha').each(function()
 {
 	$(this).datepicker({
-		inline: true
+		inline: true,
+		dateFormat: "dd/mm/yy"
 	});	
 });	
 
@@ -88,33 +97,22 @@ $(function(){
     </tbody>
     </table>
     <table>
-    <th style="font-color:white">Selecciona sus Padres</th><th>Selecciona sus Antecesores</th>
+    <th style="color:white">Selecciona sus Padres</th>
+    <py:if test="posibles_antecesores">
+    <th style="color:white">Selecciona sus Antecesores</th>
+    </py:if>
     <tr>
         <td>
-        		<select id="countries" class="multiselect" multiple="multiple" name="countries[]">
-			  <option value="AFG">Afghanistan</option>
-			  <option value="ALB">Albania</option>
-			  <option value="DZA">Algeria</option>
-			  <option value="AND">Andorra</option>
-			  <option value="ARG">Argentina</option>
-			  <option value="ARM">Armenia</option>
-			  <option value="ABW">Aruba</option>
-			  <option value="AUS">Australia</option>
-			  <option value="AUT" selected="selected">Austria</option>
+        	<select id="padres" class="multiselect" multiple="multiple" name="padres[]">
+				<option py:for="pp in posibles_padres" value="${pp.id}">${pp.name}</option>
 			</select> 
         </td>
         <td>
-			<select id="countries" class="multiselect" multiple="multiple" name="countries[]">
-			  <option value="AFG">Afghanistan</option>
-			  <option value="ALB">Albania</option>
-			  <option value="DZA">Algeria</option>
-			  <option value="AND">Andorra</option>
-			  <option value="ARG">Argentina</option>
-			  <option value="ARM">Armenia</option>
-			  <option value="ABW">Aruba</option>
-			  <option value="AUS">Australia</option>
-			  <option value="AUT" selected="selected">Austria</option>
-			</select>        
+        <py:if test="posibles_antecesores">
+        	<select style="align:right" id="antecesores" class="multiselect" multiple="multiple" name="antecesores[]">
+				<option py:for="pa in posibles_antecesores" value="${pa.id}">${pa.name}</option>
+			</select>   
+		</py:if>
 		</td>
 		</tr>
 	</table>
@@ -127,7 +125,7 @@ $(function(){
         </tr>	
 	</form>
   </div>
-    <!--  <div style="clear:both;"></div> -->  
+ 
   <div style="height:0px; clear:both;"> &nbsp; </div>
 
 </body>
