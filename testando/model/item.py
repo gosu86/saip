@@ -20,6 +20,8 @@ class Item(DeclarativeBase):
     
     historico_id    =   Column(Integer)
     
+    #codigo          =   Column(Unicode(25))
+    
     name            =   Column(Unicode(150), nullable=False)
     
     descripcion     =   Column(UnicodeText(255))

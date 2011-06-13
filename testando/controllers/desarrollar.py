@@ -1,7 +1,7 @@
-from tg import expose, redirect, validate, request, tmpl_context
+from tg import expose, redirect, validate, request, tmpl_context,config
 from formencode        import validators
 
-from sqlalchemy.sql import and_, or_, not_
+from sqlalchemy.sql import and_, or_, not_, select
 
 from repoze.what.predicates import All,not_anonymous,in_any_group
 
@@ -10,6 +10,7 @@ from testando.model.proyecto        import Proyecto
 from testando.model.fase            import Fase,usuario_rol_fase_table
 from testando.model.auth            import Usuario
 from testando.model.tipoitem        import TipoItem
+from testando.model.item            import Item
 
 from testando.lib.base                  import BaseController
 from testando.controllers.error         import ErrorController
@@ -123,15 +124,45 @@ class DesarrollarController(BaseController):
         except:
             result = dict() 
         return result
-    
+
+
+    def get_rol(self,uid,fid):
+        uid=int(uid)
+        fid=int(fid)
+        conn = config['pylons.app_globals'].sa_engine.connect()
+        se=select([usuario_rol_fase_table.c.rol_id],and_(usuario_rol_fase_table.c.usuario_id==uid, usuario_rol_fase_table.c.fases_id==fid))        
+        result=conn.execute(se)
+        row=result.fetchone() 
+        rol=int(row['rol_id'])
+
+        conn.close()
+         
+        return rol
+
     @expose('testando.templates.desarrollar.fases.desarrollo_de_fases') 
     def desarrollo_de_fases(self,fid=None):
-        fid=int(fid)
+        a   =   False
+        d   =   False
+        ad  =   False
+        
+        uid =   request.identity['user'].id       
+        fid =   int(fid)
+        rol =   self.get_rol(uid, fid)
+        if rol == 1:
+            a   =   True           
+        elif rol ==2:
+            d   =   True         
+        elif rol ==3:
+            ad  =   True                
+            
         f=DBSession.query(Fase).filter_by(id=fid).one()
+        
+       
+        
         nombre=f.name        
         tmpl_context.faseId = hideMe()
         tmpl_context.faseNombre = hideMe()        
-        return dict(page='Desarrollar',faseId=fid,faseNombre=nombre)
+        return dict(page='Desarrollar',faseId=fid,faseNombre=nombre,A=a,D=d,AD=ad)
 
     @validate(validators={"page":validators.Int(), "rp":validators.Int()})
     @expose('json')    
@@ -160,4 +191,33 @@ class DesarrollarController(BaseController):
             result = dict(page=page, total=total, rows=rows)
         except:
             result = dict() 
-        return result            
+        return result    
+    
+    @validate(validators={"page":validators.Int(), "rp":validators.Int()})
+    @expose('json')    
+    def items_creados(self,fid=None, page='1', rp='25', sortname='id', sortorder='asc', qtype=None, query=None):
+        try:
+            offset = (int(page)-1) * int(rp)
+            
+            if (query):
+                d = {qtype:query,'fase_id':int(fid)}
+                items = DBSession.query(Item).filter_by(**d)
+            else:
+                d = {'fase_id':int(fid)}
+                items = DBSession.query(Item).filter_by(**d)
+                
+            total = items.count()
+            log.debug('total %s' %total)
+            column = getattr(Item, sortname)
+            items = items.order_by(getattr(column,sortorder)()).offset(offset).limit(rp)
+            
+            rows = [{'id'  : item.id,
+                    'cell': [item.id,
+                            item.name,
+                            item.descripcion,
+                            item.complejidad,
+                            item.tipo_item.name]} for item in items]
+            result = dict(page=page, total=total, rows=rows)
+        except:
+            result = dict() 
+        return result             

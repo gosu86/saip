@@ -1,4 +1,4 @@
-#Mon May 16 16:59:35 PYT 2011
+#Sun Jun 12 00:49:25 PYT 2011
 eclipse.preferences.version=1
 encoding//testando/__init__.py=utf-8
 encoding//testando/config/__init__.py=utf-8
@@ -11,6 +11,8 @@ encoding//testando/controllers/desarrollar.py=utf-8
 encoding//testando/controllers/error.py=utf-8
 encoding//testando/controllers/root.py=utf-8
 encoding//testando/lib/__init__.py=utf-8
+encoding//testando/lib/app_globals.py=utf-8
+encoding//testando/lib/base.py=utf-8
 encoding//testando/lib/helpers.py=utf-8
 encoding//testando/model/__init__.py=utf-8
 encoding//testando/model/auth.py=utf-8

@@ -8,24 +8,49 @@
     </title>
     <script type="text/javascript" src="${url('/javascript/fases/fasesDesarrollarTiposDeItemFlexi.js')}">
     </script>
+    <py:if test="A">    
     <script type="text/javascript" src="${url('/javascript/fases/fasesAprobarItemsFlexi.js')}">
     </script>
+    </py:if>
+    <py:if test="D">
     <script type="text/javascript" src="${url('/javascript/fases/fasesDesarrollarItemsFlexi.js')}">
-    </script>            
-    <script type="text/javascript" src="${url('/javascript/fases/fasesDesarrollarItemsFlexi.js')}">
-    </script>    
+    </script>
+    </py:if>            
+    <py:if test="AD">
+    <script type="text/javascript" src="${url('/javascript/fases/fasesAprobarDesarrollarItemsFlexi.js')}">
+    </script>
+    </py:if>    
   </head>
   <body>
+    
     <div py:replace="tmpl_context.faseId(id='fid',value=faseId)">Input Form</div>
     <div py:replace="tmpl_context.faseNombre(id='fNombre',value=faseNombre)">Input Form</div>
+    
       <div class="TablaTiposDeItem DeFase">
         <table id="fasesDesarrollarTiposDeItemFlexi">
         </table>
       </div>
-      <div class="TablaTiposDeItem DeSistema">
-        <table id="fasesDesarrollarFlexi">
+      
+      <py:if test="D">
+      <div class="TablaDesarrolloItems">
+        <table id="fasesDesarrollarItemsFlexi">
         </table>
-      </div>                
+      </div>
+      </py:if>
+      
+      <py:if test="A">
+      <div class="TablaAprobacionItems">
+        <table id="fasesAprobarItemsFlexi">
+        </table>
+      </div>
+      </py:if>
+      
+      <py:if test="AD">
+      <div class="TablaAprobacionDesarrolloItems">
+        <table id="fasesAprobarDesarrollarItemsFlexi">
+        </table>
+      </div>
+      </py:if>          
     <br />
   </body>
 </html>

@@ -1,0 +1,134 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:py="http://genshi.edgewall.org/"
+      xmlns:xi="http://www.w3.org/2001/XInclude">
+
+<xi:include href="master.html" />
+<title>Saip - Crear Item</title>
+<head>
+<link type="text/css" href="/css/jquery-ui-1.8.13.custom.css" rel="stylesheet" />
+<link type="text/css" href="/css/common.css" rel="stylesheet" />
+<link type="text/css" href="/css/ui.multiselect.css" rel="stylesheet" />common.css
+<script type="text/javascript" src="${url('/javascript/jquery-ui-1.8.13.custom.min.js')}" >
+</script>
+<script type="text/javascript" src="${url('/javascript/ui.multiselect.js')}" >
+</script>
+
+<script type="text/javascript">
+$().ready(function() {
+	$(".tableform").validate({
+			rules: {
+				descripcion: "required",
+				complejidad: "required",
+			}
+		
+	});
+
+$('input#Fecha').each(function()
+{
+	$(this).datepicker({
+		inline: true
+	});	
+});	
+
+$(function(){
+  // choose either the full version
+  $(".multiselect").multiselect();
+});
+
+});
+</script>
+
+<script type="text/javascript" src="${url('/javascript/add_more_attr.js')}">
+</script>
+</head>
+<body class="tundra">
+  <div style="height:0px;"> &nbsp; </div>
+
+  <div style="float:left;" class="crud_edit">
+    <h2 style="margin-top:1px;">Crear Item</h2>
+    <form class="required tableform" method="post" action="../">
+    <div>
+    		<input type="hidden" value="${fase_id}" id="fase_id" class="hiddenfield" name="fase_id"/>
+    		<input type="hidden" value="${tipo_item_id}" id="tipo_item_id" class="hiddenfield" name="tipo_item_id"/>
+    </div>
+
+    <table cellspacing="0" cellpadding="2" border="0">
+        <tbody><tr title="" class="even" id="name.container">
+            <td class="labelcol">
+                <label class="fieldlabel required" for="name" id="name.label">Name</label>
+            </td>
+            <td class="fieldcol">
+                <input type="text" value="" id="name" class="textfield required" name="name"/>
+            </td>
+        </tr><tr title="" class="odd" id="descripcion.container">
+            <td class="labelcol">
+                <label class="fieldlabel" for="descripcion" id="descripcion.label">Descripcion</label>
+            </td>
+            <td class="fieldcol">
+                <textarea cols="50" rows="2" class="textarea" name="descripcion" id="descripcion"></textarea>
+            </td>
+        </tr>
+        <tr title="" class="even" id="complejidad.container">
+            <td class="labelcol">
+                <label class="fieldlabel" for="complejidad" id="complejidad.label">Complejidad</label>
+            </td>
+            <td class="fieldcol">
+                <input type="text" value="" id="complejidad" class="textfield" name="complejidad"/>
+            </td>
+        </tr>
+        <tr py:for="attr in attr_extra" title="" class="even" id="complejidad.container">
+            <td class="labelcol">
+                <label class="fieldlabel" for="${attr.name}" id="${attr.name}.label">${attr.name}</label><br/>
+                <label style="font-size:10px; text-align:center" for="${attr.name}" id="${attr.name}.label">(${attr.tipo})</label>
+            </td>
+            <td class="fieldcol">
+                <input type="text" value="" id="${attr.tipo}" class="textfield" name="${attr.name}"/>
+            </td>
+        </tr>
+    </tbody>
+    </table>
+    <table>
+    <th style="font-color:white">Selecciona sus Padres</th><th>Selecciona sus Antecesores</th>
+    <tr>
+        <td>
+        		<select id="countries" class="multiselect" multiple="multiple" name="countries[]">
+			  <option value="AFG">Afghanistan</option>
+			  <option value="ALB">Albania</option>
+			  <option value="DZA">Algeria</option>
+			  <option value="AND">Andorra</option>
+			  <option value="ARG">Argentina</option>
+			  <option value="ARM">Armenia</option>
+			  <option value="ABW">Aruba</option>
+			  <option value="AUS">Australia</option>
+			  <option value="AUT" selected="selected">Austria</option>
+			</select> 
+        </td>
+        <td>
+			<select id="countries" class="multiselect" multiple="multiple" name="countries[]">
+			  <option value="AFG">Afghanistan</option>
+			  <option value="ALB">Albania</option>
+			  <option value="DZA">Algeria</option>
+			  <option value="AND">Andorra</option>
+			  <option value="ARG">Argentina</option>
+			  <option value="ARM">Armenia</option>
+			  <option value="ABW">Aruba</option>
+			  <option value="AUS">Australia</option>
+			  <option value="AUT" selected="selected">Austria</option>
+			</select>        
+		</td>
+		</tr>
+	</table>
+        <tr title="" class="odd" id="submit.container">
+            <td class="labelcol">
+            </td>
+            <td class="fieldcol">
+                <input type="submit" value="Submit" class="submitbutton"/>
+            </td>
+        </tr>	
+	</form>
+  </div>
+    <!--  <div style="clear:both;"></div> -->  
+  <div style="height:0px; clear:both;"> &nbsp; </div>
+
+</body>
+</html>
