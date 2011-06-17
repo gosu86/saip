@@ -107,9 +107,9 @@ def bootstrap(command, conf, vars):
         model.DBSession.flush()
         
         p               =   model.Proyecto()
-        p.name          =   "El proyecto"
-        p.descripcion   =   "Este es un proyecto de prueba"
-        p.empresa       =   "La empresa S.A."
+        p.name          =   u"El proyecto"
+        p.descripcion   =   u"Este es un proyecto de prueba"
+        p.empresa       =   u"La empresa S.A."
         p.lider_id      =   u.id   
         model.DBSession.add(p)        
         model.DBSession.flush()

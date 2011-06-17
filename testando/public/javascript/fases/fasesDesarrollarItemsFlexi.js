@@ -14,7 +14,7 @@ $(function(){
 		
 		buttons : [	           
 			{separator: true},
-			{name: 'Editar', bclass: 'add', onpress : doCommandItem},
+			{name: 'Editar', bclass: 'edit', onpress : doCommandItem},
 			{separator: true},			
 			
 		],
@@ -41,13 +41,13 @@ function doCommandItem(com, grid)
 {
 	if ($('.trSelected', grid).length > 0)
 	{	
-			if (com == 'Crear Item de este tipo')
+			if (com == 'Editar')
 			{
 			
 				$('.trSelected', grid).each(function()
 				{
 					id = get_id(this) 
-					window.location = '/desarrollar/items/new/?tdiid='+id;
+					window.location = '/desarrollar/items/'+id+'/edit/';
 				});
 			}
 	}

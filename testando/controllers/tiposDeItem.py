@@ -13,7 +13,9 @@ import logging
 from tw.forms import TextField
 from string import find, replace
 from decorators import registered_validate, register_validators, catch_errors
-
+from testando.model.atributoextranumero import AtributoExtraNumero
+from testando.model.atributoextratexto  import AtributoExtraTexto
+from testando.model.atributoextrafecha  import AtributoExtraFecha
 errors = ()
 try:
     from sqlalchemy.exc import IntegrityError, DatabaseError, ProgrammingError
@@ -56,7 +58,7 @@ class TiposDeItemController(CrudRestController):
             override_template(self.edit,'genshi:testando.templates.administrar.tiposDeItem.agregar_attr')
         log.debug('edit -> kw = %s' %str(kw))
         """Display a page to edit the record."""
-    #        tmpl_context.widget = self.edit_form
+
         pks = self.provider.get_primary_fields(self.model)
         kw = {}
         for i, pk in  enumerate(pks):
@@ -64,10 +66,16 @@ class TiposDeItemController(CrudRestController):
         value = self.edit_filler.get_value(kw)
         tdi=DBSession.query(TipoItem).filter_by(id=int(kw[pk])).first()
         attr_extra=tdi.campos_extra
+        faseNoIniciada=True
+        if len(tdi.fase.items)>0:
+            faseNoIniciada=False
         log.debug('attr_extra = %s' %attr_extra)
         value['_method'] = 'PUT'
         log.debug('value = %s' %value)
-        return dict(value=value, model="Tipo De Item", attr_extra=attr_extra,pk_count=len(pks))
+        return dict(value=value,
+                    model="Tipo De Item",
+                    attr_extra=attr_extra,
+                    faseNoIniciada=faseNoIniciada)
         
         
     @expose()
@@ -122,9 +130,38 @@ class TiposDeItemController(CrudRestController):
                 campoExtra.tipo=tipo
                 campoExtra.tipo_item_id=tdi.id
                 DBSession.add(campoExtra)
+                self.actualizar_items(tdi,campoExtra)
         DBSession.flush()
 
         redirect('/configurar/vista_de_tiposDeItem/?fid='+str(tdi.fase_id))
+                
+    def actualizar_items(self,tdi,ce):
+        
+        if ce.tipo=='Texto':
+            for i in tdi.items:
+                ae=AtributoExtraTexto()
+                ae.name=ce.name
+                ae.item_id=i.id
+                DBSession.add(ae)
+               
+        elif ce.tipo=='Fecha':
+            ae=AtributoExtraFecha()
+            for i in tdi.items:
+                ae=AtributoExtraFecha()
+                ae.name=ce.name
+                ae.item_id=i.id
+                DBSession.add(ae)
+                            
+        elif ce.tipo=='Numero':
+            ae=AtributoExtraNumero()
+            for i in tdi.items:
+                ae=AtributoExtraNumero()
+                ae.name=ce.name
+                ae.item_id=i.id
+                DBSession.add(ae)            
+
+
+            
                 
     @validate(validators={"page":validators.Int(), "rp":validators.Int()})
     @expose('json')

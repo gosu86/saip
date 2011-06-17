@@ -3,7 +3,7 @@
       xmlns:xi="http://www.w3.org/2001/XInclude">
 
 <xi:include href="master.html" />
-<title>Saip - Crear Item</title>
+<title>Saip - Editar Item</title>
 <head>
 <link type="text/css" href="/css/jquery-ui-1.8.13.custom.css" rel="stylesheet" />
 <link type="text/css" href="/css/common.css" rel="stylesheet" />
@@ -53,11 +53,11 @@ $(function(){
   <div style="height:0px;"> &nbsp; </div>
 
   <div style="float:left;" class="crud_edit">
-    <h2 style="margin-top:1px;">Crear Item</h2>
-    <form class="required tableform" method="post" action="../">
+    <h2 style="margin-top:1px;">Editar Item</h2>
+    <form class="required tableform" method="post" action="./">
     <div>
-    		<input type="hidden" value="${fase_id}" id="fase_id" class="hiddenfield" name="fase_id"/>
-    		<input type="hidden" value="${tipo_item_id}" id="tipo_item_id" class="hiddenfield" name="tipo_item_id"/>
+
+    		<input type="hidden" value="PUT" id="_method" class="sproxmethodputhiddenfield" name="_method"/>
     </div>
 
     <table cellspacing="0" cellpadding="2" border="0">
@@ -66,14 +66,14 @@ $(function(){
                 <label class="fieldlabel required" for="name" id="name.label">Name</label>
             </td>
             <td class="fieldcol">
-                <input type="text" value="" id="name" class="textfield required" name="name"/>
+                <input type="text" value="${item.name}" id="name" class="textfield required" name="name"/>
             </td>
         </tr><tr title="" class="odd" id="descripcion.container">
             <td class="labelcol">
                 <label class="fieldlabel" for="descripcion" id="descripcion.label">Descripcion</label>
             </td>
             <td class="fieldcol">
-                <textarea cols="50" rows="2" class="textarea" name="descripcion" id="descripcion"></textarea>
+                <textarea cols="50" rows="2" class="textarea" name="descripcion" id="descripcion">${item.descripcion}</textarea>
             </td>
         </tr>
         <tr title="" class="even" id="complejidad.container">
@@ -81,35 +81,45 @@ $(function(){
                 <label class="fieldlabel" for="complejidad" id="complejidad.label">Complejidad</label>
             </td>
             <td class="fieldcol">
-                <input type="text" value="" id="complejidad" class="textfield" name="complejidad"/>
+                <input type="text" value="${item.complejidad}" id="complejidad" class="textfield" name="complejidad"/>
             </td>
         </tr>
-        <tr py:for="attr in attr_extra" title="" class="even" id="complejidad.container">
+        <tr py:for="k,attr in attr_extra.iteritems()" title="" class="even" id="complejidad.container">
             <td class="labelcol">
                 <label class="fieldlabel" for="${attr.name}" id="${attr.name}.label">${attr.name}</label><br/>
                 <label style="font-size:10px; text-align:center" for="${attr.name}" id="${attr.name}.label">(${attr.tipo})</label>
             </td>
             <td class="fieldcol">
-                <input type="text" value="" id="${attr.tipo}" class="textfield" name="${attr.name}"/>
+                <input type="text" value="${extras[k].valor}" id="${attr.tipo}" class="textfield" name="extra_${extras[k].id}"/>
+                <input type="hidden" name="extras" value="${extras[k].id}"/>
+                <input type="hidden" name="tipo_${extras[k].id}" value="${attr.tipo}"/>
             </td>
         </tr>
     </tbody>
     </table>
     <table>
-    <th style="color:white">Selecciona sus Padres</th>
+    <th style="color:white">Relaciones en la misma fase</th>
     <py:if test="posibles_antecesores">
-    <th style="color:white">Selecciona sus Antecesores</th>
+    <th style="color:white">Relaciones en la fase anterior</th>
     </py:if>
     <tr>
         <td>
         	<select id="padres" class="multiselect" multiple="multiple" name="padres">
-				<option py:for="pp in posibles_padres" value="${pp.id}">${pp.name}</option>
+        	<py:for each="pp in posibles_padres">
+    		
+			<div py:choose="">
+				<option py:when="pp in item.padres" selected="true"  value="${pp.id}">${pp.name}</option>
+				<option py:otherwise="" value="${pp.id}">${pp.name}</option>
+			</div>    		
+				
+				
+			</py:for>
 			</select> 
         </td>
         <td>
         <py:if test="posibles_antecesores">
         	<select style="align:right" id="antecesores" class="multiselect" multiple="multiple" name="antecesores">
-				<option py:for="pa in posibles_antecesores" value="${pa.id}">${pa.name}</option>
+				<option selected="('false','true')[pa in item.antecesores]" py:for="pa in posibles_antecesores" value="${pa.id}">${pa.name}</option>
 			</select>   
 		</py:if>
 		</td>

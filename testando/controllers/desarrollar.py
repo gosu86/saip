@@ -1,4 +1,4 @@
-from tg import expose, redirect, validate, request, tmpl_context,config
+from tg import expose, redirect, validate, request, tmpl_context,config,url
 from formencode        import validators
 
 from sqlalchemy.sql import and_, or_, not_, select
@@ -90,8 +90,9 @@ class DesarrollarController(BaseController):
         nombre=p.name
         tmpl_context.proyectoId = hideMe()
         tmpl_context.proyectoNombre = hideMe()
-
-        return dict(page='Desarrollar', proyectoId=pid,proyectoNombre=nombre)            
+        
+        referer=url('/desarrollar/seleccion_de_proyectos')
+        return dict(page='Desarrollar', proyectoId=pid,proyectoNombre=nombre,referer=referer,title_nav='Lista de Proyectos')            
 
     @validate(validators={"page":validators.Int(), "rp":validators.Int()})
     @expose('json')    
@@ -156,13 +157,13 @@ class DesarrollarController(BaseController):
             ad  =   True                
             
         f=DBSession.query(Fase).filter_by(id=fid).one()
-        
+        referer=url('/desarrollar/vista_de_fases/?pid='+str(f.proyecto.id))
        
         
         nombre=f.name        
         tmpl_context.faseId = hideMe()
         tmpl_context.faseNombre = hideMe()        
-        return dict(page='Desarrollar',faseId=fid,faseNombre=nombre,A=a,D=d,AD=ad)
+        return dict(page='Desarrollar',faseId=fid,faseNombre=nombre,A=a,D=d,AD=ad,referer=referer,title_nav='Lista de fases')
 
     @validate(validators={"page":validators.Int(), "rp":validators.Int()})
     @expose('json')    

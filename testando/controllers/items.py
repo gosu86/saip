@@ -1,4 +1,4 @@
-from tg             import expose,redirect, validate,flash,tmpl_context
+from tg             import expose,redirect, validate,flash,tmpl_context,request
 from tg.decorators  import override_template
 from sqlalchemy.sql import and_, or_, not_, select
 from tgext.crud     import CrudRestController
@@ -41,6 +41,8 @@ class ItemsController(CrudRestController):
     @without_trailing_slash
     @expose('testando.templates.desarrollar.items.new')
     def new(self, *args, **kw):
+        referer=request.headers.get("Referer", "")
+        log.debug("referer == %s" % (referer))
         log.debug('kw %s' %str(kw))
         tdiid=int(kw['tdiid'])
         tdi=DBSession.query(TipoItem).filter_by(id=tdiid).first()
@@ -58,7 +60,9 @@ class ItemsController(CrudRestController):
                     fase_orden=fase_orden,
                     tipo_item_id=tipo_item_id,
                     posibles_padres=posibles_padres,
-                    posibles_antecesores=posibles_antecesores)
+                    posibles_antecesores=posibles_antecesores,
+                    referer=referer,
+                    title_nav='Desarrollo de fases')
     
     @expose()
     #@registered_validate(error_handler=new)
@@ -78,6 +82,7 @@ class ItemsController(CrudRestController):
             cod=cod+upper(str(w[0]))
         cod=cod+'-'+str(cant)
         log.debug('Codigo: %s' %cod)
+        
         for ce in ti.campos_extra:
             if ce.tipo=='Texto':
                 ae=AtributoExtraTexto()
@@ -137,3 +142,101 @@ class ItemsController(CrudRestController):
             msg="El item se ha eliminado."
 
         return dict(msg=msg,nombre=nombre)
+    
+    
+    @expose('testando.templates.desarrollar.items.edit')
+    def edit(self, *args, **kw):
+        referer=request.headers.get("Referer", "")        
+        log.debug("len(kw) %s" %len(kw))
+        pks = self.provider.get_primary_fields(self.model)
+        kw = {}
+        for i, pk in  enumerate(pks):
+            kw[pk] = args[i]
+
+        i=DBSession.query(Item).filter_by(id=int(kw[pk])).first()
+        extras=i.tipo_item.campos_extra
+        attr_extra={}
+        for e in extras: 
+            attr_extra[e.name]=e
+        extras={}
+        for et in i.atributos_extra_texto: 
+            extras[et.name]=et                
+        for et in i.atributos_extra_numero: 
+            extras[et.name]=et
+        for et in i.atributos_extra_fecha: 
+            extras[et.name]=et            
+        log.debug('attr_extra = %s' %attr_extra)
+        #=======================================================================
+        fase_id=i.fase_id
+        fase_orden=i.fase.orden
+        
+        posibles_antecesores=False
+        
+        if fase_orden > 1:
+            posibles_antecesores=DBSession.query(Item).filter(and_(Item.fase_id==(fase_orden-1),
+                                                                   Item.historico_id==None)).all()
+            
+        posibles_padres=DBSession.query(Item).filter(and_(Item.fase_id==fase_id,
+                                                          Item.id!=i.id,
+                                                          Item.historico_id==None)).all()
+
+        for h in i.hijos:
+            if h in posibles_padres:
+                posibles_padres.remove(h)
+
+        
+        return dict(page="Desarrollar",
+                    attr_extra=attr_extra,
+                    extras=extras,
+                    fase_id=fase_id,
+                    fase_orden=fase_orden,
+                    tipo_item_id=i.tipo_item_id,
+                    posibles_padres=posibles_padres,
+                    posibles_antecesores=posibles_antecesores,
+                    referer=referer,
+                    title_nav='Desarrollo de fases',
+                    item=i)
+        
+        
+    @expose()
+    def put(self, *args, **kw):
+        """update"""
+        log.debug('-------- PUTTING --------')
+        log.debug('kw-> kw = %s' %str(kw))
+        log.debug('ARGS %s' %str(args))
+        
+        pks = self.provider.get_primary_fields(self.model)
+        log.debug('put -> pks = %s' %str(pks))
+        
+        for i, pk in enumerate(pks):
+            if pk not in kw and i < len(args):
+                kw[pk] = args[i]
+                log.debug('put -> kw[pk] = %s' %str(kw[pk]))
+        #self.provider.update(self.model, params=kw)               
+        
+        i=DBSession.query(Item).filter_by(id=int(kw[pk])).first()
+        i.name=kw['name']
+        i.descripcion=kw['descripcion']
+        i.complejidad=kw['complejidad']
+        if kw.has_key('padres'):
+            i.padres=[]             
+            for id in kw['padres']:
+                p=DBSession.query(Item).filter_by(id=int(id)).first()
+                i.padres.append(p)
+        else:
+            i.padres=[]
+        
+        for id in kw['extras']:
+            id=str(id)
+            log.debug("str(kw['tipo_'+id])=='Texto': %s" %(str(kw['tipo_'+id])=='Texto'))
+            if str(kw['tipo_'+id])=='Texto':
+                e=DBSession.query(AtributoExtraTexto).filter_by(id=int(id)).first()
+            elif str(kw['tipo_'+id])==u'Numero':
+                e=DBSession.query(AtributoExtraNumero).filter_by(id=int(id)).first()
+            elif str(kw['tipo_'+id])=='Fecha':
+                e=DBSession.query(AtributoExtraFecha).filter_by(id=int(id)).first()
+            e.valor=kw['extra_'+id]
+        DBSession.flush() 
+
+        redirect('/desarrollar/desarrollo_de_fases/?fid='+str(i.fase_id))
+    

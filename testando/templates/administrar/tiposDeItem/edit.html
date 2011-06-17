@@ -36,7 +36,7 @@ function set_to_delete(attr_id)
 		$('input#attr_to_modify').val(MArray.toString())
 	}
 	
-	$('table#'+attr_id).remove();
+	$('table#attr'+attr_id).remove();
 }
 
 function set_to_modify(attr_id)
@@ -98,7 +98,7 @@ function set_to_modify(attr_id)
         <tr py:for="attr in attr_extra" title="" class="even" id="complejidad.container">
         <td></td>
         <td>
-			<table id="${attr.id}">
+			<table id="attr${attr.id}">
 			<tbody>
 			<tr title="" class="even" id="attr_label.container2">
 				<td class="labelcol">
@@ -110,17 +110,29 @@ function set_to_modify(attr_id)
 			</tr>
 			<tr title="" class="odd" id="attr_container">
 				<td class="fieldcol">
-					<input onBlur='checkIfUnique(this)' type="text" name="attr_nombre[${attr.id}]" value="${attr.name}" class="textfield required" id="attr_nombre" onchange="set_to_modify(${attr.id})"/>
+				<div py:choose="">
+					<input py:when="faseNoIniciada" onBlur='checkIfUnique(this)' type="text" name="attr_nombre[${attr.id}]" value="${attr.name}" class="textfield required" id="attr_nombre" onchange="set_to_modify(${attr.id})"/>
+					<input py:otherwise="" disabled="disabled" type="text" name="attr_nombre[${attr.id}]" value="${attr.name}" class="textfield required" id="attr_nombre"/>
+				</div>	
 				</td>
 				<td class="fieldcol">
-					<select name="attr_tipo[${attr.id}]" onchange="set_to_modify(${attr.id})">
+				<div py:choose="">
+					<select py:when="faseNoIniciada" name="attr_tipo[${attr.id}]" onchange="set_to_modify(${attr.id})">
 						<option selected="${('', 'True')[attr.tipo=='Texto']}">Texto</option>
 						<option	selected="${('', 'True')[attr.tipo=='Fecha']}">Fecha</option>
 						<option	selected="${('', 'True')[attr.tipo=='Numero']}">Numero</option>
 					</select>
+					<select py:otherwise="" disabled="disabled" name="attr_tipo[${attr.id}]">
+						<option selected="${('', 'True')[attr.tipo=='Texto']}">Texto</option>
+						<option	selected="${('', 'True')[attr.tipo=='Fecha']}">Fecha</option>
+						<option	selected="${('', 'True')[attr.tipo=='Numero']}">Numero</option>
+					</select>					
+				</div>	
 				</td>
 				<td>
+				<py:if test="faseNoIniciada">
 					<input type="button" class="button" id="remove_this_attr" value="quitar" onclick="set_to_delete(${attr.id})"/>
+				</py:if>
 				</td>
 			</tr>
 			</tbody>

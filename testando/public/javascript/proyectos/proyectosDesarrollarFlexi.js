@@ -15,7 +15,7 @@ $(function()
 
 		buttons : [
 			{separator: true},         
-			{name: 'Ver Fases', bclass: 'view', onpress : doCommandFases},
+			{name: 'Acceder al Proyecto', bclass: 'enter', onpress : doCommandFases},
 		],
 		
 		searchitems : [
@@ -37,7 +37,7 @@ $(function()
 });
 function doCommandFases(com, grid)
 {
-	if (com == 'Ver Fases')
+	if (com == 'Acceder al Proyecto')
 	{
 		if ($('.trSelected', grid).length > 0)
 		{

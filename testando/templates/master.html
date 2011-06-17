@@ -52,6 +52,12 @@
               Desarrollar
             </a>
           </li>
+            <li py:if="defined('referer')" class="">
+
+            <a href="${referer}">
+              &lt; ${title_nav} &gt;
+            </a>
+          </li>          
 
           <li py:if="request.identity" id="login" class="loginlogout">
           <a href="${tg.url('/logout_handler')}">

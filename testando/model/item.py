@@ -12,6 +12,20 @@ from testando.model.atributoextranumero import AtributoExtraNumero
 from testando.model.atributoextratexto  import AtributoExtraTexto
 from testando.model.atributoextrafecha  import AtributoExtraFecha
 
+item_padre_table = Table('items_padres', metadata,
+    Column('hijo_id', Integer, ForeignKey('items.id',
+        onupdate="CASCADE", ondelete="CASCADE"), primary_key=True),
+    Column('padre_id', Integer, ForeignKey('items.id',
+        onupdate="CASCADE", ondelete="CASCADE"), primary_key=True)
+)
+
+item_antecesor_table = Table('items_antecesores', metadata,
+    Column('sucesor_id', Integer, ForeignKey('items.id',
+        onupdate="CASCADE", ondelete="CASCADE"), primary_key=True),
+    Column('antecesores_id', Integer, ForeignKey('items.id',
+        onupdate="CASCADE", ondelete="CASCADE"), primary_key=True)
+)
+
 class Item(DeclarativeBase):
     __tablename__ = 'items'
     
@@ -48,19 +62,33 @@ class Item(DeclarativeBase):
     atributos_extra_texto    =   relationship(AtributoExtraTexto, order_by=AtributoExtraTexto.id, backref="item")
     
     atributos_extra_fecha    =   relationship(AtributoExtraFecha, order_by=AtributoExtraFecha.id, backref="item")
-
-    padre_id        =   Column(Integer, ForeignKey('items.id'))
-    padre           =   relationship("Item",
-                        primaryjoin=('items.c.id==items.c.padre_id'),
-                        remote_side='Item.id',
-                        backref=backref("hijos"))    
-      
-      
-    antecesor_id    =   Column(Integer, ForeignKey('items.id'))
-    antecesor       =   relationship("Item",
-                        primaryjoin=('items.c.id==items.c.antecesor_id'),
-                        remote_side='Item.id',
-                        backref=backref("sucesores"))    
+    
+    
+    padres      = relation('Item',
+                           primaryjoin=('items.c.id==items_padres.c.hijo_id'),
+                           secondaryjoin=('items_padres.c.padre_id==items.c.id'),
+                           secondary=item_padre_table,
+                           backref='hijos')
+    
+    antecesores = relation('Item',
+                           primaryjoin=('items.c.id==items_antecesores.c.sucesor_id'),
+                           secondaryjoin=('items_antecesores.c.sucesor_id==items.c.id'),
+                           secondary=item_antecesor_table,
+                           backref='sucesores')
+    #antecesores = relation('Item',primaryjoin=('items.c.id==items_antecesores.c.sucesor_id'), secondary=item_antecesor_table, backref='sucesores')
+    
+#    padre_id        =   Column(Integer, ForeignKey('items.id'))
+#    padre           =   relationship("Item",
+#                        primaryjoin=('items.c.id==items.c.padre_id'),
+#                        remote_side='Item.id',
+#                        backref=backref("hijos"))    
+#      
+#      
+#    antecesor_id    =   Column(Integer, ForeignKey('items.id'))
+#    antecesor       =   relationship("Item",
+#                        primaryjoin=('items.c.id==items.c.antecesor_id'),
+#                        remote_side='Item.id',
+#                        backref=backref("sucesores"))    
 
         
     #adjuntos        = relationship(Adjunto, order_by=Adjunto.id, backref="item")     
