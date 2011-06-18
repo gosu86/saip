@@ -7,6 +7,7 @@ $(function(){
 		colModel : [
 			{display: 'ID', name : 'id', width : 40, sortable : true, align: 'left', hide : true},
 			{display: 'Nombre', name : 'name', width : 150, sortable : true, align: 'left'},
+			{display: 'Version', name : 'version', width : 150, sortable : true, align: 'left'},			
 			{display: 'Descripcion', name : 'descripcion', width : 150, sortable : true, align: 'left'},
 			{display: 'Complejidad', name : 'complejidad', width : 150, sortable : true, align: 'left'},
 			{display: 'Campos Extras', name : 'camposExtras', width : 150, sortable : true, align: 'left'},			
@@ -14,7 +15,7 @@ $(function(){
 		
 		buttons : [
 			{separator: true},
-			{name: 'Aprobar', bclass: 'add', onpress : doCommandTipoDeItem},
+			{name: 'Aprobar', bclass: 'approve', onpress : doCommandItem},
 			{separator: true},			
 			
 		],
@@ -31,23 +32,28 @@ $(function(){
 		rp: 5,
 		showTableToggleBtn: true,
 		height: 'auto',
-		singleSelect: true
+		singleSelect: false
 	});
 	$('div.DeFase .flexigrid').addClass('hideBody');	
 });
 
 
-function doCommandTipoDeItem(com, grid)
+function doCommandItem(com, grid)
 {
 	if ($('.trSelected', grid).length > 0)
 	{	
-			if (com == 'Crear Item de este tipo')
+			if (com == 'Aprobar')
 			{
 			
 				$('.trSelected', grid).each(function()
 				{
 					id = get_id(this) 
-					window.location = '/desarrollar/items/new/?tdiid='+id;
+					jQuery.noticeAdd({
+			              text: "Aprobar: "+id,
+			              stay: false,
+			              stayTime: 2500,
+			              type: "notice"
+			    	  });
 				});
 			}
 	}
@@ -64,7 +70,7 @@ function get_id(tr){
 
 function msg_falta_seleccion(){
 	jQuery.noticeAdd({
-	              text: "Debe seleccionar un tipo de item!",
+	              text: "Debe seleccionar almenos un item!",
 	              stay: false,
 	              stayTime: 2500,
 	              type: "notice"

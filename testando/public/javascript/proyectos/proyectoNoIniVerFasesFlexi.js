@@ -29,9 +29,9 @@ $(function()
 			{separator: true},
 			{separator: true},		           
 			{separator: true},
-			{name: 'Usuarios', bclass: 'Users', onpress : doCommandFases},
+			{name: 'Usuarios', bclass: 'users', onpress : doCommandFases},
 			{separator: true},
-			{name: 'Tipos de Items', bclass: 'ItemsType', onpress : doCommandFases},	
+			{name: 'Tipos de Items', bclass: 'itemtypes', onpress : doCommandFases},	
 			{separator: true},
 		],
 		

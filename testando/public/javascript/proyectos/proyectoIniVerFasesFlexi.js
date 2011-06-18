@@ -18,13 +18,19 @@ $(function()
 		
 		buttons : [
 			{separator: true},
-			{name: 'Usuarios', bclass: 'addUsers', onpress : doCommandFases},
-			{separator: true},			
-			{name: 'Tipos de Items', bclass: 'addItemsType', onpress : doCommandFases},		
+			{name: 'Usuarios', bclass: 'users', onpress : doCommandFases},
+			{separator: true},	
 			{separator: true},
-			{name: 'Items', bclass: 'addItemsType', onpress : doCommandFases},
+			{separator: true},	
+			{name: 'Tipos de Items', bclass: 'itemtypes', onpress : doCommandFases},		
+			{separator: true},	
 			{separator: true},
-			{name: 'Lineas Base', bclass: 'addItemsType', onpress : doCommandFases},
+			{separator: true},
+			{name: 'Items', bclass: 'items', onpress : doCommandFases},
+			{separator: true},	
+			{separator: true},
+			{separator: true},
+			{name: 'Lineas Base', bclass: 'baselines', onpress : doCommandFases},
 			{separator: true},
 		],
 		
@@ -50,11 +56,12 @@ $(function()
 function doCommandFases(com, grid) {
 	if ($('.trSelected', grid).length > 0)
 	{
-	if (com == 'Usuarios')
+		if (com == 'Usuarios')
 		{ver_usuarios(grid);}		
 		else if (com == 'Tipos de Items')
 		{ver_tipos_de_item(grid);}
-		
+		else if (com == 'Items')
+		{ver_items(grid);}			
 	}
 	else
 	{msg_falta_seleccion();}
@@ -64,7 +71,6 @@ function ver_usuarios(grid){
 	$('.trSelected', grid).each(function()
 	{	
 		id = get_id(this) 
-		nombre=get_nombre()
 		window.location = "/configurar/vista_de_usuarios/?fid="+id
 	});	
 }
@@ -73,9 +79,17 @@ function ver_tipos_de_item(grid){
 	$('.trSelected', grid).each(function()
 	{	
 		id = get_id(this) 
-		nombre=get_nombre()
 		estado=get_estado()
 		window.location = "/configurar/vista_de_tiposDeItem/?fid="+id
+	});	
+}
+
+function ver_items(grid){
+	$('.trSelected', grid).each(function()
+	{	
+		id = get_id(this) 
+		estado=get_estado()
+		window.location = "/configurar/vista_de_items/?fid="+id
 	});	
 }
 

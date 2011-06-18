@@ -13,10 +13,9 @@ from datetime import datetime
 from testando.model.fase import Fase
 
 
-usuario_rol_proyecto_table = Table('usuarios_roles_proyectos', metadata,
+usuario_proyecto_table = Table('usuarios_proyectos', metadata,
     Column('usuario_id', Integer, ForeignKey('usuarios.id',
         onupdate="CASCADE", ondelete="CASCADE"), primary_key=True),
-    Column('rol_id', Integer),
     Column('proyecto_id', Integer, ForeignKey('proyectos.id',
         onupdate="CASCADE", ondelete="CASCADE"), primary_key=True)
 )
@@ -44,7 +43,7 @@ class Proyecto(DeclarativeBase):
     #{ Relations
     fases       = relationship(Fase, order_by=Fase.orden, backref="proyecto")
     
-    usuarios    = relation('Usuario', secondary=usuario_rol_proyecto_table, backref='proyectos')
+    usuarios    = relation('Usuario', secondary=usuario_proyecto_table, backref='proyectos')
     
     lider_id    = Column(Integer, ForeignKey('usuarios.id'))   
     #}    

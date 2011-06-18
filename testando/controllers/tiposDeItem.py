@@ -1,37 +1,27 @@
 from tgext.crud import CrudRestController
-from testando.model.tipoitem import TipoItem
-from testando.widgets.tipoDeItem_w import *
-from tg import expose, flash, require, url, request, redirect, validate,tmpl_context
-from repoze.what.predicates import not_anonymous
-#===============================================================================
-# Imports for FlexiGrid Widget
-from testando.model import DeclarativeBase, metadata, DBSession
-from testando.model.campoextra     import CampoExtra
-from tg.decorators import *
+
+from tg import redirect,tmpl_context
+from tg.decorators import  expose,validate,without_trailing_slash,override_template
 from formencode import validators
-import logging
-from tw.forms import TextField
+
+from testando.widgets.tipoDeItem_w import *
+
+from testando.model import DBSession
+from testando.model.campoextra     import CampoExtra
+from testando.model.atributoextra import AtributoExtra
+from testando.model.tipoitem import TipoItem
+
 from string import find, replace
-from decorators import registered_validate, register_validators, catch_errors
-from testando.model.atributoextranumero import AtributoExtraNumero
-from testando.model.atributoextratexto  import AtributoExtraTexto
-from testando.model.atributoextrafecha  import AtributoExtraFecha
-errors = ()
-try:
-    from sqlalchemy.exc import IntegrityError, DatabaseError, ProgrammingError
-    errors =  (IntegrityError, DatabaseError, ProgrammingError)
-except ImportError:
-    pass
-#===============================================================================
+
+import logging
+
 log = logging.getLogger(__name__)
 class TiposDeItemController(CrudRestController):
 
-    model = TipoItem
-    edit_form = tipoitem_edit_form
-    edit_filler = tipoitem_edit_filler
-    new_form = tipoitem_add_form
-    template=''
-    page=''
+    model       =   TipoItem
+    new_form    =   tipoitem_add_form
+    edit_form   =   tipoitem_edit_form
+    edit_filler =   tipoitem_edit_filler
 
     @expose()
     def get_one(self, *args, **kw):
@@ -56,9 +46,6 @@ class TiposDeItemController(CrudRestController):
         log.debug("len(kw) %s" %len(kw))
         if len(kw)>0:
             override_template(self.edit,'genshi:testando.templates.administrar.tiposDeItem.agregar_attr')
-        log.debug('edit -> kw = %s' %str(kw))
-        """Display a page to edit the record."""
-
         pks = self.provider.get_primary_fields(self.model)
         kw = {}
         for i, pk in  enumerate(pks):
@@ -68,10 +55,9 @@ class TiposDeItemController(CrudRestController):
         attr_extra=tdi.campos_extra
         faseNoIniciada=True
         if len(tdi.fase.items)>0:
-            faseNoIniciada=False
-        log.debug('attr_extra = %s' %attr_extra)
+            faseNoIniciada=False  
         value['_method'] = 'PUT'
-        log.debug('value = %s' %value)
+
         return dict(value=value,
                     model="Tipo De Item",
                     attr_extra=attr_extra,
@@ -81,24 +67,25 @@ class TiposDeItemController(CrudRestController):
     @expose()
     def put(self, *args, **kw):
         """update"""
-        log.debug('put -> kw = %s' %str(kw))
-        log.debug('ARGS %s' %str(args))
+#        log.debug('put -> kw = %s' %str(kw))
+#        log.debug('ARGS %s' %str(args))
         
         pks = self.provider.get_primary_fields(self.model)
-        log.debug('put -> pks = %s' %str(pks))
+#        log.debug('put -> pks = %s' %str(pks))
         
         for i, pk in enumerate(pks):
             if pk not in kw and i < len(args):
                 kw[pk] = args[i]
-                log.debug('put -> kw[pk] = %s' %str(kw[pk]))
+#                log.debug('put -> kw[pk] = %s' %str(kw[pk]))
         tdi=DBSession.query(TipoItem).filter_by(id=int(kw[pk])).first()                
         if kw.has_key('name'):                        
             tdi.name=kw['name']
             tdi.descripcion=kw['descripcion']
             tdi.complejidad=kw['complejidad']
+            tdi.codigo=kw['codigo']
         
             attr_ids = kw['attr_to_modify'].split(',')        
-            log.debug('attr_to_modify %s' %attr_ids)
+#            log.debug('attr_to_modify %s' %attr_ids)
             
             if (len(attr_ids)>0  and attr_ids[0] != ''):
                 for id in attr_ids:
@@ -110,7 +97,7 @@ class TiposDeItemController(CrudRestController):
                     ae.tipo=tipo
     
             attr_ids = kw['attr_to_delete'].split(',')
-            log.debug('attr_to_delete %s' %attr_ids)
+#            log.debug('attr_to_delete %s' %attr_ids)
     
             if (len(attr_ids)>0 and attr_ids[0] != ''):
                 for id in attr_ids:       
@@ -136,32 +123,14 @@ class TiposDeItemController(CrudRestController):
         redirect('/configurar/vista_de_tiposDeItem/?fid='+str(tdi.fase_id))
                 
     def actualizar_items(self,tdi,ce):
-        
-        if ce.tipo=='Texto':
-            for i in tdi.items:
-                ae=AtributoExtraTexto()
-                ae.name=ce.name
-                ae.item_id=i.id
-                DBSession.add(ae)
-               
-        elif ce.tipo=='Fecha':
-            ae=AtributoExtraFecha()
-            for i in tdi.items:
-                ae=AtributoExtraFecha()
-                ae.name=ce.name
-                ae.item_id=i.id
-                DBSession.add(ae)
-                            
-        elif ce.tipo=='Numero':
-            ae=AtributoExtraNumero()
-            for i in tdi.items:
-                ae=AtributoExtraNumero()
-                ae.name=ce.name
-                ae.item_id=i.id
-                DBSession.add(ae)            
+        log.debug('Actualizar')
+        for i in tdi.items:
+            log.debug('--------Actualizar')
+            ae=AtributoExtra()
+            ae.item_id=i.id
+            ae.campo_extra_id=ce.id
+            DBSession.add(ae)
 
-
-            
                 
     @validate(validators={"page":validators.Int(), "rp":validators.Int()})
     @expose('json')
@@ -195,8 +164,6 @@ class TiposDeItemController(CrudRestController):
         except:
             result = dict() 
         return result
-#--flexi--flexi--flexi--flexi--flexi--flexi--flexi--flexi--flexi--flexi
-#===============================================================================
     
     @validate(validators={"id":validators.Int()})
     @expose('json')
@@ -212,9 +179,7 @@ class TiposDeItemController(CrudRestController):
             type="succes"
         return dict(msg=msg, type=type)
             
-    @expose()
-    #@registered_validate(error_handler=new)
-    #@catch_errors(errors, error_handler=new)    
+    @expose() 
     def post(self, *args, **kw):
         log.debug('post -> kw = %s' %str(kw))       
         ti=self.provider.create(self.model, params=kw)

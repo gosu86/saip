@@ -1,16 +1,11 @@
-from sqlalchemy import *
-from sqlalchemy.orm import mapper, relation
-from sqlalchemy import Table, ForeignKey, Column
-from sqlalchemy.types import Integer, Unicode
-from sqlalchemy.orm import relationship, backref
-from testando.model import DeclarativeBase, metadata, DBSession
-from datetime import datetime
+from sqlalchemy         import  Table, ForeignKey, Column
+from sqlalchemy.orm     import  relationship, backref,relation
+from sqlalchemy.types   import  Integer, Unicode,UnicodeText,Float,DateTime,BOOLEAN
 
-# modelos relacionados
-#from testando.model.tipoitem import TipoItem
-from testando.model.atributoextranumero import AtributoExtraNumero
-from testando.model.atributoextratexto  import AtributoExtraTexto
-from testando.model.atributoextrafecha  import AtributoExtraFecha
+from testando.model import DeclarativeBase, metadata, DBSession
+from testando.model.atributoextra import AtributoExtra
+
+from datetime import datetime
 
 item_padre_table = Table('items_padres', metadata,
     Column('hijo_id', Integer, ForeignKey('items.id',
@@ -22,19 +17,22 @@ item_padre_table = Table('items_padres', metadata,
 item_antecesor_table = Table('items_antecesores', metadata,
     Column('sucesor_id', Integer, ForeignKey('items.id',
         onupdate="CASCADE", ondelete="CASCADE"), primary_key=True),
-    Column('antecesores_id', Integer, ForeignKey('items.id',
+    Column('antecesor_id', Integer, ForeignKey('items.id',
         onupdate="CASCADE", ondelete="CASCADE"), primary_key=True)
 )
 
 class Item(DeclarativeBase):
     __tablename__ = 'items'
-    
-    #{ Columns
+
     id              =   Column(Integer, primary_key=True)
     
     historico_id    =   Column(Integer)
     
-    #codigo          =   Column(Unicode(25))
+    historico       =   Column(BOOLEAN,default=False)
+    
+    codigo          =   Column(Unicode(25))
+    
+    estado          =   Column(Unicode(25),default="En Desarrollo")
     
     name            =   Column(Unicode(150), nullable=False)
     
@@ -44,26 +42,16 @@ class Item(DeclarativeBase):
        
     complejidad     =   Column(Integer)
         
-    version         =   Column(Integer)    
-    #}
-    
-    #{ Relations
-    
+    version         =   Column(Float(precision=1))    
+
     tipo_item_id    =   Column(Integer, ForeignKey('tipos_items.id'))
-    #tipo_item (por backref en la relacion "items" en el modelo tipo_item.py)
     
     linea_base_id   =   Column(Integer, ForeignKey('lineas_bases.id'))
-    #linea_base (por backref en la relacion "items" en el modelo linea_base.py)
     
     fase_id         =   Column(Integer, ForeignKey('fases.id'))
 
-    atributos_extra_numero   =   relationship(AtributoExtraNumero, order_by=AtributoExtraNumero.id, backref="item")
-    
-    atributos_extra_texto    =   relationship(AtributoExtraTexto, order_by=AtributoExtraTexto.id, backref="item")
-    
-    atributos_extra_fecha    =   relationship(AtributoExtraFecha, order_by=AtributoExtraFecha.id, backref="item")
-    
-    
+    atributos_extra =   relationship(AtributoExtra, order_by=AtributoExtra.id, backref="item")
+
     padres      = relation('Item',
                            primaryjoin=('items.c.id==items_padres.c.hijo_id'),
                            secondaryjoin=('items_padres.c.padre_id==items.c.id'),
@@ -72,25 +60,8 @@ class Item(DeclarativeBase):
     
     antecesores = relation('Item',
                            primaryjoin=('items.c.id==items_antecesores.c.sucesor_id'),
-                           secondaryjoin=('items_antecesores.c.sucesor_id==items.c.id'),
+                           secondaryjoin=('items_antecesores.c.antecesor_id==items.c.id'),
                            secondary=item_antecesor_table,
                            backref='sucesores')
-    #antecesores = relation('Item',primaryjoin=('items.c.id==items_antecesores.c.sucesor_id'), secondary=item_antecesor_table, backref='sucesores')
-    
-#    padre_id        =   Column(Integer, ForeignKey('items.id'))
-#    padre           =   relationship("Item",
-#                        primaryjoin=('items.c.id==items.c.padre_id'),
-#                        remote_side='Item.id',
-#                        backref=backref("hijos"))    
-#      
-#      
-#    antecesor_id    =   Column(Integer, ForeignKey('items.id'))
-#    antecesor       =   relationship("Item",
-#                        primaryjoin=('items.c.id==items.c.antecesor_id'),
-#                        remote_side='Item.id',
-#                        backref=backref("sucesores"))    
 
-        
     #adjuntos        = relationship(Adjunto, order_by=Adjunto.id, backref="item")     
-    #fase (por backref en la relacion "items" en el modelo fase.py)
-    #}    

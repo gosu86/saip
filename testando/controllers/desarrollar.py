@@ -1,7 +1,7 @@
 from tg import expose, redirect, validate, request, tmpl_context,config,url
 from formencode        import validators
 
-from sqlalchemy.sql import and_, or_, not_, select
+from sqlalchemy.sql import and_, select
 
 from repoze.what.predicates import All,not_anonymous,in_any_group
 
@@ -33,16 +33,9 @@ class DesarrollarController(BaseController):
                     )
 
     proyectos=ProyectosController(DBSession)
-    proyectos.template='genshi:testando.templates.desarrollar.proyectos.index'
-    proyectos.page='Desarrollar'
-    
-    fases=FasesController(DBSession)
-    fases.template='genshi:testando.templates.desarrollar.fases.index'
-    fases.page='Desarrollar'
-    
+    fases=FasesController(DBSession)   
     items=ItemsController(DBSession)
-    items.template='genshi:testando.templates.desarrollar.items.index'
-    items.page='Desarrollar'
+
     
     error = ErrorController()
     @expose('testando.templates.desarrollar.index')
@@ -203,9 +196,11 @@ class DesarrollarController(BaseController):
             if (query):
                 d = {qtype:query,'fase_id':int(fid)}
                 items = DBSession.query(Item).filter_by(**d)
+                items = items.filter(Item.historico==False)
             else:
                 d = {'fase_id':int(fid)}
                 items = DBSession.query(Item).filter_by(**d)
+                items = items.filter(Item.historico==False)
                 
             total = items.count()
             log.debug('total %s' %total)
@@ -215,6 +210,7 @@ class DesarrollarController(BaseController):
             rows = [{'id'  : item.id,
                     'cell': [item.id,
                             item.name,
+                            item.version,
                             item.descripcion,
                             item.complejidad,
                             item.tipo_item.name]} for item in items]

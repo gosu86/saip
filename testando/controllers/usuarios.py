@@ -24,14 +24,11 @@ class UsuariosController(CrudRestController):
     new_form    =   usuario_new_form
     edit_filler =   usuario_edit_filler
     edit_form   =   usuario_edit_form
-     
-    template    =   ''
-    page        =   ''
 
-    @expose('testando.templates.usuario.index')
-    def get_all(self):
-        override_template(self.get_all,self.template)    
-        return dict(page=self.page)
+
+    @expose('testando.templates.administrar.usuarios.index')
+    def get_all(self):   
+        return dict(page="Administrar")
 
     @validate(validators={"page":validators.Int(), "rp":validators.Int()})
     @expose('json')

@@ -72,22 +72,7 @@
     </span>
   </ul>
   <div id="content">
-
-    <!--************************************************************************** -->
-    <!--
-      Aqui se asigna a la variable "flash" (en "flash=tg.flash_.....) el contenido del objeto tipo flash obtenido de
-      tg.flash_obj.render('flash', use_js=False)
-    -->
-    <py:with vars="flash=tg.flash_obj.render('flash', use_js=False)">
-      <div py:if="flash" py:content="XML(flash)" />
-    </py:with>
-    <!--************************************************************************** -->
-    <!--
-      py:replace="select('*|text()')" se encarga de colocar todo el contenido de las etiquetas <body></body> de
-      master.html en las etiquetas <body></body> del documento que llama a master.html
-    -->
     <div py:replace="select('*|text()')"/>
-    <!-- End of main_content -->
     ${footer()}
   </div>
 </body>

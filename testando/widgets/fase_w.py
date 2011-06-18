@@ -1,4 +1,5 @@
 from sprox.dojo.formbase    import DojoEditableForm,DojoAddRecordForm
+from sprox.formbase    import EditableForm,AddRecordForm
 from sprox.fillerbase       import EditFormFiller
 
 from testando.model         import DBSession
@@ -10,24 +11,25 @@ from formencode import validators
 from formencode.compound import All
 from myWidgets import SingleSelectEstadosFases
 
-class FaseNewForm(DojoAddRecordForm):
+class FaseNewForm(AddRecordForm):
     __model__       = Fase
     __omit_fields__ = ['estado','fecha_creacion', 'tiposDeItem','usuarios','items']
-    __field_attrs__ = {'descripcion':{'rows':'2','cols':'30'}}
-    orden   =   TextField('orden',validator=All(
-                                                validators.Int(messages={'integer': 'Orden debe ser un numero entero.'}),
-                                                validators.NotEmpty(messages={'empty': 'Orden no puede estar vacio.'})))
-    name    =   TextField('name',label_text='Nombre')
-    proyecto = HiddenField('proyecto_id')
-    descripcion = TextArea
+    __field_attrs__ = {'descripcion':{'rows':'2','cols':'50'},'name':{'label':'Nombre:'},'orden':{'readonly':'true'}}
+    
+    orden       =   TextField('orden',size=5,validator=All(
+                                                validators.Int(messages={'integer': 'Orden debe ser un numero entero.'})))
+    name        =   TextField
+    proyecto    = HiddenField('proyecto_id')
 
+    submit_text = "Guardar"
+    
 class FaseEditFiller(EditFormFiller):
     __model__ = Fase
    
 class FaseEditForm(DojoEditableForm):
     __model__       = Fase
     __omit_fields__ = ['estado','fecha_creacion', 'tiposDeItem','usuarios','items']
-    __field_attrs__ = {'descripcion':{'rows':'2','cols':'30'}}
+    __field_attrs__ = {'descripcion':{'rows':'2','cols':'50'},'name':{'label':'Nombre:'}}
     proyecto = HiddenField
     name = TextField
     estado = SingleSelectEstadosFases

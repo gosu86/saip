@@ -20,14 +20,13 @@ $().ready(function() {
 			rules: {
 				descripcion: "required",
 				complejidad: "required",
-				"antecesores[]":"required"
+				"antecesores":"required"
 			},
 			messages: {
 
-			"antecesores[]": "Por favor, seleccione una realcion en la fase anterior.",
+			"antecesores": "Por favor, seleccione una realcion en la fase anterior.",
 
 			},
-		errorClass: "fielderror"
 	});
 
 $('input#Fecha').each(function()
@@ -61,14 +60,36 @@ $(function(){
     </div>
 
     <table cellspacing="0" cellpadding="2" border="0">
-        <tbody><tr title="" class="even" id="name.container">
+        <tbody>
+        
+		<tr title="" class="even" id="version.container">
             <td class="labelcol">
-                <label class="fieldlabel required" for="name" id="name.label">Name</label>
+                <label class="fieldlabel" for="version" id="version.label">Version</label>
+            </td>
+            <td class="fieldcol">
+                <input readonly="true" type="text" value="${version}" id="version" class="textfield" name="version"/>             
+            </td>
+        </tr>         
+        
+		<tr title="" class="even" id="codigo.container">
+            <td class="labelcol">
+                <label class="fieldlabel" for="codigo" id="codigo.label">Codigo</label>
+            </td>
+            <td class="fieldcol">
+                <input readonly="true" type="text" value="${codigo}" id="codigo" class="textfield" name="codigo"/>             
+            </td>            
+        </tr>    
+            
+        <tr title="" class="even" id="name.container">
+            <td class="labelcol">
+                <label class="fieldlabel required" for="name" id="name.label">Nombre: </label>
             </td>
             <td class="fieldcol">
                 <input type="text" value="" id="name" class="textfield required" name="name"/>
             </td>
-        </tr><tr title="" class="odd" id="descripcion.container">
+        </tr>
+        
+        <tr title="" class="odd" id="descripcion.container">
             <td class="labelcol">
                 <label class="fieldlabel" for="descripcion" id="descripcion.label">Descripcion</label>
             </td>
@@ -76,6 +97,7 @@ $(function(){
                 <textarea cols="50" rows="2" class="textarea" name="descripcion" id="descripcion"></textarea>
             </td>
         </tr>
+        
         <tr title="" class="even" id="complejidad.container">
             <td class="labelcol">
                 <label class="fieldlabel" for="complejidad" id="complejidad.label">Complejidad</label>
@@ -84,6 +106,7 @@ $(function(){
                 <input type="text" value="" id="complejidad" class="textfield" name="complejidad"/>
             </td>
         </tr>
+        
         <tr py:for="attr in attr_extra" title="" class="even" id="complejidad.container">
             <td class="labelcol">
                 <label class="fieldlabel" for="${attr.name}" id="${attr.name}.label">${attr.name}</label><br/>
@@ -91,14 +114,16 @@ $(function(){
             </td>
             <td class="fieldcol">
                 <input type="text" value="" id="${attr.tipo}" class="textfield" name="${attr.name}"/>
+                
             </td>
         </tr>
+        
     </tbody>
     </table>
     <table>
-    <th style="color:white">Selecciona sus Padres</th>
+    <th style="color:white">Relaciones en la misma fase</th>
     <py:if test="posibles_antecesores">
-    <th style="color:white">Selecciona sus Antecesores</th>
+    <th style="color:white">Relaciones en la fase anterior</th>
     </py:if>
     <tr>
         <td>

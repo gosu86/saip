@@ -1,0 +1,22 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:py="http://genshi.edgewall.org/"
+      xmlns:xi="http://www.w3.org/2001/XInclude">
+
+<xi:include href="master.html" />
+<title>SAIP - Editar ${model}</title>
+<head>
+    <script type="text/javascript" src="${url('/javascript/jquery.multiselect.js')}">
+    </script>
+    <script type="text/javascript">
+	    $(function() {$("#lider").multiselect();});
+            </script>
+</head>
+<body class="tundra">
+  <div style="float:left;" class="crud_edit">
+    <h2 style="margin-top:1px;">Edit $model</h2>
+     ${XML(tmpl_context.widget(value=value, action='./'))}
+  </div>
+  <div style="height:0px; clear:both;"> &nbsp; </div>
+
+</body>
+</html>

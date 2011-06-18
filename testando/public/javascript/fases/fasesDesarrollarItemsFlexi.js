@@ -7,6 +7,7 @@ $(function(){
 		colModel : [
 			{display: 'ID', name : 'id', width : 40, sortable : true, align: 'left', hide : true},
 			{display: 'Nombre', name : 'name', width : 150, sortable : true, align: 'left'},
+			{display: 'Version', name : 'version', width : 150, sortable : true, align: 'left'},			
 			{display: 'Descripcion', name : 'descripcion', width : 150, sortable : true, align: 'left'},
 			{display: 'Complejidad', name : 'complejidad', width : 150, sortable : true, align: 'left'},
 			{display: 'Tipo De Item', name : 'tipoDeItem', width : 150, sortable : true, align: 'left'},			
@@ -14,8 +15,12 @@ $(function(){
 		
 		buttons : [	           
 			{separator: true},
-			{name: 'Editar', bclass: 'edit', onpress : doCommandItem},
-			{separator: true},			
+			{name: 'Editar', bclass: 'edit_item', onpress : doCommandItem},
+			{separator: true},
+			{separator: true},
+			{separator: true},
+			{name: 'Borrar', bclass: 'delete_item', onpress : doCommandItem},
+			{separator: true},
 			
 		],
 		
@@ -64,7 +69,7 @@ function get_id(tr){
 
 function msg_falta_seleccion(){
 	jQuery.noticeAdd({
-	              text: "Debe seleccionar un tipo de item!",
+	              text: "Debe seleccionar al menos un item!",
 	              stay: false,
 	              stayTime: 2500,
 	              type: "notice"

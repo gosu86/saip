@@ -40,11 +40,78 @@
     background: url("images/key_pencil.png") no-repeat scroll left center transparent;
 }
 
+div.flexigrid div.fbutton .approve
+{
+    background: url("images/approve.png") no-repeat scroll left center transparent;
+}
+div.flexigrid div.fbutton .edit_item
+{
+    background: url("images/edit_item.png") no-repeat scroll left center transparent;
+}
+div.flexigrid div.fbutton .start
+{
+    background: url("images/start.png") no-repeat scroll left center transparent;
+}
+div.flexigrid div.fbutton .detail
+{
+    background: url("images/detail.png") no-repeat scroll left center transparent;
+}
+div.flexigrid div.fbutton .phases
+{
+    background: url("images/phases.png") no-repeat scroll left center transparent;
+}
+div.flexigrid div.fbutton .users
+{
+    background: url("images/users.png") no-repeat scroll left center transparent;
+}
+div.flexigrid div.fbutton .add_users
+{
+    background: url("images/add_users.png") no-repeat scroll left center transparent;
+}
+
+div.flexigrid div.fbutton .import
+{
+    background: url("images/import.png") no-repeat scroll left center transparent;
+}
+
+div.flexigrid div.fbutton .delete_users
+{
+    background: url("images/delete_users.png") no-repeat scroll left center transparent;
+}
+div.flexigrid div.fbutton .itemtypes
+{
+    background: url("images/itemtypes.png") no-repeat scroll left center transparent;
+}
+div.flexigrid div.fbutton .items
+{
+    background: url("images/items.png") no-repeat scroll left center transparent;
+}
+div.flexigrid div.fbutton .baselines
+{
+    background: url("images/baselines.png") no-repeat scroll left center transparent;
+}
+div.flexigrid div.fbutton .delete_item
+{
+    background: url("images/delete_item.png") no-repeat scroll left center transparent;
+}
+div.flexigrid div.fbutton .add_item
+{
+    background: url("images/add_item.png") no-repeat scroll left center transparent;
+}
+div.flexigrid div.fbutton .switch_rol
+{
+    background: url("images/switch_rol.png") no-repeat scroll left center transparent;
+}
 /*********** Imagenes para las tablas de proyectos, fases y tipos de item ***********/
 .TablaProyectos		div.flexigrid div.fbutton .addRemove
 {
     background: url("images/table_row_alt.png") no-repeat scroll left center transparent;
-}		
+}
+.TablaProyectos		div.flexigrid div.fbutton .enter,
+.TablaFases			div.flexigrid div.fbutton .enter
+{
+    background: url("images/enter.png") no-repeat scroll left center transparent;
+}	
 .TablaProyectos		div.flexigrid div.fbutton .add,
 .TablaFases 		div.flexigrid div.fbutton .add,
 .TablaTiposDeItem 	div.flexigrid div.fbutton .add

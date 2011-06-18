@@ -1,37 +1,22 @@
-from tg             import expose,redirect, validate,flash,tmpl_context,request
-from tg.decorators  import override_template
-from sqlalchemy.sql import and_, or_, not_, select
 from tgext.crud     import CrudRestController
-from string import find, replace, upper
-from testando.model         import DBSession
-from testando.model.item    import Item
-from testando.model.tipoitem    import TipoItem
-from testando.model.atributoextranumero import AtributoExtraNumero
-from testando.model.atributoextratexto  import AtributoExtraTexto
-from testando.model.atributoextrafecha  import AtributoExtraFecha
+from tg             import redirect, request
+from tg.decorators  import override_template,validate,without_trailing_slash,expose
+from sqlalchemy.sql import and_
 
-from testando.widgets.item_w import *
+from testando.model                 import DBSession
+from testando.model.item            import Item
+from testando.model.tipoitem        import TipoItem
+from testando.model.atributoextra   import AtributoExtra
 
-from tg.decorators import *
 from formencode import validators
-from tw.forms import TextField
-from string import find, replace
-from decorators import registered_validate, register_validators, catch_errors
 
 import logging
-from repoze.what.predicates import has_permission, not_anonymous, All
-#===============================================================================
-log = logging.getLogger(__name__)
 
+log = logging.getLogger(__name__)
 class ItemsController(CrudRestController):
     log.debug('<-- In to ProyectosItems -->')
         
     model = Item
-    new_form = item_add_form 
-    edit_form = item_edit_form
-    edit_filler=item_edit_filler
-    template=''
-    page=''
     
     @expose('testando.templates.desarrollar.items.index')
     def get_all(self):
@@ -41,6 +26,7 @@ class ItemsController(CrudRestController):
     @without_trailing_slash
     @expose('testando.templates.desarrollar.items.new')
     def new(self, *args, **kw):
+        
         referer=request.headers.get("Referer", "")
         log.debug("referer == %s" % (referer))
         log.debug('kw %s' %str(kw))
@@ -48,12 +34,19 @@ class ItemsController(CrudRestController):
         tdi=DBSession.query(TipoItem).filter_by(id=tdiid).first()
         fase_id=tdi.fase_id
         fase_orden=tdi.fase.orden
+        
+        cant=len(DBSession.query(Item).filter(and_(Item.fase_id==fase_id,Item.tipo_item_id==tdi.id)).all())
+        cod=str(tdi.codigo)
+        cod= cod+'-'+str(cant)
+        version=1.0
+        
         tipo_item_id=tdi.id
         attr_extra=tdi.campos_extra
         posibles_antecesores=False
         if fase_orden > 1:
-            posibles_antecesores=DBSession.query(Item).filter(Item.fase_id==1)
-        posibles_padres=DBSession.query(Item).filter(and_(Item.fase_id==fase_id,Item.tipo_item_id==tdiid))
+            posibles_antecesores=DBSession.query(Item).filter(and_(Item.fase_id==1,Item.historico_id==None))
+            
+        posibles_padres=DBSession.query(Item).filter(and_(Item.fase_id==fase_id,Item.historico_id==None))
         return dict(page="Desarrollar",
                     attr_extra=attr_extra,
                     fase_id=fase_id,
@@ -62,11 +55,11 @@ class ItemsController(CrudRestController):
                     posibles_padres=posibles_padres,
                     posibles_antecesores=posibles_antecesores,
                     referer=referer,
-                    title_nav='Desarrollo de fases')
+                    title_nav='Desarrollo de fases',
+                    codigo=cod,
+                    version=version)
     
     @expose()
-    #@registered_validate(error_handler=new)
-    #@catch_errors(errors, error_handler=new)    
     def post(self, *args, **kw):
         log.debug('post -> kw = %s' %str(kw))
         
@@ -74,31 +67,17 @@ class ItemsController(CrudRestController):
                
         i=self.provider.create(self.model, params=kw)
         ti=i.tipo_item
-        
-        cant=DBSession.query(Item).filter(and_(Item.fase_id==fid,Item.tipo_item_id==ti.id)).count()
-        words=ti.name.split(' ')
-        cod=''
-        for w in words:
-            cod=cod+upper(str(w[0]))
-        cod=cod+'-'+str(cant)
-        log.debug('Codigo: %s' %cod)
+        i.fase.estado='En Desarrollo'
         
         for ce in ti.campos_extra:
-            if ce.tipo=='Texto':
-                ae=AtributoExtraTexto()
-            elif ce.tipo=='Fecha':
-                ae=AtributoExtraFecha()
-            elif ce.tipo=='Numero':
-                ae=AtributoExtraNumero()
-            ae.name=ce.name
-            ae.valor=kw[str(ae.name)]
-            ae.item_id=i.id
-            DBSession.add(ae)
-            
+            ae                  =   AtributoExtra()
+            ae.valor            =   kw[str(ce.name)]
+            ae.item_id          =   i.id
+            ae.campo_extra_id   =   ce.id            
+            DBSession.add(ae)            
         DBSession.flush()
-        
-        log.debug('fase_id = %s' %str(fid))
-          
+        i.historico_id=i.id
+        DBSession.flush()  
         raise redirect('/desarrollar/desarrollo_de_fases/?fid='+fid)
     
     @validate(validators={"page":validators.Int(), "rp":validators.Int()})
@@ -148,37 +127,25 @@ class ItemsController(CrudRestController):
     def edit(self, *args, **kw):
         referer=request.headers.get("Referer", "")        
         log.debug("len(kw) %s" %len(kw))
+        
         pks = self.provider.get_primary_fields(self.model)
         kw = {}
         for i, pk in  enumerate(pks):
             kw[pk] = args[i]
 
         i=DBSession.query(Item).filter_by(id=int(kw[pk])).first()
-        extras=i.tipo_item.campos_extra
-        attr_extra={}
-        for e in extras: 
-            attr_extra[e.name]=e
-        extras={}
-        for et in i.atributos_extra_texto: 
-            extras[et.name]=et                
-        for et in i.atributos_extra_numero: 
-            extras[et.name]=et
-        for et in i.atributos_extra_fecha: 
-            extras[et.name]=et            
-        log.debug('attr_extra = %s' %attr_extra)
-        #=======================================================================
+
         fase_id=i.fase_id
         fase_orden=i.fase.orden
         
         posibles_antecesores=False
-        
         if fase_orden > 1:
             posibles_antecesores=DBSession.query(Item).filter(and_(Item.fase_id==(fase_orden-1),
-                                                                   Item.historico_id==None)).all()
+                                                                   Item.historico==False)).all()
             
         posibles_padres=DBSession.query(Item).filter(and_(Item.fase_id==fase_id,
                                                           Item.id!=i.id,
-                                                          Item.historico_id==None)).all()
+                                                          Item.historico==False)).all()
 
         for h in i.hijos:
             if h in posibles_padres:
@@ -186,11 +153,6 @@ class ItemsController(CrudRestController):
 
         
         return dict(page="Desarrollar",
-                    attr_extra=attr_extra,
-                    extras=extras,
-                    fase_id=fase_id,
-                    fase_orden=fase_orden,
-                    tipo_item_id=i.tipo_item_id,
                     posibles_padres=posibles_padres,
                     posibles_antecesores=posibles_antecesores,
                     referer=referer,
@@ -211,32 +173,77 @@ class ItemsController(CrudRestController):
         for i, pk in enumerate(pks):
             if pk not in kw and i < len(args):
                 kw[pk] = args[i]
-                log.debug('put -> kw[pk] = %s' %str(kw[pk]))
-        #self.provider.update(self.model, params=kw)               
+                log.debug('put -> kw[pk] = %s' %str(kw[pk]))            
         
-        i=DBSession.query(Item).filter_by(id=int(kw[pk])).first()
-        i.name=kw['name']
-        i.descripcion=kw['descripcion']
-        i.complejidad=kw['complejidad']
+        i                   =   DBSession.query(Item).filter_by(id=int(kw[pk])).first()
+        i.historico         =   True
+        
+        item                =   Item()
+        item.name           =   kw['name']
+        item.fase           =   i.fase
+        item.codigo         =   i.codigo
+        item.version        =   i.version+0.1
+        item.tipo_item      =   i.tipo_item
+        item.descripcion    =   kw['descripcion']
+        item.complejidad    =   kw['complejidad']
+        item.historico_id   =   i.historico_id
+        
+        if kw.has_key('atributos_extra'):
+            for id in kw['atributos_extra']:
+                aeo          =   DBSession.query(AtributoExtra).filter_by(id=int(id)).first()
+                aen          =   AtributoExtra()
+                aen.valor    =   kw['atributos_extra_'+id]
+                aen.campo_extra_id  =   aeo.campo_extra_id
+                DBSession.add(aen)
+                item.atributos_extra.append(aen)
+                log.debug('ae = %s' %str(aen))
+                log.debug('attr extra valor = %s' %str(kw['atributos_extra_'+id]))
+                log.debug('attr extra id = %s' %str(id))
+                    
         if kw.has_key('padres'):
-            i.padres=[]             
+            item.padres=[]             
             for id in kw['padres']:
                 p=DBSession.query(Item).filter_by(id=int(id)).first()
-                i.padres.append(p)
+                item.padres.append(p)
         else:
-            i.padres=[]
+            item.padres=[]
         
-        for id in kw['extras']:
-            id=str(id)
-            log.debug("str(kw['tipo_'+id])=='Texto': %s" %(str(kw['tipo_'+id])=='Texto'))
-            if str(kw['tipo_'+id])=='Texto':
-                e=DBSession.query(AtributoExtraTexto).filter_by(id=int(id)).first()
-            elif str(kw['tipo_'+id])==u'Numero':
-                e=DBSession.query(AtributoExtraNumero).filter_by(id=int(id)).first()
-            elif str(kw['tipo_'+id])=='Fecha':
-                e=DBSession.query(AtributoExtraFecha).filter_by(id=int(id)).first()
-            e.valor=kw['extra_'+id]
+        if kw.has_key('antecesores'):
+            item.antecesores=[]             
+            for id in kw['antecesores']:
+                a=DBSession.query(Item).filter_by(id=int(id)).first()
+                item.antecesores.append(a)
+        else:
+            item.antecesores=[]
+
+
         DBSession.flush() 
 
-        redirect('/desarrollar/desarrollo_de_fases/?fid='+str(i.fase_id))
+
+        redirect('/desarrollar/desarrollo_de_fases/?fid='+str(item.fase_id))
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     

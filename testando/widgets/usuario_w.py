@@ -1,4 +1,3 @@
-from sprox.widgets.dojo import SproxDojoSelectShuttleField, SproxDojoSortedSelectShuttleField
 from sprox.dojo.formbase    import DojoEditableForm,DojoAddRecordForm
 from sprox.fillerbase       import EditFormFiller
 

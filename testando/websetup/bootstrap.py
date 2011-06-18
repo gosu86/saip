@@ -44,6 +44,7 @@ def bootstrap(command, conf, vars):
         rco = model.Rol()
         rco.rol_name = u'Configuradores'
         rco.name = u'Configuradores de Items'
+        rco.usuarios.append(u)
         model.DBSession.add(rco)
             
         ra = model.Rol()
@@ -111,7 +112,39 @@ def bootstrap(command, conf, vars):
         p.descripcion   =   u"Este es un proyecto de prueba"
         p.empresa       =   u"La empresa S.A."
         p.lider_id      =   u.id   
-        model.DBSession.add(p)        
+        model.DBSession.add(p)
+        
+        f               =   model.Fase()
+        f.name          =   u"Primera Fase"
+        f.descripcion   =   U"Esta es la primera fase"
+        f.orden         =   1
+        f.proyecto      =   p
+        model.DBSession.add(f)                  
+        
+        f               =   model.Fase()
+        f.name          =   u"Segunda Fase"
+        f.descripcion   =   U"Segunda fase del proyecto"
+        f.orden         =   2
+        f.proyecto      =   p
+        model.DBSession.add(f)
+
+        tdi               =   model.TipoItem()
+        tdi.name          =   u"Tipo de item 3"
+        tdi.descripcion   =   U"este es un tipo de item"
+        tdi.codigo        =   U"TDI1"
+        tdi.complejidad   =   3
+        tdi.fase          =   f
+        model.DBSession.add(tdi)
+
+        tdi               =   model.TipoItem()
+        tdi.name          =   u"Cuarto Tipo de item "
+        tdi.descripcion   =   U"este es el tipo de item numero 4"
+        tdi.codigo        =   U"TDI4"
+        tdi.complejidad   =   4
+        tdi.fase          =   f
+        model.DBSession.add(tdi)
+
+                
         model.DBSession.flush()
         transaction.commit()
     except IntegrityError:

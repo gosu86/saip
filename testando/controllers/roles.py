@@ -24,14 +24,10 @@ class RolesController(CrudRestController):
 	new_form 	= 	rol_new_form
 	edit_filler	=	rol_edit_filler
 	edit_form 	=	rol_edit_form
-	
-	template	=	''
-	page		=	''
 
-	@expose()
+	@expose('testando.templates.administrar.roles.index')
 	def get_all(self):
-		override_template(self.get_all,self.template)	
-		return dict(page=self.page)
+		return dict(page="Administrar")
 	
 	@validate(validators={"page":validators.Int(), "rp":validators.Int()})
 	@expose('json')

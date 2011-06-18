@@ -1,9 +1,9 @@
-from tg             import expose,redirect, validate,flash,tmpl_context, request,config
+from tg             import expose,redirect, validate,tmpl_context, request,config
 from formencode        import validators
 from repoze.what.predicates import All,not_anonymous,in_any_group
 
 from sqlalchemy.sql import select
-from sqlalchemy.sql import and_, or_, not_
+from sqlalchemy.sql import and_
 
 from testando.model                 import DBSession
 from testando.model.proyecto        import Proyecto
@@ -11,6 +11,7 @@ from testando.model.fase            import Fase,usuario_rol_fase_table
 from testando.model.auth            import Usuario
 from testando.model.auth            import Rol
 from testando.model.tipoitem        import TipoItem
+from testando.model.item            import Item
 
 from testando.lib.base                  import BaseController
 from testando.controllers.error         import ErrorController
@@ -19,9 +20,10 @@ from testando.controllers.fases         import FasesController
 from testando.controllers.tiposDeItem   import TiposDeItemController
 from testando.controllers.usuarios      import UsuariosController
 from testando.controllers.items         import ItemsController
+#from testando.controllers.lineasBase   import LineasBaseController
 
 from testando.widgets.myWidgets     import hideMe
-#from testando.controllers.lineasBase    import LineasBaseController
+
 
 
 import logging
@@ -118,10 +120,6 @@ class ConfigurarController(BaseController):
             total = proyectos.count()
             column = getattr(Proyecto, sortname)
             proyectos = proyectos.order_by(getattr(column,sortorder)()).offset(offset).limit(rp)
-
-            # botonIniciar = '<input type="submit" value="Iniciar" onClick=doCommandFases("Iniciar",$("#proyectosConfigurarFlexi"))>'
-            # botonVerFases = '<input type="submit" class="clickclass" value="Ver Fases">'
-            #-------------------------------- botones=botonIniciar+botonVerFases
             
             rows = [{'id'  : proyecto.id,
                     'cell': [proyecto.id,
@@ -538,9 +536,89 @@ class ConfigurarController(BaseController):
         
         return dict(msg=msg,type=type)
         
+    @expose('json')    
+    @expose('testando.templates.configurar.fases.vista_de_items') 
+    def vista_de_items(self,*args, **kw):
+        fid=kw['fid']
+        f=DBSession.query(Fase).filter_by(id=fid).one()
+        nombre=f.name        
+        tmpl_context.faseId = hideMe()
+        tmpl_context.faseNombre = hideMe()
         
+        return dict(page='Configurar', faseId=fid,faseNombre=nombre)    
+    
+    @validate(validators={"page":validators.Int(), "rp":validators.Int()})
+    @expose('json')    
+    def items_creados(self,fid=None, page='1', rp='25', sortname='id', sortorder='asc', qtype=None, query=None):
+        try:
+            offset = (int(page)-1) * int(rp)
+            
+            if (query):
+                d = {qtype:query,'fase_id':int(fid)}
+                items = DBSession.query(Item).filter_by(**d)
+                items = items.filter(Item.historico==False)
+            else:
+                d = {'fase_id':int(fid)}
+                items = DBSession.query(Item).filter_by(**d)
+                items = items.filter(Item.historico==False)
+                
+            total = items.count()
+            log.debug('total %s' %total)
+            column = getattr(Item, sortname)
+            items = items.order_by(getattr(column,sortorder)()).offset(offset).limit(rp)
+            total = items.count()
+            log.debug('total 2 %s' %total)            
+            rows = [{'id'  : item.id,
+                    'cell': [item.id,
+                            item.name,
+                            item.version,
+                            item.descripcion,
+                            item.complejidad,
+                            str(item.estado),
+                            item.tipo_item.name]} for item in items]
+            result = dict(page=page, total=total, rows=rows)
+        except:
+            result = dict() 
+        return result                     
         
+    @expose('testando.templates.configurar.items.historial')    
+    def historial(self, iid=None,**kw):
+        i=DBSession.query(Item).filter_by(id=int(iid)).first()
+        return dict(page='Configurar',item=i)
         
-        
+    @validate(validators={"page":validators.Int(), "rp":validators.Int()})
+    @expose('json')    
+    def items_historial(self,iid=None, page='1', rp='25', sortname='version', sortorder='desc', qtype=None, query=None):
+        i=DBSession.query(Item).filter_by(id=int(iid)).first()
+        try:
+            offset = (int(page)-1) * int(rp)
+            
+            if (query):
+                d = {qtype:query,'historico_id':i.historico_id}
+                items = DBSession.query(Item).filter_by(**d)
+                items = items.filter(Item.historico==True)
+            else:
+                d = {'historico_id':i.historico_id}
+                items = DBSession.query(Item).filter_by(**d)
+                items = items.filter(Item.historico==True)
+                
+            total = items.count()
+            log.debug('total %s' %total)
+            column = getattr(Item, sortname)
+            items = items.order_by(getattr(column,sortorder)()).offset(offset).limit(rp)
+            total = items.count()
+            log.debug('total 2 %s' %total)            
+            rows = [{'id'  : item.id,
+                    'cell': [item.id,
+                            item.name,
+                            item.version,
+                            item.descripcion,
+                            item.complejidad,
+                            str(item.estado),
+                            item.tipo_item.name]} for item in items]
+            result = dict(page=page, total=total, rows=rows)
+        except:
+            result = dict() 
+        return result          
         
         

@@ -20,7 +20,7 @@ $(function(){
 			{separator: true},
 			{name: 'Borrar', bclass: 'delete', onpress : doCommandTipoDeItem},
 			{separator: true},
-			{name: 'Ver Tipos de Item del sistema', bclass: 'import', onpress : doCommandTipoDeItem},
+			{name: 'Ver Tipos de Item del sistema', bclass: 'itemtypes', onpress : doCommandTipoDeItem},
 			{separator: true},			
 			
 		],
@@ -56,7 +56,7 @@ $(function(){
 				
 				buttons : [
 					{separator: true},
-					{name: 'Importar a la fase', bclass: 'add', onpress : doCommandTipoDeItem},
+					{name: 'Importar a la fase', bclass: 'import', onpress : doCommandTipoDeItem},
 				],
 				
 				searchitems : [

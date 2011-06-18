@@ -66,6 +66,4 @@ from testando.model.tipoitem import TipoItem
 from testando.model.item import Item
 from testando.model.lineabase import LineaBase
 from testando.model.campoextra import CampoExtra
-from testando.model.atributoextranumero import AtributoExtraNumero
-from testando.model.atributoextratexto  import AtributoExtraTexto
-from testando.model.atributoextrafecha  import AtributoExtraFecha
+from testando.model.atributoextra import AtributoExtra

@@ -8,6 +8,7 @@ from testando.model             import DBSession
 from testando.model.fase        import Fase
 from testando.model.campoextra  import CampoExtra
 from testando.model.tipoitem        import TipoItem
+from testando.model.proyecto        import Proyecto
 from testando.widgets.fase_w    import fase_new_form,fase_edit_filler,fase_edit_form
 from testando.widgets.myWidgets import hideMe
 from formencode     import validators
@@ -42,6 +43,7 @@ class FasesController(CrudRestController):
     @without_trailing_slash
     @expose('testando.templates.administrar.fases.new')
     def new(self, *args, **kw):
+        kw['orden']=len(DBSession.query(Proyecto).filter_by(id=int(kw['proyecto_id'])).first().fases)+1
         #proyecto_id se recibe en kw, y este se le asigna a value y en el template se le llena
         """Display a page to show a new record."""
         tmpl_context.widget = self.new_form
@@ -51,7 +53,7 @@ class FasesController(CrudRestController):
     @expose()
     @registered_validate(error_handler=new)
     def post(self, *args, **kw):
-        fase=self.provider.create(self.model, params=kw)
+        self.provider.create(self.model, params=kw)
         raise redirect('/configurar/vista_de_fases/?pid='+kw['proyecto_id'])    
 
     @expose('tgext.crud.templates.edit')

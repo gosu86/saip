@@ -14,7 +14,7 @@ $(function(){
 		
 		buttons : [
 			{separator: true},
-			{name: 'Crear Item de este tipo', bclass: 'add', onpress : doCommandTipoDeItem},
+			{name: 'Crear Item de este tipo', bclass: 'add_item', onpress : doCommandTipoDeItem},
 			{separator: true},			
 			
 		],

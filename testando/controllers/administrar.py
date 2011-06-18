@@ -28,28 +28,9 @@ class AdministrarController(BaseController):
                                         msg='Solo usuarios con algun permiso de administracion pueden acceder a esta seccion!'))
 
     usuarios=UsuariosController(DBSession)
-    usuarios.template='genshi:testando.templates.administrar.usuarios.index'
-    usuarios.page='Administrar'
-
     roles=RolesController(DBSession)
-    roles.template='genshi:testando.templates.administrar.roles.index'
-    roles.page='Administrar'
-
     permisos=PermisosController(DBSession)
-    permisos.template='genshi:testando.templates.administrar.permisos.index'
-    permisos.page='Administrar'
-        
     proyectos=ProyectosController(DBSession)
-    proyectos.template='genshi:testando.templates.administrar.proyectos.index'
-    proyectos.page='Administrar'
-    
-    fases=FasesController(DBSession)
-    fases.template='genshi:testando.templates.administrar.fases.index'
-    fases.page='Administrar'
-        
-    tiposDeItem=TiposDeItemController(DBSession)
-    tiposDeItem.template='genshi:testando.templates.administrar.tiposDeItem.index'
-    tiposDeItem.page='Administrar'
 
     error = ErrorController()
     @expose('testando.templates.administrar.index')    

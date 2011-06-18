@@ -56,19 +56,40 @@ $(function(){
     <h2 style="margin-top:1px;">Editar Item</h2>
     <form class="required tableform" method="post" action="./">
     <div>
-
-    		<input type="hidden" value="PUT" id="_method" class="sproxmethodputhiddenfield" name="_method"/>
+		<input type="hidden" value="PUT" id="_method" name="_method"/>
     </div>
 
     <table cellspacing="0" cellpadding="2" border="0">
-        <tbody><tr title="" class="even" id="name.container">
+        <tbody>
+
+		<tr title="" class="even" id="version.container">
             <td class="labelcol">
-                <label class="fieldlabel required" for="name" id="name.label">Name</label>
+                <label class="fieldlabel" for="version" id="version.label">Version</label>
+            </td>
+            <td class="fieldcol">
+                <input readonly="true" type="text" value="${item.version}" id="version" class="textfield" name="version"/>             
+            </td>
+        </tr> 
+		
+		<tr title="" class="even" id="codigo.container">
+            <td class="labelcol">
+                <label class="fieldlabel" for="codigo" id="codigo.label">Codigo</label>
+            </td>
+            <td class="fieldcol">
+                <input readonly="true" type="text" value="${item.codigo}" id="codigo" class="textfield" name="codigo"/>             
+            </td>
+        </tr>    
+            
+        <tr title="" class="even" id="name.container">
+            <td class="labelcol">
+                <label class="fieldlabel required" for="name" id="name.label">Nombre: </label>
             </td>
             <td class="fieldcol">
                 <input type="text" value="${item.name}" id="name" class="textfield required" name="name"/>
             </td>
-        </tr><tr title="" class="odd" id="descripcion.container">
+        </tr>
+        
+        <tr title="" class="odd" id="descripcion.container">
             <td class="labelcol">
                 <label class="fieldlabel" for="descripcion" id="descripcion.label">Descripcion</label>
             </td>
@@ -76,6 +97,7 @@ $(function(){
                 <textarea cols="50" rows="2" class="textarea" name="descripcion" id="descripcion">${item.descripcion}</textarea>
             </td>
         </tr>
+        
         <tr title="" class="even" id="complejidad.container">
             <td class="labelcol">
                 <label class="fieldlabel" for="complejidad" id="complejidad.label">Complejidad</label>
@@ -84,17 +106,18 @@ $(function(){
                 <input type="text" value="${item.complejidad}" id="complejidad" class="textfield" name="complejidad"/>
             </td>
         </tr>
-        <tr py:for="k,attr in attr_extra.iteritems()" title="" class="even" id="complejidad.container">
+        
+        <tr py:for="attr in item.atributos_extra" title="" class="even" id="atributos_extra.container">
             <td class="labelcol">
-                <label class="fieldlabel" for="${attr.name}" id="${attr.name}.label">${attr.name}</label><br/>
-                <label style="font-size:10px; text-align:center" for="${attr.name}" id="${attr.name}.label">(${attr.tipo})</label>
+                <label class="fieldlabel" 						 for="${attr.campo_extra.name}" id="attr_${attr.id}.label">${attr.campo_extra.name}</label><br/>
+                <label style="font-size:10px; text-align:center" for="${attr.campo_extra.tipo}" id="attr_${attr.id}.label">(${attr.campo_extra.tipo})</label>
             </td>
             <td class="fieldcol">
-                <input type="text" value="${extras[k].valor}" id="${attr.tipo}" class="textfield" name="extra_${extras[k].id}"/>
-                <input type="hidden" name="extras" value="${extras[k].id}"/>
-                <input type="hidden" name="tipo_${extras[k].id}" value="${attr.tipo}"/>
+                <input type="text" value="${attr.valor}" id="${attr.campo_extra.tipo}" class="textfield" name="atributos_extra_${attr.id}"/>
+                <input type="hidden" name="atributos_extra" value="${attr.id}"/>
             </td>
         </tr>
+        
     </tbody>
     </table>
     <table>
@@ -119,7 +142,12 @@ $(function(){
         <td>
         <py:if test="posibles_antecesores">
         	<select style="align:right" id="antecesores" class="multiselect" multiple="multiple" name="antecesores">
-				<option selected="('false','true')[pa in item.antecesores]" py:for="pa in posibles_antecesores" value="${pa.id}">${pa.name}</option>
+	        	<py:for each="pa in posibles_antecesores">
+					<div py:choose="">
+						<option py:when="pa in item.antecesores" selected="true"  value="${pa.id}">${pa.name}</option>
+						<option py:otherwise="" value="${pa.id}">${pa.name}</option>
+					</div>
+				</py:for>
 			</select>   
 		</py:if>
 		</td>

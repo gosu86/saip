@@ -6,8 +6,10 @@
     <title>
       SAIP·${page}·Fases
     </title>
+    <py:if test=" not A">
     <script type="text/javascript" src="${url('/javascript/fases/fasesDesarrollarTiposDeItemFlexi.js')}">
     </script>
+    </py:if>
     <py:if test="A">    
     <script type="text/javascript" src="${url('/javascript/fases/fasesAprobarItemsFlexi.js')}">
     </script>

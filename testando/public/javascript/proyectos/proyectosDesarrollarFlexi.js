@@ -1,10 +1,23 @@
 $(function()
 {
+	function checkProyectos(data) {
+		if (data.total == 0)
+		{
+			jQuery.noticeAdd(
+			    	  {
+			              text: "Ud. no posee proyectos iniciados...",
+			              stay: false,
+			              stayTime: 5000,
+			              type: "notice"
+			    	  });		
+		}
+		return data
+	}	
+	
 	$("#proyectosDesarrollarFlexi").flexigrid(
 	{
 		url: '/desarrollar/lista_de_proyectos/',
 		dataType: 'json',
-		
 		colModel : [
 			{display: 'ID', name : 'id', width : 40, sortable : true, align: 'left', hide : true},
 			{display: 'Nombre', name : 'name', width : 150, sortable : true, align: 'left'},
@@ -15,7 +28,7 @@ $(function()
 
 		buttons : [
 			{separator: true},         
-			{name: 'Acceder al Proyecto', bclass: 'enter', onpress : doCommandFases},
+			{name: 'Acceder al Proyecto', bclass: 'enter',width : 150, onpress : doCommandFases},
 		],
 		
 		searchitems : [
@@ -32,9 +45,11 @@ $(function()
 		rp: 10,
 		showTableToggleBtn: true,
 		height: 'auto',
-		singleSelect: true
+		singleSelect: true,
+		preProcess: checkProyectos,
 	});
 });
+
 function doCommandFases(com, grid)
 {
 	if (com == 'Acceder al Proyecto')

@@ -11,7 +11,7 @@ from datetime import datetime
 
 
 class CampoExtra(DeclarativeBase):
-    __tablename__ = 'campos_extras'
+    __tablename__ = 'campos_extra'
     
     id      =   Column(Integer, primary_key=True)
     

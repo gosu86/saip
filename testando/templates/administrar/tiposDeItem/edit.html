@@ -10,14 +10,16 @@ $().ready(function() {
 	$(".tableform").validate({
 		rules: {
 			name: "required",
+			codigo: "required",
 			descripcion:{
 				required: true,
 				minlength: 2
 			},
+		},
 		messages: {
-			name: "Por favor... Ingrese el un nombre para el tipo de item",
-			descripcion: "Por favor... Ingrese una descripcion para el tipo de item",
-		}
+		codigo		:	"Por favor... Ingrese un codigo que identifique al tipo de item.",
+			name		:	"Por favor... Ingrese el un nombre para el tipo de item.",
+			descripcion	:	"Por favor... Ingrese una descripcion para el tipo de item.",		
 		}
 	});
 	});
@@ -64,7 +66,20 @@ function set_to_modify(attr_id)
             <input type="hidden" value="PUT" id="_method" class="sproxmethodputhiddenfield" name="_method"/>
     </div>
     <table cellspacing="0" cellpadding="2" border="0">
-        <tbody><tr title="" class="even" id="name.container">
+        <tbody>        
+		<tr title="" class="even" id="codigo.container">
+            <td class="labelcol">
+                <label class="fieldlabel" for="codigo" id="codigo.label">Codigo</label>
+            </td>
+            <td class="fieldcol">
+            <div py:choose="">
+                <input py:when="faseNoIniciada" type="text" value="${value['codigo']}" id="codigo" class="textfield" name="codigo"/>
+                <input py:otherwise="" disabled="disabled" type="text" value="${value['codigo']}" id="codigo" class="textfield" name="codigo"/>
+			</div>                
+            </td>
+            
+        </tr>        
+        <tr title="" class="even" id="name.container">
             <td class="labelcol">
                 <label class="fieldlabel required" for="name" id="name.label">Name</label>
             </td>

@@ -13,11 +13,15 @@ $(function()
 		
 		buttons : [
 			{separator: true},
-			{name: 'Agregar Usuarios', bclass: 'add', onpress : doCommandUsuarios},
+			{name: 'Agregar Usuarios', bclass: 'add_users', onpress : doCommandUsuarios},
+			{separator: true},	
 			{separator: true},
-			{name: 'Quitar de la Fase', bclass: 'delete', onpress : doCommandUsuarios},
 			{separator: true},
-			{name: 'Cambiar Rol', bclass: 'switch', onpress : doCommandUsuarios},
+			{name: 'Quitar de la Fase', bclass: 'delete_users', onpress : doCommandUsuarios},
+			{separator: true},	
+			{separator: true},
+			{separator: true},
+			{name: 'Cambiar Rol', bclass: 'switch_rol', onpress : doCommandUsuarios},
 		],
 		
 		searchitems : [

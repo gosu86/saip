@@ -24,14 +24,10 @@ class PermisosController(CrudRestController):
 	new_form	=	permiso_new_form
 	edit_filler	=	permiso_edit_filler
 	edit_form	= 	permiso_edit_form
-	
-	template	=	''
-	page		=	''
 
-	@expose()
+	@expose('testando.templates.administrar.permisos.index')
 	def get_all(self):
-		override_template(self.get_all,self.template)	
-		return dict(page=self.page)
+		return dict(page="Administrar")
 	
 	@validate(validators={"page":validators.Int(), "rp":validators.Int()})
 	@expose('json')
