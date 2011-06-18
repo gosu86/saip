@@ -33,7 +33,7 @@ $(function(){
 		sortname: "version",
 		sortorder: "desc",
 		usepager: true,
-		title: "Historial del Item: "+$('#INombre').val()+ '    >--<    Version Actual: '+$('#IVersion').val(),
+		title: "Historial del Item: <span class=flexiNameTitle>"+$('#INombre').val()+ '  </span><span class=flexiVersionTitle>Version Actual: '+$('#IVersion').val()+"</span>",
 		useRp: true,
 		rp: 5,
 		showTableToggleBtn: true,

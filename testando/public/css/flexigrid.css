@@ -1,4 +1,13 @@
 @charset "UTF-8";
+
+.flexiNameTitle {
+	color: 
+}
+
+.flexiVersionTitle {
+	color: green;
+	padding-left: 5px;	
+}
 /* CSS Document */
 /*********** Imagenes para la tabla de usuarios ***********/
 .TablaUsuarios div.flexigrid div.fbutton .add {

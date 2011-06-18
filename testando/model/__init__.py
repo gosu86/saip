@@ -67,3 +67,4 @@ from testando.model.item import Item
 from testando.model.lineabase import LineaBase
 from testando.model.campoextra import CampoExtra
 from testando.model.atributoextra import AtributoExtra
+from testando.model.adjunto import Adjunto

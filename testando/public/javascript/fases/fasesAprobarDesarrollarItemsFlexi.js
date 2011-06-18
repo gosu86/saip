@@ -19,6 +19,10 @@ $(function(){
 			{separator: true},
 			{separator: true},
 			{separator: true},
+			{name: 'Adjuntar', bclass: 'file', onpress : doCommandItem},
+			{separator: true},
+			{separator: true},
+			{separator: true},				
 			{name: 'Borrar', bclass: 'delete_item', onpress : doCommandItem},
 			{separator: true},
 			{separator: true},
@@ -81,6 +85,15 @@ function doCommandItem(com, grid)
 								window.location = '/desarrollar/items/'+id+'/edit/';
 							});			
 				}
+			}
+			else if (com == 'Adjuntar')
+			{
+			
+				$('.trSelected', grid).each(function()
+				{
+					id = get_id(this) 
+					window.location = '/desarrollar/items/index/?itemid='+id;
+				});
 			}
 	}
 	else

@@ -156,7 +156,7 @@ class DesarrollarController(BaseController):
         nombre=f.name        
         tmpl_context.faseId = hideMe()
         tmpl_context.faseNombre = hideMe()        
-        return dict(page='Desarrollar',faseId=fid,faseNombre=nombre,A=a,D=d,AD=ad,referer=referer,title_nav='Lista de fases')
+        return dict(page='Desarrollar',faseId=fid,faseNombre=nombre,A=a,D=d,AD=ad,referer=referer,title_nav='Lista de Fases')
 
     @validate(validators={"page":validators.Int(), "rp":validators.Int()})
     @expose('json')    

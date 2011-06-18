@@ -4,6 +4,7 @@ from sqlalchemy.types   import  Integer, Unicode,UnicodeText,Float,DateTime,BOOL
 
 from testando.model import DeclarativeBase, metadata, DBSession
 from testando.model.atributoextra import AtributoExtra
+from testando.model.adjunto import Adjunto
 
 from datetime import datetime
 
@@ -64,4 +65,4 @@ class Item(DeclarativeBase):
                            secondary=item_antecesor_table,
                            backref='sucesores')
 
-    #adjuntos        = relationship(Adjunto, order_by=Adjunto.id, backref="item")     
+    adjuntos        = relationship(Adjunto, order_by=Adjunto.id, backref="item")

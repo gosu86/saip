@@ -1,12 +1,15 @@
 from tgext.crud     import CrudRestController
-from tg             import redirect, request
+from tg             import redirect, request,response
 from tg.decorators  import override_template,validate,without_trailing_slash,expose
+from tg.controllers import CUSTOM_CONTENT_TYPE
+
 from sqlalchemy.sql import and_
 
 from testando.model                 import DBSession
 from testando.model.item            import Item
 from testando.model.tipoitem        import TipoItem
 from testando.model.atributoextra   import AtributoExtra
+from testando.model.adjunto         import Adjunto
 
 from formencode import validators
 
@@ -224,7 +227,61 @@ class ItemsController(CrudRestController):
         
         
         
+#-----------------------------------------------------------------#
+#-------------------Adjunto Controller----------------------------#
+#-----------------------------------------------------------------#
+    @expose('testando.templates.desarrollar.items.adjunto.index')
+    def index(self, *args, **kw):
+        itemid=int(kw['itemid'])
+        current_files = DBSession.query(Adjunto).filter_by(item_id=itemid)
+        return dict(current_files=current_files,
+                    itemid=itemid)
         
+    @expose()
+    def save(self, *args, **kw):
+        adjunto=Adjunto()
+        adjunto.filecontent=kw['userfile'].value
+        adjunto.name=kw['userfile'].filename
+        adjunto.item_id=kw['itemid']
+        DBSession.add(adjunto)
+        DBSession.flush()
+        redirect('/desarrollar/items/index/?itemid='+kw['itemid'])
+    
+    @expose(content_type=CUSTOM_CONTENT_TYPE)
+    def view(self, fileid):
+        try:
+            userfile = DBSession.query(Adjunto).filter_by(id=fileid).one()
+            iid= userfile.item_id
+        except:
+            redirect("/")
+        content_types = {
+            'display': {'.png': 'image/jpeg', '.jpeg':'image/jpeg', '.jpg':'image/jpeg', '.gif':'image/jpeg', '.txt': 'text/plain'},
+            'download': {'.pdf':'application/pdf', '.zip':'application/zip','.rar':'application/x-rar-compressed',
+                         '.py':'application/text','.c':'application/text','.java':'application/text'}
+        }
+        for file_type in content_types['display']:
+            if userfile.name.endswith(file_type):
+                response.headers["Content-Type"] = content_types['display'][file_type]
+        for file_type in content_types['download']:
+            if userfile.name.endswith(file_type):
+                response.headers["Content-Type"] = content_types['download'][file_type]
+                response.headers["Content-Disposition"] = 'attachment; filename="'+userfile.name+'"'
+        if userfile.name.find(".") == -1:
+            response.headers["Content-Type"] = "text/plain"
+        return userfile.filecontent
+    
+        return redirect('/desarrollar/items/index/?itemid='+str(iid))
+    
+    @expose()
+    def delete(self, fileid):
+        try:
+            userfile = DBSession.query(Adjunto).filter_by(id=fileid).one()
+            iid= userfile.item_id
+        except:
+            return redirect('/desarrollar/items/index')
+        DBSession.delete(userfile)
+        DBSession.flush()
+        return redirect('/desarrollar/items/index/?itemid='+str(iid))        
         
         
         

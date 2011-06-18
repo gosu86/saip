@@ -1,4 +1,4 @@
-from tg             import expose,redirect, validate,tmpl_context, request,config
+from tg             import expose,redirect, validate,tmpl_context, request,config,url
 from formencode        import validators
 from repoze.what.predicates import All,not_anonymous,in_any_group
 
@@ -160,11 +160,14 @@ class ConfigurarController(BaseController):
         nombre=p.name
         tmpl_context.proyectoId = hideMe()
         tmpl_context.proyectoNombre = hideMe()
+        
+        referer=url('/configurar/seleccion_de_proyectos/')
+        
         if estado=='Iniciado':
             iniciado=True
         else:
             iniciado=False
-        return dict(page='Configurar', proyectoId=pid, iniciado=iniciado,proyectoNombre=nombre)
+        return dict(page='Configurar', proyectoId=pid, iniciado=iniciado,proyectoNombre=nombre,referer=referer,title_nav='Lista de Proyectos')
     
     @validate(validators={"page":validators.Int(), "rp":validators.Int()})
     @expose('json')    
@@ -430,8 +433,8 @@ class ConfigurarController(BaseController):
             iniciado=True
         else:
             iniciado=False
-        
-        return dict(page='Configurar', faseId=fid,faseNombre=nombre,iniciado=iniciado)        
+        referer=url('/configurar/vista_de_fases/?pid='+str(f.proyecto.id))
+        return dict(page='Configurar', faseId=fid,faseNombre=nombre,iniciado=iniciado,referer=referer,title_nav='Lista de Fases')        
         
     @validate(validators={"page":validators.Int(), "rp":validators.Int()})
     @expose('json')    
