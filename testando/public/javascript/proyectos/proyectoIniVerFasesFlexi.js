@@ -61,7 +61,9 @@ function doCommandFases(com, grid) {
 		else if (com == 'Tipos de Items')
 		{ver_tipos_de_item(grid);}
 		else if (com == 'Items')
-		{ver_items(grid);}			
+		{ver_items(grid);}
+		else if (com == 'Lineas Base')
+		{ver_lineas_base(grid);}						
 	}
 	else
 	{msg_falta_seleccion();}
@@ -92,7 +94,13 @@ function ver_items(grid){
 		window.location = "/configurar/vista_de_items/?fid="+id
 	});	
 }
-
+function ver_lineas_base(grid){
+	$('.trSelected', grid).each(function()
+	{	
+		id = get_id(this) 
+		window.location = "/configurar/vista_de_lineasbase/?fid="+id
+	});	
+}
 function get_id(tr){
 	var id = $(tr).attr('id');
 	id = id.substring(id.lastIndexOf('row')+3);

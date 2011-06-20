@@ -47,9 +47,10 @@ class ItemsController(CrudRestController):
         attr_extra=tdi.campos_extra
         posibles_antecesores=False
         if fase_orden > 1:
-            posibles_antecesores=DBSession.query(Item).filter(and_(Item.fase_id==1,Item.historico_id==None))
+            posibles_antecesores=DBSession.query(Item).filter(and_(Item.fase_id==1,Item.historico==False))
+            posibles_antecesores=posibles_antecesores.filter(Item.linea_base.has(estado='Activa'))
             
-        posibles_padres=DBSession.query(Item).filter(and_(Item.fase_id==fase_id,Item.historico_id==None))
+        posibles_padres=DBSession.query(Item).filter(and_(Item.fase_id==fase_id,Item.historico==False))
         return dict(page="Desarrollar",
                     attr_extra=attr_extra,
                     fase_id=fase_id,
@@ -110,20 +111,23 @@ class ItemsController(CrudRestController):
             result = dict() 
         return result
     
-    @validate(validators={"id":validators.Int()})
     @expose('json')
     def post_delete(self,**kw):
-        id = kw['id']
-        log.debug("Inside post_fetch: id == %s" % (id))
-        if (id != None):
-            d = {'id':id}
-            item = DBSession.query(Item).filter_by(**d).first()
-            nombre=item.name
-            DBSession.delete(item)
-            DBSession.flush()
-            msg="El item se ha eliminado."
-
-        return dict(msg=msg,nombre=nombre)
+        
+        item = DBSession.query(Item).filter_by(id = int(kw['id'])).first()
+        item.estado='Eliminado'
+        DBSession.flush()
+        #=======================================================================
+        # if (id != None):
+        #    
+        #    item = DBSession.query(Item).filter_by(**d).first()
+        #    nombre=item.name
+        #    DBSession.delete(item)
+        #   
+        #    
+        #=======================================================================
+        msg="El item se ha eliminado."
+        return dict(msg=msg)
     
     
     @expose('testando.templates.desarrollar.items.edit')
@@ -288,19 +292,74 @@ class ItemsController(CrudRestController):
         
         
         
+#--------------------------------------------------------------
+    @expose('json')        
+    def aprobar(self,**kw):
+        ids=kw['ids'].split(',')
+        ids.pop()
+        cant=len(ids)
+        error=0
+        msg=''
+        type=''
+        cods=''
+        for id in ids:
+            id=int(id)
+            i=DBSession.query(Item).filter_by(id=id).first()
+            if i.estado == 'Terminado':
+                i.estado='Aprobado'
+            else:
+                error=error+1
+                cods=cods+i.codigo+','
+                
+        DBSession.flush()
         
+        dif=cant-error
+        if dif!=0:
+            msg=str(dif)+' items se han aprobado con exito'
+            type= 'succes'
+        if error!=0:
+            error=str(error) +' items ('+cods+') no se han aprobado!'        
+            
+        return dict(msg=msg,type=type,error=error)        
+                
+    @expose('json')        
+    def terminar(self,**kw):
+        ids=kw['ids'].split(',')
+        ids.pop()
+        cant=len(ids)
+        error=0
+        msg=''
+        type=''
+        cods=''        
+        for id in ids:
+            id=int(id)
+            i=DBSession.query(Item).filter_by(id=id).first()
+            if i.estado != 'Aprobado':
+                i.estado='Terminado'
+            else:
+                error=error+1
+                cods=cods+i.codigo+','
+                
+        DBSession.flush()
         
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+        dif=cant-error
+        if dif!=0:
+            msg=str(dif)+' items se han terminado con exito'
+            type= 'succes'
+        if error!=0:
+            error=str(error) +' items ('+cods+') no han cambiado, tienen estado "Aprobado"!'
+        return dict(msg=msg,type=type,error=error)  
     
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+                   

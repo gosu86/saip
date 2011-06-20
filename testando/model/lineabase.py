@@ -6,26 +6,21 @@ from sqlalchemy.orm import relationship, backref
 from testando.model import DeclarativeBase, metadata, DBSession
 from datetime import datetime
 
-# modelos relacionados
 from testando.model.item import Item
 
 
 class LineaBase(DeclarativeBase):
     __tablename__ = 'lineas_bases'
-    
-    #{ Columns
+
     
     id = Column(Integer, primary_key=True)
-    
-    name = Column(Unicode(150), nullable=False)
        
     fecha_creacion = Column(DateTime, default=datetime.now)
+
+    items = relationship(Item, order_by=Item.id, backref="linea_base") 
     
-    #}
+    estado = Column(Unicode(25),default='Activa')
     
-    #{ Relations
-    
-    items = relationship(Item, order_by=Item.id, backref="linea_base")   
-    
-    #}    
+    fase_id = Column(Integer)  
+ 
 

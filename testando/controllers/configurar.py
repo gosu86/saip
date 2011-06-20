@@ -12,6 +12,8 @@ from testando.model.auth            import Usuario
 from testando.model.auth            import Rol
 from testando.model.tipoitem        import TipoItem
 from testando.model.item            import Item
+from testando.model.lineabase       import LineaBase
+from testando.model.atributoextra   import AtributoExtra
 
 from testando.lib.base                  import BaseController
 from testando.controllers.error         import ErrorController
@@ -560,10 +562,12 @@ class ConfigurarController(BaseController):
                 d = {qtype:query,'fase_id':int(fid)}
                 items = DBSession.query(Item).filter_by(**d)
                 items = items.filter(Item.historico==False)
+
             else:
                 d = {'fase_id':int(fid)}
                 items = DBSession.query(Item).filter_by(**d)
                 items = items.filter(Item.historico==False)
+
                 
             total = items.count()
             log.debug('total %s' %total)
@@ -624,4 +628,147 @@ class ConfigurarController(BaseController):
             result = dict() 
         return result          
         
+ 
+    @expose('testando.templates.configurar.fases.vista_de_lineasbase') 
+    def vista_de_lineasbase(self,*args, **kw):
+        fid=kw['fid']
+        f=DBSession.query(Fase).filter_by(id=fid).one()
+        nombre=f.name        
+        tmpl_context.faseId = hideMe()
+        tmpl_context.faseNombre = hideMe()
         
+        return dict(page='Configurar', faseId=fid,faseNombre=nombre)    
+                
+    @validate(validators={"page":validators.Int(), "rp":validators.Int()})
+    @expose('json')    
+    def lineas_base(self,fid=None, page='1', rp='25', sortname='id', sortorder='asc', qtype=None, query=None):
+        try:
+            offset = (int(page)-1) * int(rp)
+            
+            if (query):
+                d = {qtype:query,'fase_id':int(fid)}
+                lineasBase = DBSession.query(LineaBase).filter_by(**d)
+                lineasBase = lineasBase.filter(LineaBase.estado!='Inactiva')
+            else:
+                d = {'fase_id':int(fid)}
+                lineasBase = DBSession.query(LineaBase).filter_by(**d)
+                lineasBase = lineasBase.filter(LineaBase.estado!='Inactiva')
+                
+            total = lineasBase.count()
+            log.debug('total lineas base %s' %total)
+            column = getattr(LineaBase, sortname)
+            lineasBase = lineasBase.order_by(getattr(column,sortorder)()).offset(offset).limit(rp)
+            total = lineasBase.count()
+            log.debug('total lineas base 2 %s' %total)            
+            rows = [{'id'  : lineaBase.id,
+                    'cell': [lineaBase.id,
+                            lineaBase.fecha_creacion,
+                            lineaBase.estado,
+                            len(lineaBase.items)
+                            ]} for lineaBase in lineasBase]
+            result = dict(page=page, total=total, rows=rows)
+        except:
+            result = dict() 
+        return result          
+      
+    @validate(validators={"page":validators.Int(), "rp":validators.Int()})
+    @expose('json')    
+    def items_aprobados(self,fid=None, page='1', rp='25', sortname='id', sortorder='asc', qtype=None, query=None):
+        try:
+            offset = (int(page)-1) * int(rp)            
+            if (query):
+                d = {qtype:query,'fase_id':int(fid)}
+                items = DBSession.query(Item).filter_by(**d)
+                items = items.filter(and_(Item.historico==False,Item.estado=='Aprobado',Item.linea_base_id==None))
+            else:
+                d = {'fase_id':int(fid)}
+                items = DBSession.query(Item).filter_by(**d)
+                items = items.filter(and_(Item.historico==False,Item.estado=='Aprobado',Item.linea_base_id==None))
+                
+            total = items.count()
+            log.debug('total item aprobados %s' %total)
+            column = getattr(Item, sortname)
+            items = items.order_by(getattr(column,sortorder)()).offset(offset).limit(rp)
+            total = items.count()
+            log.debug('total item aprobados %s' %total)            
+            rows = [{'id'  : item.id,
+                    'cell': [item.id,
+                            item.name,
+                            item.version,
+                            str(item.estado),                            
+                            item.descripcion,
+                            item.complejidad,
+                            item.tipo_item.name]} for item in items]
+            result = dict(page=page, total=total, rows=rows)
+        except:
+            result = dict() 
+        return result  
+    
+    
+    @expose('json')        
+    def aplicar_linea_base(self,**kw):
+        lb=LineaBase()
+        ids=kw['ids'].split(',')
+        ids.pop()
+        cant=len(ids)
+        
+        for id in ids:
+            id=int(id)
+            i=DBSession.query(Item).filter_by(id=id).first()
+            lb.items.append(i)
+        lb.fase_id=i.fase_id        
+        DBSession.flush()
+
+        msg=str(cant)+' items ahora tienen linea base.'
+        type= 'succes'   
+            
+        return dict(msg=msg,type=type)  
+
+    @expose('json')        
+    def abrir_linea_base(self,**kw):
+        lb=DBSession.query(LineaBase).filter_by(id=int(kw['id'])).first()
+        lb.estado='Abierta'     
+        DBSession.flush()
+
+        msg='Linea base abierta con exito.'
+        type= 'succes'   
+            
+        return dict(msg=msg,type=type)  
+
+
+    @expose('json')        
+    def revertir(self,**kw):          
+        id=kw['id'].split(',')
+        ia                  =   DBSession.query(Item).filter_by(id=int(id[0])).first()
+        i                   =   DBSession.query(Item).filter_by(id=int(id[1])).first()
+        ia.historico         =   True
+        
+        item                =   Item()
+        item.name           =   i.name
+        item.fase           =   i.fase
+        item.codigo         =   i.codigo
+        item.version        =   ia.version+0.1
+        item.tipo_item      =   i.tipo_item
+        item.descripcion    =   i.descripcion
+        item.complejidad    =   i.complejidad
+        item.historico_id   =   i.historico_id
+
+        for attr in i.atributos_extra:
+            aen                 =   AtributoExtra()
+            aen.valor           =   attr.valor
+            aen.campo_extra_id  =   attr.campo_extra_id
+            DBSession.add(aen)
+            item.atributos_extra.append(aen)
+                                
+        for p in i.padres:
+            item.padres.append(p)
+        
+        for a in i.antecesores:
+            item.antecesores.append(a)
+            
+        DBSession.flush() 
+        log.debug('id %s' %str(item.id))
+        msg='El item se ha revertido con exito!'
+        type='succes'
+        return dict(msg=msg,type=type,id=str(item.id))  
+    

@@ -197,10 +197,12 @@ class DesarrollarController(BaseController):
                 d = {qtype:query,'fase_id':int(fid)}
                 items = DBSession.query(Item).filter_by(**d)
                 items = items.filter(Item.historico==False)
+                items = items.filter(Item.estado!='Eliminado')
             else:
                 d = {'fase_id':int(fid)}
                 items = DBSession.query(Item).filter_by(**d)
                 items = items.filter(Item.historico==False)
+                items = items.filter(Item.estado!='Eliminado')
                 
             total = items.count()
             log.debug('total %s' %total)
@@ -209,12 +211,43 @@ class DesarrollarController(BaseController):
             
             rows = [{'id'  : item.id,
                     'cell': [item.id,
+                            item.codigo,
                             item.name,
                             item.version,
+                            item.estado,
                             item.descripcion,
                             item.complejidad,
-                            item.tipo_item.name]} for item in items]
+                            item.tipo_item.name,
+                            item.lineaBase]} for item in items]
             result = dict(page=page, total=total, rows=rows)
         except:
             result = dict() 
         return result             
+    
+    
+    @expose('json')        
+    def aprobar(self,**kw):
+        i=DBSession.query(Item).filter_by(id=int(kw['id'])).first()
+        i.estado='Aprobado'
+        DBSession.flush()
+        msg='El item se ha aprobado con exito'
+        type= 'succes'
+        return dict(msg=msg,type=type)        
+            
+    @expose('json')        
+    def comprometer(self,**kw):
+        i=DBSession.query(Item).filter_by(id=int(kw['id'])).first()
+        i.estado='En Revision'
+        i.linea_base.estado='Comprometida'
+        DBSession.flush()
+        msg='El item ha pasado al estado de revision.'
+        type= 'notice'
+        return dict(msg=msg,type=type)      
+    
+    
+    
+    
+    
+    
+    
+    

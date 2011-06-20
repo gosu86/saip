@@ -6,37 +6,36 @@ $(function(){
 		
 		colModel : [
 			{display: 'ID', name : 'id', width : 40, sortable : true, align: 'left', hide : true},
+			{display: 'Codigo', name : 'codigo', width : 40, sortable : true, align: 'left'},
 			{display: 'Nombre', name : 'name', width : 150, sortable : true, align: 'left'},
-			{display: 'Version', name : 'version', width : 150, sortable : true, align: 'left'},			
+			{display: 'Version', name : 'version', width : 50, sortable : true, align: 'left'},
+			{display: 'Estado', name : 'estado', width : 80, sortable : true, align: 'left'},			
 			{display: 'Descripcion', name : 'descripcion', width : 150, sortable : true, align: 'left'},
-			{display: 'Complejidad', name : 'complejidad', width : 150, sortable : true, align: 'left'},
-			{display: 'Campos Extras', name : 'camposExtras', width : 150, sortable : true, align: 'left'},			
+			{display: 'Complejidad', name : 'complejidad', width : 80, sortable : true, align: 'left'},
+			{display: 'Tipo De Item', name : 'tipoDeItem', width : 150, sortable : true, align: 'left'},
+			{display: 'Linea Base', name : 'lineaBase', width : 150, sortable : true, align: 'left'},		
 		],
 		
 		buttons : [          
 			{separator: true},
 			{name: 'Editar', bclass: 'edit_item', onpress : doCommandItem},
-			{separator: true},
-			{separator: true},
-			{separator: true},
-			{name: 'Adjuntar', bclass: 'file', onpress : doCommandItem},
-			{separator: true},
-			{separator: true},
-			{separator: true},				
+			{separator: true},{separator: true},{separator: true},
+			{name: 'Adjuntos', bclass: 'attachment', onpress : doCommandItem},
+			{separator: true},{separator: true},{separator: true},				
 			{name: 'Borrar', bclass: 'delete_item', onpress : doCommandItem},
-			{separator: true},
-			{separator: true},
-			{separator: true},
-			{separator: true},
-			{separator: true},
-			{separator: true},			
+			{separator: true},{separator: true},{separator: true},
+			{separator: true},{separator: true},{separator: true},			
+			{name: 'Dar por terminado', bclass: 'finish', onpress : doCommandItem},			
+			{separator: true},{separator: true},{separator: true},
+			{separator: true},{separator: true},{separator: true},			
 			{name: 'Aprobar', bclass: 'approve', onpress : doCommandItem},
 			{separator: true},			
 			
 		],
 		
 		searchitems : [
-			{display: 'Nombre', name : 'name', isdefault: true}
+			{display: 'Nombre', name : 'name', isdefault: true},
+			{display: 'Codigo', name : 'codigo', isdefault: true}
 		],
 		
 		sortname: "id",
@@ -59,46 +58,210 @@ function doCommandItem(com, grid)
 	{	
 			if (com == 'Aprobar')
 			{
-			
-				$('.trSelected', grid).each(function()
-				{
-					id = get_id(this) 
-					jQuery.noticeAdd({
-			              text: "Aprobar: "+id,
-			              stay: false,
-			              stayTime: 2500,
-			              type: "notice"
-			    	  });
-				});
+				obtener_ids(grid,'aprobar');
 			}
+			else if (com == 'Dar por terminado')
+			{
+				obtener_ids(grid,'terminar');
+			}			
 			else if (com == "Editar")
 			{
 				if ($('.trSelected', grid).length > 1)
 				{
-					msg_toManySelected()
+					msg_toManySelected('editar')
 				}
 				else
 				{
 					$('.trSelected', grid).each(function()
-							{
-								id = get_id(this) 
+					{
+						id = get_id(this) 
+						lb = $('tr.trSelected td:last').children().text()
+						
+						if (lb == 'Activa')
+						{
+							alert(lb)
+							set_comprometida(id)
+						}
+						else if (lb == 'Comprometida')
+						{
+							msg_comprometida()
+						}
+						else{
 								window.location = '/desarrollar/items/'+id+'/edit/';
-							});			
+							}
+					});			
 				}
 			}
-			else if (com == 'Adjuntar')
+			else if (com == 'Adjuntos')
 			{
-			
-				$('.trSelected', grid).each(function()
+				if ($('.trSelected', grid).length > 1)
 				{
-					id = get_id(this) 
-					window.location = '/desarrollar/items/index/?itemid='+id;
-				});
+					msg_toManySelected('ver adjuntos de')
+				}
+				else{
+					$('.trSelected', grid).each(function()
+					{
+						id = get_id(this)
+							window.location = '/desarrollar/items/index/?itemid='+id;		
+					});					
+				}			
+
 			}
+			else if (com == 'Borrar')
+			{
+				if ($('.trSelected', grid).length > 1)
+				{
+					msg_toManySelected('borrar')
+				}
+				else
+				{
+					id = get_id($('.trSelected', grid)) 
+					borrar(id)
+				}
+			}			
 	}
 	else
 	{msg_falta_seleccion()}
 
+}
+
+function obtener_ids(grid,tipo){
+		ids=''
+		$('.trSelected', grid).each(function()
+		{
+			id = get_id(this) 
+			ids=ids+(id+',')
+		});
+		if (tipo=='aprobar'){
+			aprobar(ids)	
+		}
+		else if (tipo=='terminar'){
+			terminar(ids)
+		}
+		
+	}
+function set_comprometida(id)
+{
+    $.ajax(
+    	    {
+    	      type: 'POST',
+    	      dataType: "json",
+    	      url: '/desarrollar/comprometer',
+    	      data: {id:id},
+    	      success: function(data)
+    	      { 
+
+				  jQuery.noticeAdd(
+				    	  {
+				              text: data.msg,
+				              stay: false,
+				              stayTime: 2500,
+				              type: data.type
+				    	  });
+				  jQuery.noticeAdd(
+				    	  {
+				              text: 'Su linea base ha pasado al estado "Comprometida"',
+				              stay: false,
+				              stayTime: 2500,
+				              type: data.type
+				    	  });				    	  
+				  $('#fasesAprobarDesarrollarItemsFlexi').flexReload();
+    	    	 
+    	      },
+    	    });	
+	
+}	
+function aprobar(ids){
+    $.ajax(
+    	    {
+    	      type: 'POST',
+    	      dataType: "json",
+    	      url: '/desarrollar/items/aprobar',
+    	      data: {ids:ids},
+    	      success: function(data)
+    	      { 
+
+				  jQuery.noticeAdd(
+				    	  {
+				              text: data.msg,
+				              stay: false,
+				              stayTime: 2500,
+				              type: data.type
+				    	  });
+					if (data.error != 0){
+						  jQuery.noticeAdd(
+						    	  {
+						              text: data.error,
+						              stay: false,
+						              stayTime: 2500,
+						              type: 'error'
+						    	  });
+						  jQuery.noticeAdd(
+						    	  {
+						              text: 'Solo items "terminados", pueden ser aprobados... ',
+						              stay: false,
+						              stayTime: 2500,
+						              type: 'notice'
+						    	  });						    	  
+					}
+				  $('#fasesAprobarDesarrollarItemsFlexi').flexReload();
+    	    	 
+    	      },
+    	    });	
+}
+
+function terminar(ids){
+    $.ajax(
+    	    {
+    	      type: 'POST',
+    	      dataType: "json",
+    	      url: '/desarrollar/items/terminar',
+    	      data: {ids:ids},
+    	      success: function(data)
+    	      { 
+				  jQuery.noticeAdd(
+				    	  {
+				              text: data.msg,
+				              stay: false,
+				              stayTime: 2500,
+				              type: data.type
+				    	  });
+					if (data.error != 0){
+						  jQuery.noticeAdd(
+						    	  {
+						              text: data.error,
+						              stay: false,
+						              stayTime: 2500,
+						              type: 'error'
+						    	  });
+					}
+				  $('#fasesAprobarDesarrollarItemsFlexi').flexReload();
+    	    	 
+    	      },
+    	    });	
+}
+
+
+function borrar(id){
+    $.ajax(
+    	    {
+    	      type: 'POST',
+    	      dataType: "json",
+    	      url: '/desarrollar/items/post_delete',
+    	      data: {id:id},
+    	      success: function(data)
+    	      { 
+				  jQuery.noticeAdd(
+				    	  {
+				              text: data.msg,
+				              stay: false,
+				              stayTime: 2500,
+				              type: data.type
+				    	  });
+				  $('#fasesAprobarDesarrollarItemsFlexi').flexReload();
+    	    	 
+    	      },
+    	    });	
 }
 
 function get_id(tr){
@@ -116,7 +279,7 @@ function msg_falta_seleccion(){
 	    	  });
 }
 
-function msg_toManySelected(){
+function msg_toManySelected(que){
 	jQuery.noticeAdd({
         text: "Ha seleccionado más de un item!",
         stay: false,
@@ -124,7 +287,15 @@ function msg_toManySelected(){
         type: "error"
 	  });
 	jQuery.noticeAdd({
-        text: "Solo puede editar un item a la vez.",
+        text: "Solo puede "+que+" un item a la vez.",
+        stay: false,
+        stayTime: 3000,
+        type: "notice"
+	  });	
+}
+function msg_comprometida(){
+	jQuery.noticeAdd({
+        text: "El item posee un linea base comprometida, No se puede editar.",
         stay: false,
         stayTime: 3000,
         type: "notice"

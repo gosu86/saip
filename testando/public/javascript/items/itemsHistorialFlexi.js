@@ -18,10 +18,7 @@ $(function(){
 			{separator: true},
 			{name: 'Revertir', bclass: 'goback', onpress : doCommandItem},
 			{separator: true},
-			{separator: true},
-			{separator: true},
-			{name: 'Revivir', bclass: 'reborn', onpress : doCommandItem},
-			{separator: true},
+
 			
 		],
 		
@@ -33,7 +30,9 @@ $(function(){
 		sortname: "version",
 		sortorder: "desc",
 		usepager: true,
-		title: "Historial del Item: <span class=flexiNameTitle>"+$('#INombre').val()+ '  </span><span class=flexiVersionTitle>Version Actual: '+$('#IVersion').val()+"</span>",
+		title: "Historial del Item: <span class=flexiNameTitle>"+$('#INombre').val()+ '  </span>'+
+		'<span class=flexiVersionTitle>Version Actual: '+$('#IVersion').val()+"</span>"+
+		'<span class="flexiEstadoTitle '+$('#IEstado').val()+'"> Estado: '+$('#IEstado').val()+"</span>",
 		useRp: true,
 		rp: 5,
 		showTableToggleBtn: true,
@@ -46,18 +45,18 @@ $(function(){
 function doCommandItem(com, grid)
 {
 	if ($('.trSelected', grid).length > 0)
-	{		
-			id=get_id($('.trSelected', grid).first())
+	{
+		if ($('input#IEstado').val()=='Eliminado'){
+			msg_eliminado()	
+		}
+		else{
+			id=$('input#iid').val()+','
+			id=id+get_id($('.trSelected', grid).first())
 			if (com == 'Revertir')
 			{
-				alert('revertir: '+id)
-				//revertir(id)
-			}
-			else if (com == 'Revivir')
-			{
-				alert('ReVIVIR: '+id)
-				//revivir(id)
-			}			
+				revertir(id)
+			}	
+		}		
 			
 	}
 	else
@@ -80,34 +79,28 @@ function msg_falta_seleccion(){
 	    	  });
 }
 
-function revivir(id){
-    $.ajax(
-    	    {
-    	      type: 'POST',
-    	      dataType: "json",
-    	      url: '/configurar/aplicar_linea_base',
-    	      data: {ids:ids},
-    	      success: function(data)
-    	      { 
-    	        	  jQuery.noticeAdd(
-    	        	    	  {
-    	        	              text: data.msg,
-    	        	              stay: false,
-    	        	              stayTime: 2500,
-    	        	              type: data.type
-    	        	    	  });    	        		  
-    	        	  $("#faseVerItemsFlexi").flexReload();
-    	      }
-    	    	 
-    	    });	
+function msg_eliminado(){
+	jQuery.noticeAdd({
+	              text: "La version actual del item tiene estado eliminado.",
+	              stay: false,
+	              stayTime: 3000,
+	              type: "notice"
+	    	  });
+	jQuery.noticeAdd({
+	              text: "No se pueden revertir items eliminados.",
+	              stay: false,
+	              stayTime: 2500,
+	              type: "error"
+	    	  });	    	  
 }
+
 function revertir(id){
     $.ajax(
     	    {
     	      type: 'POST',
     	      dataType: "json",
-    	      url: '/configurar/aplicar_linea_base',
-    	      data: {ids:ids},
+    	      url: '/configurar/revertir',
+    	      data: {id:id},
     	      success: function(data)
     	      { 
     	        	  jQuery.noticeAdd(
@@ -116,9 +109,10 @@ function revertir(id){
     	        	              stay: false,
     	        	              stayTime: 2500,
     	        	              type: data.type
-    	        	    	  });    	        		  
-    	        	  $("#faseVerItemsFlexi").flexReload();
+    	        	    	  });  
+				window.location='/configurar/historial/?iid='+data.id 	        		  
     	      }
     	    	 
-    	    });	
+    	    });
+       	     		
 }

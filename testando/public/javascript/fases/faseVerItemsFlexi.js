@@ -20,8 +20,8 @@ $(function(){
 			{separator: true},
 			{separator: true},
 			{separator: true},
-			{name: 'Aplicar Linea Base', bclass: 'baseLine', onpress : doCommandItem},
-			{separator: true},
+			{name: 'Revivir', bclass: 'reborn', onpress : doCommandItem},
+			{separator: true},			
 			
 		],
 		
@@ -38,7 +38,7 @@ $(function(){
 		rp: 5,
 		showTableToggleBtn: true,
 		height: 'auto',
-		singleSelect: false
+		singleSelect: true
 	});	
 });
 
@@ -47,24 +47,15 @@ function doCommandItem(com, grid)
 {
 	if ($('.trSelected', grid).length > 0)
 	{	
+			id = get_id($('.trSelected', grid))
 			if (com == 'Ver Historial')
 			{
-				if ($('.trSelected', grid).length > 1)
-				{
-					
-				}
-				else
-				{
-					id = get_id($('.trSelected', grid))
-					alert(id);
 					window.location = '/configurar/historial/?iid='+id;
-				}
 			}
-			else if (com == 'Aplicar Linea Base')
+			else if (com == 'Revivir')
 			{
-				aplicar_lineaBase(grid)
+				revivir(id)
 			}			
-			
 	}
 	else
 	{msg_falta_seleccion()}
@@ -77,30 +68,13 @@ function get_id(tr){
 	return id;
 }
 
-function msg_falta_seleccion(){
-	jQuery.noticeAdd({
-	              text: "Debe seleccionar al menos un item!",
-	              stay: false,
-	              stayTime: 2500,
-	              type: "notice"
-	    	  });
-}
-
-function aplicar_lineaBase(grid){
-	faseId=$('input#faseId').val();
-	ids=''
-	ids=faseId+','
-	$('.trSelected', grid).each(function()
-	{
-		id = get_id(this) 
-		ids=ids+(id+',')
-	});
+function revivir(id){
     $.ajax(
     	    {
     	      type: 'POST',
     	      dataType: "json",
-    	      url: '/configurar/aplicar_linea_base',
-    	      data: {ids:ids},
+    	      url: '/configurar/revivir',
+    	      data: {id:id},
     	      success: function(data)
     	      { 
     	        	  jQuery.noticeAdd(
@@ -114,4 +88,15 @@ function aplicar_lineaBase(grid){
     	      }
     	    	 
     	    });	
+}
+
+
+
+function msg_falta_seleccion(){
+	jQuery.noticeAdd({
+	              text: "Debe seleccionar al menos un item!",
+	              stay: false,
+	              stayTime: 2500,
+	              type: "notice"
+	    	  });
 }

@@ -16,7 +16,7 @@ class FaseNewForm(AddRecordForm):
     __omit_fields__ = ['estado','fecha_creacion', 'tiposDeItem','usuarios','items']
     __field_attrs__ = {'descripcion':{'rows':'2','cols':'50'},'name':{'label':'Nombre:'},'orden':{'readonly':'true'}}
     
-    orden       =   TextField('orden',size=5,validator=All(
+    orden       =   TextField('orden',size=5,disabled="",validator=All(
                                                 validators.Int(messages={'integer': 'Orden debe ser un numero entero.'})))
     name        =   TextField
     proyecto    = HiddenField('proyecto_id')
@@ -30,6 +30,8 @@ class FaseEditForm(DojoEditableForm):
     __model__       = Fase
     __omit_fields__ = ['estado','fecha_creacion', 'tiposDeItem','usuarios','items']
     __field_attrs__ = {'descripcion':{'rows':'2','cols':'50'},'name':{'label':'Nombre:'}}
+    
+    orden       =   TextField('orden',size=5,disabled="true")
     proyecto = HiddenField
     name = TextField
     estado = SingleSelectEstadosFases

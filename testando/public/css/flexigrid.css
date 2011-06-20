@@ -8,6 +8,11 @@
 	color: green;
 	padding-left: 5px;	
 }
+
+.Eliminado{
+	color: red;
+	padding-left: 5px;	
+}
 /* CSS Document */
 /*********** Imagenes para la tabla de usuarios ***********/
 .TablaUsuarios div.flexigrid div.fbutton .add {
@@ -53,6 +58,14 @@ div.flexigrid div.fbutton .approve
 {
     background: url("images/approve.png") no-repeat scroll left center transparent;
 }
+div.flexigrid div.fbutton .open
+{
+    background: url("images/open.png") no-repeat scroll left center transparent;
+}
+div.flexigrid div.fbutton .baseline
+{
+    background: url("images/baseline.png") no-repeat scroll left center transparent;
+}
 div.flexigrid div.fbutton .edit_item
 {
     background: url("images/edit_item.png") no-repeat scroll left center transparent;
@@ -65,6 +78,15 @@ div.flexigrid div.fbutton .detail
 {
     background: url("images/detail.png") no-repeat scroll left center transparent;
 }
+div.flexigrid div.fbutton .finish
+{
+    background: url("images/finish.png") no-repeat scroll left center transparent;
+}
+div.flexigrid div.fbutton .attachment
+{
+    background: url("images/attachment.png") no-repeat scroll left center transparent;
+}
+
 div.flexigrid div.fbutton .phases
 {
     background: url("images/phases.png") no-repeat scroll left center transparent;

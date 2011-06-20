@@ -6,11 +6,14 @@ $(function(){
 		
 		colModel : [
 			{display: 'ID', name : 'id', width : 40, sortable : true, align: 'left', hide : true},
+			{display: 'Codigo', name : 'codigo', width : 40, sortable : true, align: 'left'},
 			{display: 'Nombre', name : 'name', width : 150, sortable : true, align: 'left'},
-			{display: 'Version', name : 'version', width : 150, sortable : true, align: 'left'},			
+			{display: 'Version', name : 'version', width : 50, sortable : true, align: 'left'},
+			{display: 'Estado', name : 'estado', width : 80, sortable : true, align: 'left'},			
 			{display: 'Descripcion', name : 'descripcion', width : 150, sortable : true, align: 'left'},
-			{display: 'Complejidad', name : 'complejidad', width : 150, sortable : true, align: 'left'},
-			{display: 'Campos Extras', name : 'camposExtras', width : 150, sortable : true, align: 'left'},			
+			{display: 'Complejidad', name : 'complejidad', width : 80, sortable : true, align: 'left'},
+			{display: 'Tipo De Item', name : 'tipoDeItem', width : 150, sortable : true, align: 'left'},
+			{display: 'Linea Base', name : 'lineaBase', width : 150, sortable : true, align: 'left'},		
 		],
 		
 		buttons : [
@@ -21,7 +24,8 @@ $(function(){
 		],
 		
 		searchitems : [
-			{display: 'Nombre', name : 'name', isdefault: true}
+			{display: 'Nombre', name : 'name', isdefault: true},
+			{display: 'Codigo', name : 'codigo', isdefault: true}
 		],
 		
 		sortname: "id",
@@ -44,17 +48,7 @@ function doCommandItem(com, grid)
 	{	
 			if (com == 'Aprobar')
 			{
-			
-				$('.trSelected', grid).each(function()
-				{
-					id = get_id(this) 
-					jQuery.noticeAdd({
-			              text: "Aprobar: "+id,
-			              stay: false,
-			              stayTime: 2500,
-			              type: "notice"
-			    	  });
-				});
+				obtener_ids(grid)
 			}
 	}
 	else
@@ -75,4 +69,53 @@ function msg_falta_seleccion(){
 	              stayTime: 2500,
 	              type: "notice"
 	    	  });
+}
+
+function obtener_ids(grid){
+		ids=''
+		$('.trSelected', grid).each(function()
+		{
+			id = get_id(this) 
+			ids=ids+(id+',')
+		});
+		aprobar(ids)
+	}
+	
+function aprobar(ids){
+    $.ajax(
+    	    {
+    	      type: 'POST',
+    	      dataType: "json",
+    	      url: '/desarrollar/items/aprobar',
+    	      data: {ids:ids},
+    	      success: function(data)
+    	      { 
+
+				  jQuery.noticeAdd(
+				    	  {
+				              text: data.msg,
+				              stay: false,
+				              stayTime: 2500,
+				              type: data.type
+				    	  });
+					if (data.error != 0){
+						  jQuery.noticeAdd(
+						    	  {
+						              text: data.error,
+						              stay: false,
+						              stayTime: 2500,
+						              type: 'error'
+						    	  });
+						  jQuery.noticeAdd(
+						    	  {
+						              text: 'Solo items "terminados", pueden ser aprobados... ',
+						              stay: false,
+						              stayTime: 2500,
+						              type: 'notice'
+						    	  });										    	  
+					}
+				  $('#fasesAprobarItemsFlexi').flexReload();
+    	    	 
+    	      },
+    	    });	
 }

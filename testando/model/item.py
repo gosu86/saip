@@ -43,7 +43,7 @@ class Item(DeclarativeBase):
        
     complejidad     =   Column(Integer)
         
-    version         =   Column(Float(precision=1))    
+    version         =   Column(Integer)    
 
     tipo_item_id    =   Column(Integer, ForeignKey('tipos_items.id'))
     
@@ -66,3 +66,15 @@ class Item(DeclarativeBase):
                            backref='sucesores')
 
     adjuntos        = relationship(Adjunto, order_by=Adjunto.id, backref="item")
+    
+    @property
+    def lineaBase(self):
+        if self.linea_base_id != None:
+            return self.linea_base.estado
+        else:
+            return 'No tiene'
+        
+        
+        
+        
+        

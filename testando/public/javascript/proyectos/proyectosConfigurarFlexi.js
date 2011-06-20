@@ -16,10 +16,10 @@ $(function()
 
 		buttons : [
 			{separator: true},         
-			{name: 'Detalle Completo', bclass: 'detail', onpress : doCommandFases},
+			/*{name: 'Detalle Completo', bclass: 'detail', onpress : doCommandFases},
 			{separator: true},	
 			{separator: true},
-			{separator: true},			
+			{separator: true},	*/		
 			{name: 'Fases', bclass: 'phases', onpress : doCommandFases},
 			{separator: true},
 			{separator: true},

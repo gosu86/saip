@@ -9,32 +9,33 @@
 <body class="tundra">
   <div style="float:left;" class="crud_add">
     <h2 style="margin-top:1px;">Nueva $model</h2>
-<form class="required tableform" method="post" action="/configurar/fases">
+<form class="required tableform" method="post" action="./">
     <div>
-            <input type="hidden" value="${value['proyecto_id']}" id="proyecto_id" class="hiddenfield" name="proyecto_id"/>
+            <input type="hidden" value="${value['proyecto']}" id="proyecto" class="hiddenfield" name="proyecto"/>
             <input type="hidden" value="" id="sprox_id" class="hiddenfield" name="sprox_id"/>
+            <input type="hidden" value="PUT" id="_method" class="sproxmethodputhiddenfield" name="_method"/>
     </div>
     <table cellspacing="0" cellpadding="2" border="0">
         <tbody><tr title="" class="even" id="name.container">
             <td class="labelcol">
-                <label class="fieldlabel required" for="name" id="name.label">Name</label>
+                <label class="fieldlabel required" for="name" id="name.label">Nombre</label>
             </td>
             <td class="fieldcol">
-                <input type="text" label="Nombre:" value="" id="name" class="textfield required" name="name"/>
+                <input type="text" label="Nombre:" value="${value['name']}" id="name" class="textfield required" name="name"/>
             </td>
         </tr><tr title="" class="odd" id="descripcion.container">
             <td class="labelcol">
                 <label class="fieldlabel" for="descripcion" id="descripcion.label">Descripcion</label>
             </td>
             <td class="fieldcol">
-                <textarea cols="50" rows="2" class="textarea" name="descripcion" id="descripcion"></textarea>
+                <textarea cols="50" rows="2" class="textarea" name="descripcion" id="descripcion">${value['descripcion']}</textarea>
             </td>
         </tr><tr title="" class="even" id="orden.container">
             <td class="labelcol">
                 <label class="fieldlabel" for="orden" id="orden.label">Orden</label>
             </td>
             <td class="fieldcol">
-                <input type="text" size="5" readonly="readonly" value="${value['orden']}" id="orden" class="textfield" name="orden"/>
+                <input type="text" size="5" readonly="true" value="${value['orden']}" id="orden" class="textfield" name="orden"/>
             </td>
         </tr><tr title="" class="odd" id="submit.container">
             <td class="labelcol">

@@ -131,7 +131,7 @@ def bootstrap(command, conf, vars):
         tdi               =   model.TipoItem()
         tdi.name          =   u"Tipo de item 3"
         tdi.descripcion   =   U"este es un tipo de item"
-        tdi.codigo        =   U"TDI1"
+        tdi.codigo        =   U"TTDI1"
         tdi.complejidad   =   3
         tdi.fase          =   f
         model.DBSession.add(tdi)
@@ -139,12 +139,25 @@ def bootstrap(command, conf, vars):
         tdi               =   model.TipoItem()
         tdi.name          =   u"Cuarto Tipo de item "
         tdi.descripcion   =   U"este es el tipo de item numero 4"
-        tdi.codigo        =   U"TDI4"
+        tdi.codigo        =   U"CTDI4"
         tdi.complejidad   =   4
         tdi.fase          =   f
         model.DBSession.add(tdi)
 
-                
+        u = model.Usuario()
+        u.usuario_name = u'user1'
+        u.name = u'Usuario 1'
+        u.email = u'user1@saip.com'
+        u.password = u'pass'    
+        model.DBSession.add(u)
+
+        u = model.Usuario()
+        u.usuario_name = u'user2'
+        u.name = u'Usuario 2'
+        u.email = u'user2@saip.com'
+        u.password = u'pass'    
+        model.DBSession.add(u)        
+                        
         model.DBSession.flush()
         transaction.commit()
     except IntegrityError:

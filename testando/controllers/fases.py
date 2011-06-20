@@ -56,17 +56,19 @@ class FasesController(CrudRestController):
         self.provider.create(self.model, params=kw)
         raise redirect('/configurar/vista_de_fases/?pid='+kw['proyecto_id'])    
 
-    @expose('tgext.crud.templates.edit')
+    @expose('testando.templates.administrar.fases.edit')
     def edit(self, *args, **kw):
         """Display a page to edit the record."""
-        tmpl_context.widget = self.edit_form
+        #tmpl_context.widget = self.edit_form
         pks = self.provider.get_primary_fields(self.model)
         kw = {}
         for i, pk in  enumerate(pks):
             kw[pk] = args[i]
         value = self.edit_filler.get_value(kw)
         value['_method'] = 'PUT'
-        return dict(value=value, model=self.model.__name__, pk_count=len(pks))
+        log.debug('__________%s' %value)
+        referer='/configurar/vista_de_fases/?pid='+str(value['proyecto_id'])
+        return dict(value=value, model=self.model.__name__, pk_count=len(pks),referer=referer,title_nav='Lista de Fases')
 
 
     @expose()
