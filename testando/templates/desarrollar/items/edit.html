@@ -18,14 +18,30 @@
 $().ready(function() {
 	$(".tableform").validate({
 			rules: {
-				descripcion: "required",
-				complejidad: "required",
+				descripcion:{
+				 required:true,
+				 minlength:2,
+				 },
+				complejidad: {
+				required: true,
+				digits: true,
+				maxlength: 1,
+				},
 				"antecesores[]":"required"
 			},
 			messages: {
+			descripcion:"Por favor... Ingrese una descripcion al item.",
+			complejidad		: {
+			required:"Por favor... Ingrese el valor complejida este es obligatorio",
+			digits: "La complejidad debe ser un digito del 0 a 9",
+			maxlength:"La complejidad no puede ser mayor que un digito",
+			},
 
 			"antecesores[]": "Por favor, seleccione una realcion en la fase anterior.",
-
+			descripcion: {
+			required:"Por favor... Ingrese la descripcion este es un campo obligatorio",
+			minlength:"La descripcion tiene tener una longitud mayor a 2 caracteres"
+			},
 			},
 		errorClass: "fielderror"
 	});

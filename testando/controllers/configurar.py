@@ -288,7 +288,10 @@ class ConfigurarController(BaseController):
         nombre=f.name
         tmpl_context.faseId = hideMe()
         tmpl_context.faseNombre = hideMe()
-        return dict(page='Configurar', faseId=fid,faseNombre=nombre)
+        value=str(f.proyecto_id)
+        #log.debug('__________%s' %value)
+        referer='/configurar/vista_de_fases/?pid='+ value
+        return dict(page='Configurar', faseId=fid,faseNombre=nombre,referer=referer,title_nav='Lista de Fases')
     
     def get_rol(self,uid,fid):
         uid=int(uid)
@@ -549,8 +552,9 @@ class ConfigurarController(BaseController):
         nombre=f.name        
         tmpl_context.faseId = hideMe()
         tmpl_context.faseNombre = hideMe()
-        
-        return dict(page='Configurar', faseId=fid,faseNombre=nombre)    
+        value=str(f.proyecto_id)
+        referer='/configurar/vista_de_fases/?pid='+ value
+        return dict(page='Configurar', faseId=fid,faseNombre=nombre, referer=referer,title_nav='Lista de Fases' )    
     
     @validate(validators={"page":validators.Int(), "rp":validators.Int()})
     @expose('json')    
@@ -636,8 +640,9 @@ class ConfigurarController(BaseController):
         nombre=f.name        
         tmpl_context.faseId = hideMe()
         tmpl_context.faseNombre = hideMe()
-        
-        return dict(page='Configurar', faseId=fid,faseNombre=nombre)    
+        value=str(f.proyecto_id)
+        referer='/configurar/vista_de_fases/?pid='+ value
+        return dict(page='Configurar', faseId=fid,faseNombre=nombre, referer=referer,title_nav='Lista de Fases' )    
                 
     @validate(validators={"page":validators.Int(), "rp":validators.Int()})
     @expose('json')    
@@ -747,7 +752,7 @@ class ConfigurarController(BaseController):
         item.name           =   i.name
         item.fase           =   i.fase
         item.codigo         =   i.codigo
-        item.version        =   ia.version+0.1
+        item.version        =   ia.version+ 1
         item.tipo_item      =   i.tipo_item
         item.descripcion    =   i.descripcion
         item.complejidad    =   i.complejidad

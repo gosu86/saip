@@ -47,7 +47,8 @@ class FasesController(CrudRestController):
         #proyecto_id se recibe en kw, y este se le asigna a value y en el template se le llena
         """Display a page to show a new record."""
         tmpl_context.widget = self.new_form
-        return dict(value=kw, model=self.model.__name__)
+        referer='/configurar/vista_de_fases/?pid='+str(kw['proyecto_id'])
+        return dict(value=kw, model=self.model.__name__,referer=referer,title_nav='Lista de Fases')
     
     @catch_errors(errors, error_handler=new)
     @expose()

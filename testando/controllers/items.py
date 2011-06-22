@@ -41,7 +41,7 @@ class ItemsController(CrudRestController):
         cant=len(DBSession.query(Item).filter(and_(Item.fase_id==fase_id,Item.tipo_item_id==tdi.id)).all())
         cod=str(tdi.codigo)
         cod= cod+'-'+str(cant)
-        version=1.0
+        version=1
         
         tipo_item_id=tdi.id
         attr_extra=tdi.campos_extra
@@ -189,7 +189,7 @@ class ItemsController(CrudRestController):
         item.name           =   kw['name']
         item.fase           =   i.fase
         item.codigo         =   i.codigo
-        item.version        =   i.version+0.1
+        item.version        =   i.version+ 1
         item.tipo_item      =   i.tipo_item
         item.descripcion    =   kw['descripcion']
         item.complejidad    =   kw['complejidad']

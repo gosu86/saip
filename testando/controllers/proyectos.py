@@ -39,7 +39,8 @@ class ProyectosController(CrudRestController):
 	def new(self, *args, **kw):
 		"""Display a page to show a new record."""
 		tmpl_context.widget = self.new_form
-		return dict(value=kw, model=self.model.__name__)
+		referer='/administrar/proyectos/'
+		return dict(value=kw, model=self.model.__name__,referer=referer,title_nav='Lista de Proyectos')
 	@catch_errors(errors, error_handler=new)
 	@expose()
 	@registered_validate(error_handler=new)
@@ -60,7 +61,8 @@ class ProyectosController(CrudRestController):
 			kw[pk] = args[i]
 		value = self.edit_filler.get_value(kw)
 		value['_method'] = 'PUT'
-		return dict(value=value, model=self.model.__name__, pk_count=len(pks))	
+		referer='/administrar/proyectos/'
+		return dict(value=value, model=self.model.__name__, pk_count=len(pks),referer=referer,title_nav='Lista de Proyectos')	
 	
 	@expose()
 	def put(self, *args, **kw):

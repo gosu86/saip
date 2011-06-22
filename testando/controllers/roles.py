@@ -1,9 +1,10 @@
-from tg             import expose,redirect,validate
+from tg             import expose,redirect, validate,flash,tmpl_context,config
 from tg.decorators  import override_template
-
+from tg.decorators  import without_trailing_slash
+from decorators import registered_validate, register_validators, catch_errors
 from tgext.crud     import CrudRestController
-
 from repoze.what.predicates import All,not_anonymous,has_any_permission
+from tg.decorators  import without_trailing_slash
 
 from testando.model             import DBSession
 from testando.model.auth        import Rol
@@ -12,7 +13,7 @@ from testando.widgets.rol_w		import rol_new_form,rol_edit_filler,rol_edit_form
 from formencode		import validators
 
 import logging
-
+errors=()
 __all__ = ['RolesController']
 log = logging.getLogger(__name__)
 class RolesController(CrudRestController):
@@ -69,3 +70,31 @@ class RolesController(CrudRestController):
 			msg="El rol se ha eliminado."
 
 		return dict(msg=msg,nombre=nombre)
+	
+	
+	@expose('testando.templates.administrar.roles.edit')
+	def edit(self, *args, **kw):
+		tmpl_context.widget = self.edit_form
+		pks = self.provider.get_primary_fields(self.model)
+		kw = {}
+	 	for i, pk in  enumerate(pks):
+	 		kw[pk] = args[i]
+	 	value = self.edit_filler.get_value(kw)
+	 	value['_method'] = 'PUT'
+	 	referer='/administrar/roles/'
+	 	return dict(value=value, model=self.model.__name__, pk_count=len(pks),referer=referer,title_nav='Lista de Roles')
+
+	@without_trailing_slash
+	@expose('testando.templates.administrar.roles.new')
+	def new(self, *args, **kw):
+		tmpl_context.widget = self.new_form
+		referer='/administrar/roles/'
+		return dict(value=kw, model=self.model.__name__,referer=referer,title_nav='Lista de Roles')
+
+
+	@catch_errors(errors, error_handler=new)
+	@expose()
+	@registered_validate(error_handler=new)
+	def post(self, *args, **kw):
+		self.provider.create(self.model, params=kw)
+		raise redirect('./')

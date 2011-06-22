@@ -5,6 +5,26 @@
 <xi:include href="master.html" />
 <title>SAIP·Nueva ${model}</title>
 <head>
+<script type="text/javascript">
+$().ready(function() {
+	$(".tableform").validate({
+		rules: {
+			name: "required",
+			descripcion:{
+				required: true,
+				minlength: 2
+			},
+		},
+		messages: {
+			permiso_name: "Por favor... Ingrese el nombre para el Permiso",
+			descripcion: {
+			required: "Por favor... Ingrese una descripcion para el permiso",
+			minlength: "La decriopcion tiene que ser mayor a dos caracteres",
+		},		
+		}
+	});
+	});
+</script>
 </head>
 <body class="tundra">
   <div style="float:left;" class="crud_add">
