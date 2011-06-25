@@ -9,7 +9,6 @@ $(function(){
 			{display: 'Codigo', name : 'codigo', width : 50, sortable : true, align: 'left'},
 			{display: 'Nombre', name : 'name', width : 150, sortable : true, align: 'left'},
 			{display: 'Descripcion', name : 'descripcion', width : 150, sortable : true, align: 'left'},
-			{display: 'Complejidad', name : 'complejidad', width : 150, sortable : true, align: 'left'},
 			{display: 'Campos Extras', name : 'camposExtras', width : 150, sortable : true, align: 'left'},			
 		],
 		
@@ -28,14 +27,13 @@ $(function(){
 		sortname: "id",
 		sortorder: "asc",
 		usepager: true,
-		title: "Lista de Tipos De Item de la fase: "+$('#fNombre').val(),
+		title: "Tipos De Item de la fase: "+$('#fNombre').val(),
 		useRp: true,
 		rp: 5,
 		showTableToggleBtn: true,
 		height: 'auto',
 		singleSelect: true
 	});
-	$('div.DeFase .flexigrid').addClass('hideBody');	
 });
 
 

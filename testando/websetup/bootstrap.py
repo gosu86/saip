@@ -43,7 +43,7 @@ def bootstrap(command, conf, vars):
 
         rco = model.Rol()
         rco.rol_name = u'Configuradores'
-        rco.name = u'Configuradores de Items'
+        rco.name = u'Configuradores de Proyectos'
         rco.usuarios.append(u)
         model.DBSession.add(rco)
             

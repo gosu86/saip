@@ -9,7 +9,6 @@ $(function(){
 			{display: 'Codigo', name : 'codigo', width : 50, sortable : true, align: 'left'},
 			{display: 'Nombre', name : 'name', width : 150, sortable : true, align: 'left'},
 			{display: 'Descripcion', name : 'descripcion', width : 150, sortable : true, align: 'left'},
-			{display: 'Complejidad', name : 'complejidad', width : 150, sortable : true, align: 'left'},
 			{display: 'Campos Extras', name : 'camposExtras', width : 150, sortable : false, align: 'left'},			
 		],
 		

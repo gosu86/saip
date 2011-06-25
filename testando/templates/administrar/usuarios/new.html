@@ -5,6 +5,46 @@
 <xi:include href="master.html" />
 <title>SAIP - Nuevo ${model}</title>
 <head>
+<script type="text/javascript">
+$().ready(function() {
+	$(".tableform").validate({
+		rules: {
+			email: {
+			required:true,
+			email:true
+			},
+			name:{
+			required:true
+				},
+			usuario_name:{
+				required:true
+					},			
+			_password: {
+				required: true,
+				minlength: 4,
+			},
+			password: {
+				required: true,
+				minlength: 4,
+				equalTo: "#_password"
+			},
+		},
+		messages: {
+			email:"Por favor... Ingrese una direccion de correo valida.",
+			descripcion: "Por favor... Ingrese una descripcion para el tipo de item",
+			_password: {
+				required: "Por favor... Ingrese una contrasenha",
+				minlength: "la longitud de la contrasena debe ser como minimo 4 caracteres",
+			},
+			password: {
+				required: "Por favor... Ingrese la confirmacion de la contrasenha",
+				minlength: "la longitud de la contrasena debe ser como minimo 4 caracteres",
+				equalTo: "la confirmacion de la contrasena debe ser igual al de la contrasena",
+			},		
+		}
+	});
+	});
+</script>
 </head>
 <body class="tundra">
   <div style="height:0px;"> &nbsp; </div>

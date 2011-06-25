@@ -3,14 +3,44 @@
       xmlns:xi="http://www.w3.org/2001/XInclude">
 
 <xi:include href="master.html" />
-<title>${tmpl_context.title} - Edit ${model}</title>
+<title>SAIP - Editar ${model}</title>
 <head>
-<style>
-#menu_items {
-  padding:0px 12px 0px 2px;
-  list-style-type:None
-  }
-</style>
+<script type="text/javascript">
+$().ready(function() {
+	$(".tableform").validate({
+		rules: {
+			email: {
+			required:true,
+			email:true
+			},
+			name:{
+			required:true
+				},
+			usuario_name:{
+				required:true
+					},				
+			_password: {
+				minlength: 4
+			},
+			password: {
+				minlength: 4,
+				equalTo: "#_password"
+			},
+		},
+		messages: {
+			email:"Por favor... Ingrese una direccion de correo valida.",
+			descripcion: "Por favor... Ingrese una descripcion para el tipo de item",
+			_password: {
+				minlength: "la longitud de la contrasena debe ser como minimo 4 caracteres"
+			},
+			password: {
+				minlength: "la longitud de la contrasena debe ser como minimo 4 caracteres",
+				equalTo: "la confirmacion de la contrasena debe ser igual al de la contrasena",
+			},		
+		}
+	});
+	});
+</script>
 </head>
 <body class="tundra">
   <div style="height:0px;"> &nbsp; </div>
@@ -22,7 +52,7 @@
        </ul>
   </div>
   <div style="float:left;" class="crud_edit">
-    <h2 style="margin-top:1px;">Edit $model</h2>
+    <h2 style="margin-top:1px;">Editar $model</h2>
      ${XML(tmpl_context.widget(value=value, action='./'))}
   </div>
   <div style="height:0px; clear:both;"> &nbsp; </div>

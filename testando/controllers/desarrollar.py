@@ -181,7 +181,6 @@ class DesarrollarController(BaseController):
                              tipoDeItem.codigo,
                             tipoDeItem.name,
                             tipoDeItem.descripcion,
-                            tipoDeItem.complejidad,
                             (', </br>'.join([(ce.name+': '+ce.tipo) for ce in tipoDeItem.campos_extra]))]} for tipoDeItem in tiposDeItem]
             result = dict(page=page, total=total, rows=rows)
         except:

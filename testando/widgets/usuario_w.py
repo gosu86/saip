@@ -23,7 +23,7 @@ class UsuarioNewForm(DojoAddRecordForm):
     submit_text = 'Guardar'
 
 class UsuarioEditFiller(EditFormFiller):
-    __omit_fields__   = ['password']
+    __omit_fields__   = ['password','_password']
     __model__ = Usuario
    
 class UsuarioEditForm(DojoEditableForm):
@@ -31,7 +31,7 @@ class UsuarioEditForm(DojoEditableForm):
     __omit_fields__ =   ['fecha_creacion','id','proyectos','fases','roles','mis_proyectos']
     __field_order__ =   ['name','apellido','email','usuario_name','_password','password','roles']
     __field_attrs__ =   {'roles':{'label_text':'Roles de Sistema:'}}
-    
+    __require_fields__ =   ['apellido','usuario_name']
     estado          =   SingleSelectEstadosUsuarios
     email           =   TextField
     name            =   TextField('name',label_text='Nombre ')

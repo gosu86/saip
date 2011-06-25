@@ -56,6 +56,7 @@ class UsuariosController(CrudRestController):
         for i, pk in  enumerate(pks):
             kw[pk] = args[i]
         value = self.edit_filler.get_value(kw)
+        
         value['_method'] = 'PUT'
         referer='/administrar/usuarios/'
         return dict(value=value, model=self.model.__name__, pk_count=len(pks), referer=referer, title_nav='Lista de Usuarios')
@@ -75,6 +76,53 @@ class UsuariosController(CrudRestController):
     @expose()
     @registered_validate(error_handler=new)
     def post(self, *args, **kw):
-        self.provider.create(self.model, params=kw)
+        #self.provider.create(self.model, params=kw)
+        u=Usuario()
+
+        u.name=kw['name']
+        u.usuario_name=kw['usuario_name']
+        u.email=kw['email']
+        u.apellido=kw['apellido']
+        u._set_password(kw['_password'])
+        
+        DBSession.add(u)
+        DBSession.flush()        
         raise redirect('./')
     
+    @expose()
+    def put(self, *args, **kw):
+        """update"""
+        id=kw['name']
+        log.debug('id: %s' %id )
+        log.debug('ARGS: %s' %str(args))
+        pks = self.provider.get_primary_fields(self.model)
+        for i, pk in enumerate(pks):
+            if pk not in kw and i < len(args):
+                kw[pk] = args[i]
+        d={'id':kw[pk]}
+        u=DBSession.query(Usuario).filter_by(**d).first()
+        log.debug('usuario.name: %s' %u.name )
+        u=DBSession.query(Usuario).filter_by(**d).first()
+        log.debug('usuario.name: %s' %u.name )
+        u.name=kw['name']
+        u.usuario_name=kw['usuario_name']
+        u.email=kw['email']
+        u.apellido=kw['apellido']
+        u.estado=kw['estado']
+        pas=len(kw['password'])
+        if(pas!=0):
+            u._set_password(kw['_password'])
+        
+        
+        DBSession.flush()
+        u.email=kw['email']
+        u.empresa=kw['apellido']
+        u.estado=kw['estado']
+        pas=len(kw['password'])
+        log.debug('pass: %s' %pas )
+        if(pas>0):
+            u._set_password(kw['_password'])
+        
+        
+        DBSession.flush()
+        redirect('../' * len(pks))    

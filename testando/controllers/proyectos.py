@@ -46,7 +46,7 @@ class ProyectosController(CrudRestController):
 	@registered_validate(error_handler=new)
 	def post(self, *args, **kw):
 		p=self.provider.create(self.model, params=kw)
-		r=DBSession.query(Rol).filter(Rol.name=='Configuradores').first()
+		r=DBSession.query(Rol).filter(Rol.rol_name=='Configuradores').first()
 		p.lider.roles.append(r)
 		DBSession.flush()
 		raise redirect('./')		

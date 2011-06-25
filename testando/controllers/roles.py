@@ -6,7 +6,7 @@ from repoze.what.predicates import All,not_anonymous,has_any_permission
 from tg.decorators  import without_trailing_slash
 
 from testando.model             import DBSession
-from testando.model.auth        import Rol
+from testando.model.auth        import Rol,Permiso,Usuario
 from testando.widgets.rol_w		import rol_new_form,rol_edit_filler,rol_edit_form
 
 from formencode		import validators
@@ -97,3 +97,41 @@ class RolesController(CrudRestController):
 	def post(self, *args, **kw):
 		self.provider.create(self.model, params=kw)
 		raise redirect('./')
+
+	@expose()
+	def put(self, *args, **kw):
+		id=kw['name']
+		log.debug('id: %s' %id )
+		log.debug('ARGS: %s' %str(args))
+		pks = self.provider.get_primary_fields(self.model)
+		for i, pk in enumerate(pks):
+			if pk not in kw and i < len(args):
+				kw[pk] = args[i]
+		d={'id':kw[pk]}
+		r=DBSession.query(Rol).filter_by(**d).first()
+		r.rol_name=kw['rol_name']
+		r.name=kw['name']
+		log.debug('kw: %s' %kw )
+	
+		if(kw.has_key('permisos')):
+			r.permisos=[]
+			if type(kw['permisos'])==type(u'd'):
+				kw['permisos']=kw['permisos'].split(',')
+				
+			for id in kw['permisos']:
+				log.debug('id: %s' %(type(kw['permisos'])==type(u'd')) )
+				id=int(str(id))
+				p=DBSession.query(Permiso).filter_by(id=id).first()
+				r.permisos.append(p)
+		
+		if(kw.has_key('usuarios')):
+			r.usuarios=[]
+			if type(kw['usuarios'])==type(u'd'):
+				kw['usuarios']=kw['usuarios'].split(',')
+			for id in kw['usuarios']:
+				id=int(id)
+				u=DBSession.query(Usuario).filter_by(id=id).first()
+				r.usuarios.append(u)
+		
+		DBSession.flush()
+		redirect('../' * len(pks))

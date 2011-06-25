@@ -81,7 +81,6 @@ class TiposDeItemController(CrudRestController):
         if kw.has_key('name'):                        
             tdi.name=kw['name']
             tdi.descripcion=kw['descripcion']
-            tdi.complejidad=kw['complejidad']
             tdi.codigo=kw['codigo']
         
             attr_ids = kw['attr_to_modify'].split(',')        

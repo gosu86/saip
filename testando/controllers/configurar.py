@@ -484,7 +484,6 @@ class ConfigurarController(BaseController):
                              tipoDeItem.codigo,
                             tipoDeItem.name,
                             tipoDeItem.descripcion,
-                            tipoDeItem.complejidad,
                             (', </br>'.join([(ce.name+': '+ce.tipo) for ce in tipoDeItem.campos_extra]))]} for tipoDeItem in tiposDeItem]
             result = dict(page=page, total=total, rows=rows)
         except:
@@ -916,7 +915,7 @@ class ConfigurarController(BaseController):
         item.version        =   i_actual.version+1
         
         ok=False
-        relaciones= len(item.padres) + (item.antecesores)
+        relaciones= len(item.padres) + len(item.antecesores)
         for p in item.padres:
             if p.estado=='Eliminado':
                 item.padres.remove(p)
