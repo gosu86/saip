@@ -6,6 +6,7 @@ from tgext.crud     import CrudRestController
 from sqlalchemy.sql import and_, or_, not_
 from testando.model             import DBSession
 from testando.model.fase        import Fase
+from testando.model.auth        import Rol
 from testando.model.campoextra  import CampoExtra
 from testando.model.tipoitem        import TipoItem
 from testando.model.proyecto        import Proyecto
@@ -92,15 +93,28 @@ class FasesController(CrudRestController):
         id = kw['id']
         if (id != None):
             d = {'id':id}
-            fase = DBSession.query(Fase).filter_by(**d).first()            
+            fase = DBSession.query(Fase).filter_by(**d).first()
+            p=fase.proyecto
             nombre=fase.name
             if (fase.estado == 'Inicial'):
+                r=DBSession.query(Rol).filter(Rol.rol_name=='Desarrolladores').first()
+                for u in fase.usuarios:
+                    if (len(u.fases)-1)==0:
+                        log.debug('remover')
+                        u.roles.remove(r) 
+                    c=0    
+                    for f in u.fases:
+                        if f.proyecto_id==p.id:
+                            c=c+1
+                    if (c-1)==0:
+                        p.usuarios.remove(u)
+                                    
                 DBSession.delete(fase)
                 DBSession.flush()
                 msg="la fase "+nombre+" se ha eliminado con exito!."
                 type="succes"
             else:
-                msg="La fase NO se puede eliminar."
+                msg="La fase NO se puede eliminar, ya se ha iniciado."
                 type="error"
         return dict(msg=msg,nombre=nombre,type=type)
        
@@ -124,11 +138,14 @@ class FasesController(CrudRestController):
         for id in ids:
             id=int(id)
             tdi=DBSession.query(TipoItem).filter_by(id=id).first()
-            existeTDI=DBSession.query(TipoItem).filter(and_(TipoItem.fase_id==f_id,TipoItem.name==tdi.name))
+            existeTDI=DBSession.query(TipoItem).filter(or_(
+                                                           and_(TipoItem.fase_id==f_id,TipoItem.name==tdi.name),
+                                                           and_(TipoItem.fase_id==f_id,TipoItem.codigo==tdi.codigo))
+                                                       )
             if existeTDI.count() > 0:
                 names=names+tdi.name+', '
             else:
-                ins=TipoItem.__table__.insert().values(name=tdi.name,descripcion=tdi.descripcion,complejidad=tdi.complejidad,fase_id=f_id)
+                ins=TipoItem.__table__.insert().values(name=tdi.name,codigo=tdi.codigo,descripcion=tdi.descripcion,complejidad=tdi.complejidad,fase_id=f_id)
                 ins.compile().params
                 result=conn.execute(ins)
                 newTDIid=int(result.inserted_primary_key[0])
@@ -151,6 +168,6 @@ class FasesController(CrudRestController):
             msg    =    str(cantidad)    +    " tipos de item importados con exito!"
             type="succes"
         if cantNames > 0:
-            error = 'Los tipos de item '+str(names)+'no pudieron importarse, existem tipos de item con mismo nombre en la fase.'
+            error = 'Los tipos de item '+str(names)+'no pudieron importarse, existen tipos de item con mismo nombre y/o codigo en la fase destino.'
         return dict(msg=msg,type=type, error=error)        
         

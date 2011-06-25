@@ -121,6 +121,14 @@ def bootstrap(command, conf, vars):
         f.proyecto      =   p
         model.DBSession.add(f)                  
         
+        tdi               =   model.TipoItem()
+        tdi.name          =   u"Tipo de item 1"
+        tdi.descripcion   =   U"este es un tipo de item"
+        tdi.codigo        =   U"PTDI1"
+        tdi.complejidad   =   1
+        tdi.fase          =   f
+        model.DBSession.add(tdi)        
+        
         f               =   model.Fase()
         f.name          =   u"Segunda Fase"
         f.descripcion   =   U"Segunda fase del proyecto"
@@ -129,12 +137,34 @@ def bootstrap(command, conf, vars):
         model.DBSession.add(f)
 
         tdi               =   model.TipoItem()
-        tdi.name          =   u"Tipo de item 3"
+        tdi.name          =   u"Segundo Tipo de Item 3"
         tdi.descripcion   =   U"este es un tipo de item"
-        tdi.codigo        =   U"TTDI1"
-        tdi.complejidad   =   3
+        tdi.codigo        =   U"STDI2"
+        tdi.complejidad   =   2
         tdi.fase          =   f
         model.DBSession.add(tdi)
+
+        f               =   model.Fase()
+        f.name          =   u"Tercera Fase"
+        f.descripcion   =   U"Tercera fase del proyecto"
+        f.orden         =   3
+        f.proyecto      =   p
+        model.DBSession.add(f)
+        
+        tdi               =   model.TipoItem()
+        tdi.name          =   u"Tipo de item 3"
+        tdi.descripcion   =   U"este es un tipo de item"
+        tdi.codigo        =   U"TTDI3"
+        tdi.complejidad   =   3
+        tdi.fase          =   f
+        model.DBSession.add(tdi)        
+        
+        f               =   model.Fase()
+        f.name          =   u"Cuarta Fase"
+        f.descripcion   =   U"Cuarta fase del proyecto"
+        f.orden         =   4
+        f.proyecto      =   p
+        model.DBSession.add(f)
 
         tdi               =   model.TipoItem()
         tdi.name          =   u"Cuarto Tipo de item "
@@ -143,6 +173,24 @@ def bootstrap(command, conf, vars):
         tdi.complejidad   =   4
         tdi.fase          =   f
         model.DBSession.add(tdi)
+        
+        f               =   model.Fase()
+        f.name          =   u"Quinta Fase"
+        f.descripcion   =   U"Quinta fase del proyecto"
+        f.orden         =   5
+        f.proyecto      =   p
+        model.DBSession.add(f)
+
+
+        tdi               =   model.TipoItem()
+        tdi.name          =   u"Tipo de item 5"
+        tdi.descripcion   =   U"este es un tipo de item"
+        tdi.codigo        =   U"QTDI5"
+        tdi.complejidad   =   5
+        tdi.fase          =   f
+        model.DBSession.add(tdi)
+
+
 
         u = model.Usuario()
         u.usuario_name = u'user1'

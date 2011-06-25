@@ -14,6 +14,7 @@ from testando.model.tipoitem        import TipoItem
 from testando.model.item            import Item
 from testando.model.lineabase       import LineaBase
 from testando.model.atributoextra   import AtributoExtra
+from testando.model.adjunto         import Adjunto
 
 from testando.lib.base                  import BaseController
 from testando.controllers.error         import ErrorController
@@ -26,7 +27,7 @@ from testando.controllers.items         import ItemsController
 
 from testando.widgets.myWidgets     import hideMe
 
-
+from string import find
 
 import logging
 from sqlalchemy.sql.functions import current_user
@@ -42,24 +43,18 @@ class ConfigurarController(BaseController):
                      )
     
     proyectos=ProyectosController(DBSession)
-    proyectos.template='genshi:testando.templates.configurar.proyectos.index'
-    proyectos.page='Configurar'
+
     
     fases=FasesController(DBSession)
-    fases.template='genshi:testando.templates.configurar.fases.index'
-    fases.page='Configurar'
+
 
     tiposDeItem=TiposDeItemController(DBSession)
-    tiposDeItem.template='genshi:testando.templates.configurar.tiposDeItem.index'
-    tiposDeItem.page='Configurar'
-    
+
     usuarios=UsuariosController(DBSession)
-    usuarios.template='genshi:testando.templates.configurar.usuarios.index'
-    usuarios.page='Configurar'       
+
         
     items=ItemsController(DBSession)
-    items.template='genshi:testando.templates.configurar.items.index'
-    items.page='Configurar'
+
 
     #lineasBase=LineasBaseController(DBSession)
     #lineasBase.template='genshi:testando.templates.configurar.lineasBase.index'
@@ -105,7 +100,7 @@ class ConfigurarController(BaseController):
         return dict(page='Configurar')
              
     @validate(validators={"page":validators.Int(), "rp":validators.Int()})
-    @expose('json')
+    @expose("json")
     def lista_de_proyectos(self, page='1', rp='25', sortname='id', sortorder='asc', qtype=None, query=None):
         try:
             if (sortname=='fases') or (sortname=='usuarios'):
@@ -113,8 +108,14 @@ class ConfigurarController(BaseController):
             current_user=request.identity['user']
             offset = (int(page)-1) * int(rp)
             if (query):
-                d={qtype:query,'lider_id':current_user.id}
+                d={'lider_id':current_user.id}
                 proyectos = DBSession.query(Proyecto).filter(Proyecto.estado!='Eliminado').filter_by(**d)
+                if qtype=='name':
+                    proyectos=proyectos.filter(Proyecto.name.like('%'+query+'%'))
+                elif qtype=='estado':
+                    proyectos=proyectos.filter(Proyecto.estado.like('%'+query+'%'))
+                elif qtype=='empresa':
+                    proyectos=proyectos.filter(Proyecto.empresa.like('%'+query+'%'))
             else:
                 proyectos = DBSession.query(Proyecto).filter(and_(Proyecto.estado!='Eliminado',Proyecto.lider_id==current_user.id))
                 
@@ -144,10 +145,16 @@ class ConfigurarController(BaseController):
             proyecto = DBSession.query(Proyecto).filter_by(**d).first()
             nombre=proyecto.name
             if (proyecto.estado != 'Iniciado'):
-                proyecto.estado = 'Iniciado'
-                DBSession.flush()
-                msg="El proyecto se ha Iniciado."
-                type="succes"
+                f=proyecto.fases[0]
+                log.debug('orden %s' % str(f.orden))
+                if len(f.usuarios)!=0:
+                    proyecto.estado = 'Iniciado'
+                    DBSession.flush()
+                    msg="El proyecto se ha Iniciado."
+                    type="succes"
+                else:
+                    msg="La primera fase del proyecto no posee usuarios."
+                    type="notice"                    
             else:
                 msg="El proyecto ya se encuentra Iniciado."
                 type="notice"
@@ -178,8 +185,12 @@ class ConfigurarController(BaseController):
             offset = (int(page)-1) * int(rp)
             
             if (query):
-                d = {qtype:query,'proyecto_id':int(pid)}
+                d = {'proyecto_id':int(pid)}
                 fases = DBSession.query(Fase).filter_by(**d)
+                if qtype == 'name':
+                    fases=fases.filter(Fase.name.like('%'+query+'%'))
+                elif qtype == 'estado':
+                    fases=fases.filter(Fase.estado.like('%'+query+'%'))                    
             else:
                 d = {'proyecto_id':int(pid)}
                 fases = DBSession.query(Fase).filter_by(**d)
@@ -405,9 +416,12 @@ class ConfigurarController(BaseController):
             f.usuarios.remove(u)
             fases_del_usuario=DBSession.query(Fase).filter(Fase.usuarios.any(id = u_id))
             fases_del_proyecto=fases_del_usuario.filter_by(proyecto_id=p.id)
-            r=DBSession.query(Rol).filter(Rol.name=='Desarrolladores').first()
+            r=DBSession.query(Rol).filter(Rol.rol_name==u'Desarrolladores').first()
+            
             if len(u.fases)==0:
+                log.debug('u %s' %u.name)
                 r.usuarios.remove(u)
+                log.debug('u %s' %u.name)
             if fases_del_proyecto.count()==0:
                 log.debug('c2 %s' %c2)
                 c2=c2+1
@@ -449,7 +463,13 @@ class ConfigurarController(BaseController):
             
             if (query):
                 d = {qtype:query,'fase_id':int(fid)}
-                tiposDeItem = DBSession.query(TipoItem).filter_by(**d)
+                if qtype == 'name':
+                    tiposDeItem = DBSession.query(TipoItem).filter(and_(TipoItem.fase_id!=fid,TipoItem.name.like('%'+query+'%')))
+                elif qtype == 'codigo':
+                    tiposDeItem = DBSession.query(TipoItem).filter(and_(TipoItem.fase_id!=fid,TipoItem.codigo.like('%'+query+'%')))
+                else:
+                    tiposDeItem = DBSession.query(TipoItem).filter_by(**d)
+                    
             else:
                 d = {'fase_id':int(fid)}
                 tiposDeItem = DBSession.query(TipoItem).filter_by(**d)
@@ -461,6 +481,7 @@ class ConfigurarController(BaseController):
             
             rows = [{'id'  : tipoDeItem.id,
                     'cell': [tipoDeItem.id,
+                             tipoDeItem.codigo,
                             tipoDeItem.name,
                             tipoDeItem.descripcion,
                             tipoDeItem.complejidad,
@@ -494,7 +515,12 @@ class ConfigurarController(BaseController):
             offset = (int(page)-1) * int(rp)
             if (query):
                 d = {qtype:query}
-                tiposDeItem = DBSession.query(TipoItem).filter_by(**d)
+                if qtype == 'name':
+                    tiposDeItem = DBSession.query(TipoItem).filter(and_(TipoItem.fase_id!=fid,TipoItem.name.like('%'+query+'%')))
+                elif qtype == 'codigo':
+                    tiposDeItem = DBSession.query(TipoItem).filter(and_(TipoItem.fase_id!=fid,TipoItem.codigo.like('%'+query+'%')))
+                else:
+                    tiposDeItem = DBSession.query(TipoItem).filter(TipoItem.fase_id!=fid).filter_by(**d)
             else:
                 tiposDeItem = DBSession.query(TipoItem).filter(TipoItem.fase_id!=fid)
                 #log.debug('tiposDeItem: %s' %tiposDeItem)
@@ -505,6 +531,7 @@ class ConfigurarController(BaseController):
             #log.debug('tiposDeItem: %s' %tiposDeItem)                  
             rows = [{'id'  : tipoDeItem.id,
                     'cell': [tipoDeItem.id,
+                             tipoDeItem.codigo,
                              tipoDeItem.name,
                              tipoDeItem.descripcion,
                              tipoDeItem.complejidad,
@@ -547,14 +574,23 @@ class ConfigurarController(BaseController):
     @expose('json')    
     @expose('testando.templates.configurar.fases.vista_de_items') 
     def vista_de_items(self,*args, **kw):
+        referer=request.headers.get("Referer", "")        
+                
+        if find(referer,'configurar') >=0:
+            page='Configurar'
+            title_nav='Lista de items'
+        else:
+            page='Desarrollar'
+            title_nav='Desarrollo de fases'
+            
         fid=kw['fid']
         f=DBSession.query(Fase).filter_by(id=fid).one()
         nombre=f.name        
         tmpl_context.faseId = hideMe()
         tmpl_context.faseNombre = hideMe()
         value=str(f.proyecto_id)
-        referer='/configurar/vista_de_fases/?pid='+ value
-        return dict(page='Configurar', faseId=fid,faseNombre=nombre, referer=referer,title_nav='Lista de Fases' )    
+        #referer='/configurar/vista_de_fases/?pid='+ value
+        return dict(page=page, faseId=fid,faseNombre=nombre, referer=referer,title_nav=title_nav )    
     
     @validate(validators={"page":validators.Int(), "rp":validators.Int()})
     @expose('json')    
@@ -563,10 +599,17 @@ class ConfigurarController(BaseController):
             offset = (int(page)-1) * int(rp)
             
             if (query):
-                d = {qtype:query,'fase_id':int(fid)}
+                d = {'fase_id':int(fid)}
                 items = DBSession.query(Item).filter_by(**d)
                 items = items.filter(Item.historico==False)
-
+                if qtype=='name':
+                    items   =   items.filter(Item.name.like('%'+query+'%'))
+                elif qtype=='estado':
+                    items   =   items.filter(Item.estado.like('%'+query+'%'))
+                elif qtype=='codigo':
+                    items   =   items.filter(Item.codigo.like('%'+query+'%'))                
+                elif qtype=='version':
+                    items   =   items.filter_by(version=int(query))
             else:
                 d = {'fase_id':int(fid)}
                 items = DBSession.query(Item).filter_by(**d)
@@ -581,6 +624,7 @@ class ConfigurarController(BaseController):
             log.debug('total 2 %s' %total)            
             rows = [{'id'  : item.id,
                     'cell': [item.id,
+                             item.codigo,                             
                             item.name,
                             item.version,
                             item.descripcion,
@@ -594,8 +638,16 @@ class ConfigurarController(BaseController):
         
     @expose('testando.templates.configurar.items.historial')    
     def historial(self, iid=None,**kw):
+        referer=request.headers.get("Referer", "")        
+                
+        if find(referer,'configurar') >=0:
+            page='Configurar'
+        else:
+            page='Desarrollar'
+                    
         i=DBSession.query(Item).filter_by(id=int(iid)).first()
-        return dict(page='Configurar',item=i)
+        #referer='/configurar/vista_de_items/?fid='+str(i.fase.id)
+        return dict(page=page,item=i,referer=referer,title_nav="Lista de Items")
         
     @validate(validators={"page":validators.Int(), "rp":validators.Int()})
     @expose('json')    
@@ -605,9 +657,17 @@ class ConfigurarController(BaseController):
             offset = (int(page)-1) * int(rp)
             
             if (query):
-                d = {qtype:query,'historico_id':i.historico_id}
+                d = {'historico_id':i.historico_id}
                 items = DBSession.query(Item).filter_by(**d)
                 items = items.filter(Item.historico==True)
+                if qtype=='name':
+                    items   =   items.filter(Item.name.like('%'+query+'%'))
+                elif qtype=='estado':
+                    items   =   items.filter(Item.estado.like('%'+query+'%'))
+                elif qtype=='codigo':
+                    items   =   items.filter(Item.codigo.like('%'+query+'%'))
+                elif qtype=='version':
+                    items   =   items.filter_by(version=int(query))                    
             else:
                 d = {'historico_id':i.historico_id}
                 items = DBSession.query(Item).filter_by(**d)
@@ -621,6 +681,7 @@ class ConfigurarController(BaseController):
             log.debug('total 2 %s' %total)            
             rows = [{'id'  : item.id,
                     'cell': [item.id,
+                             item.codigo,
                             item.name,
                             item.version,
                             item.descripcion,
@@ -682,9 +743,15 @@ class ConfigurarController(BaseController):
         try:
             offset = (int(page)-1) * int(rp)            
             if (query):
-                d = {qtype:query,'fase_id':int(fid)}
+                d = {'fase_id':int(fid)}
                 items = DBSession.query(Item).filter_by(**d)
                 items = items.filter(and_(Item.historico==False,Item.estado=='Aprobado',Item.linea_base_id==None))
+                if qtype=='name':
+                    items   =   items.filter(Item.name.like('%'+query+'%'))
+                elif qtype=='estado':
+                    items   =   items.filter(Item.estado.like('%'+query+'%'))
+                elif qtype=='codigo':
+                    items   =   items.filter(Item.codigo.like('%'+query+'%'))                
             else:
                 d = {'fase_id':int(fid)}
                 items = DBSession.query(Item).filter_by(**d)
@@ -698,6 +765,7 @@ class ConfigurarController(BaseController):
             log.debug('total item aprobados %s' %total)            
             rows = [{'id'  : item.id,
                     'cell': [item.id,
+                             item.codigo,                             
                             item.name,
                             item.version,
                             str(item.estado),                            
@@ -741,39 +809,136 @@ class ConfigurarController(BaseController):
         return dict(msg=msg,type=type)  
 
 
-    @expose('json')        
-    def revertir(self,**kw):          
-        id=kw['id'].split(',')
-        ia                  =   DBSession.query(Item).filter_by(id=int(id[0])).first()
-        i                   =   DBSession.query(Item).filter_by(id=int(id[1])).first()
-        ia.historico         =   True
+    def nueva_version(self,kw,adjunto_id=None):
+        i                   =   DBSession.query(Item).filter_by(id=int(kw['itemid'])).first()
+        i.historico         =   True
         
         item                =   Item()
-        item.name           =   i.name
+        if kw.has_key('name'):
+            item.name           =   kw['name']
+        else:
+            item.name           =   i.name        
         item.fase           =   i.fase
         item.codigo         =   i.codigo
-        item.version        =   ia.version+ 1
+        item.version        =   i.version+ 1
         item.tipo_item      =   i.tipo_item
-        item.descripcion    =   i.descripcion
-        item.complejidad    =   i.complejidad
-        item.historico_id   =   i.historico_id
-
-        for attr in i.atributos_extra:
-            aen                 =   AtributoExtra()
-            aen.valor           =   attr.valor
-            aen.campo_extra_id  =   attr.campo_extra_id
-            DBSession.add(aen)
-            item.atributos_extra.append(aen)
-                                
-        for p in i.padres:
-            item.padres.append(p)
         
-        for a in i.antecesores:
-            item.antecesores.append(a)
+        if kw.has_key('descripcion'):
+            item.descripcion           =   kw['descripcion']
+        else:
+            item.descripcion           =   i.descripcion         
+
+        if kw.has_key('complejidad'):
+            item.complejidad           =   kw['complejidad']
+        else:
+            item.complejidad           =   i.complejidad
+                    
+        item.historico_id   =   i.historico_id
+        
+        if kw.has_key('atributos_extra'):
             
-        DBSession.flush() 
-        log.debug('id %s' %str(item.id))
-        msg='El item se ha revertido con exito!'
-        type='succes'
-        return dict(msg=msg,type=type,id=str(item.id))  
+            if type(kw['atributos_extra'])==type(u''):
+                a=kw['atributos_extra']
+                kw['atributos_extra']=[]
+                kw['atributos_extra'].append(a)
+            for id in kw['atributos_extra']:
+                log.debug('id = %s' %str(id))
+                aeo          =   DBSession.query(AtributoExtra).filter_by(id=int(id)).first()
+                aen          =   AtributoExtra()
+                aen.valor    =   kw['atributos_extra_'+str(id)]
+                aen.campo_extra_id  =   aeo.campo_extra_id
+                DBSession.add(aen)
+                item.atributos_extra.append(aen)
+                log.debug('ae = %s' %str(aen))
+                log.debug('attr extra valor = %s' %str(kw['atributos_extra_'+id]))
+                log.debug('attr extra id = %s' %str(id))
+        else:
+            for ae in i.atributos_extra:
+                aen          =   AtributoExtra()
+                aen.valor    =   ae.valor
+                aen.campo_extra_id  =   ae.campo_extra_id
+                log.debug('ae = %s' %str(aen))
+                DBSession.add(aen)
+                item.atributos_extra.append(aen)
+           
+        if kw.has_key('padres'):
+            item.padres=[]             
+            for id in kw['padres']:
+                p=DBSession.query(Item).filter_by(id=int(id)).first()
+                item.padres.append(p)
+        else:
+            if kw.has_key('name'):
+                item.padres=[]
+            else:
+                item.padres=[]             
+                for p in i.padres:
+                    item.padres.append(p)                
+        
+        if kw.has_key('antecesores'):
+            item.antecesores=[]             
+            for id in kw['antecesores']:
+                a=DBSession.query(Item).filter_by(id=int(id)).first()
+                item.antecesores.append(a)
+        else:
+            if kw.has_key('name'):            
+                item.antecesores=[]
+            else:
+                for a in i.antecesores:
+                    item.antecesores.append(a)
+        
+        
+        if adjunto_id==None:
+            for a in i.adjuntos:
+                adjunto=Adjunto()
+                adjunto.name    =   a.name
+                adjunto.filecontent =   a.filecontent
+                adjunto.item    =   item
+                DBSession.add(adjunto)
+        else:
+            for a in i.adjuntos:
+                if adjunto_id!=a.id:
+                    adjunto=Adjunto()
+                    adjunto.name    =   a.name
+                    adjunto.filecontent =   a.filecontent
+                    adjunto.item    =   item
+                    DBSession.add(adjunto)
+                                
+        return item        
+
+    @expose('json')        
+    def revertir(self,**kw):          
+        id                  =   kw['id'].split(',')
+        kw['itemid']        =   int(id[1])
+        log.debug('En revertir => itemid %s' %str(kw['itemid']))
+        item                =   self.nueva_version(kw)
+        i_actual            =   DBSession.query(Item).filter_by(id=int(id[0])).first()
+        i_actual.historico  =   True
+        item.version        =   i_actual.version+1
+        
+        ok=False
+        relaciones= len(item.padres) + (item.antecesores)
+        for p in item.padres:
+            if p.estado=='Eliminado':
+                item.padres.remove(p)
+                relaciones=relaciones-1
+                
+        if item.fase.orden >1:
+            for a in item.antecesores:
+                if a.estado=='Eliminado':
+                    item.antecesores.remove(a)
+                    relaciones=relaciones-1
+            if len(item.antecesores)>0:
+                ok=True
+                DBSession.flush()
+        else:
+            ok=True
+            DBSession.flush()
+             
+        if ok: 
+            msg='El item se ha revertido con exito!'
+            type='succes'
+        else:
+            msg='El item no se puede revertir, NO se todas sus relaciones esta rotas'
+            type='error'        
+        return dict(msg=msg,type=type,id=str(item.id)) 
     

@@ -2,7 +2,7 @@ $(function()
 {
 	$("#usuariosAdministrarFlexi").flexigrid(
 	{
-		url: location+'fetch/',
+		url: '/administrar/users/',
 		dataType: 'json',
 		
 		colModel : [

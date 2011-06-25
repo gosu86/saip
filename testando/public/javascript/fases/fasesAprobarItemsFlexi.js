@@ -6,7 +6,7 @@ $(function(){
 		
 		colModel : [
 			{display: 'ID', name : 'id', width : 40, sortable : true, align: 'left', hide : true},
-			{display: 'Codigo', name : 'codigo', width : 40, sortable : true, align: 'left'},
+			{display: 'Codigo', name : 'codigo', width : 50, sortable : true, align: 'left'},
 			{display: 'Nombre', name : 'name', width : 150, sortable : true, align: 'left'},
 			{display: 'Version', name : 'version', width : 50, sortable : true, align: 'left'},
 			{display: 'Estado', name : 'estado', width : 80, sortable : true, align: 'left'},			
@@ -24,7 +24,7 @@ $(function(){
 		],
 		
 		searchitems : [
-			{display: 'Nombre', name : 'name', isdefault: true},
+			{display: 'Nombre', name : 'name'},
 			{display: 'Codigo', name : 'codigo', isdefault: true}
 		],
 		
@@ -86,7 +86,7 @@ function aprobar(ids){
     	    {
     	      type: 'POST',
     	      dataType: "json",
-    	      url: '/desarrollar/items/aprobar',
+    	      url: '/desarrollar/aprobar',
     	      data: {ids:ids},
     	      success: function(data)
     	      { 

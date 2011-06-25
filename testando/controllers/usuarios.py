@@ -1,10 +1,8 @@
-from tg             import expose,redirect, validate,flash,tmpl_context,config
-from tg.decorators  import override_template
+from tg             import expose,redirect, validate,tmpl_context
 from tg.decorators  import without_trailing_slash
-from decorators import registered_validate, register_validators, catch_errors
+from decorators import registered_validate, catch_errors
 from tgext.crud     import CrudRestController
 from repoze.what.predicates import All,not_anonymous,has_any_permission
-from tg.decorators  import without_trailing_slash
 from testando.model             import DBSession
 from testando.model.auth        import Usuario
 from testando.widgets.usuario_w import usuario_new_form,usuario_edit_filler,usuario_edit_form
@@ -30,33 +28,6 @@ class UsuariosController(CrudRestController):
     def get_all(self):   
         return dict(page="Administrar")
 
-    @validate(validators={"page":validators.Int(), "rp":validators.Int()})
-    @expose('json')
-    def fetch(self, page='1', rp='25', sortname='id', sortorder='asc', qtype=None, query=None):
-        try:
-            offset = (int(page)-1) * int(rp)
-            if (query):
-                d = {qtype:query}
-                usuarios = DBSession.query(Usuario).filter_by(**d)
-            else:
-                usuarios = DBSession.query(Usuario)
- 
-                total = usuarios.count() 
-                column = getattr(Usuario, sortname)
-                usuarios = usuarios.order_by(getattr(column,sortorder)()).offset(offset).limit(rp)
-
-                    
-            rows = [{'id'  : usuario.id,
-                    'cell': [usuario.id,
-                             usuario.name,
-                             usuario.apellido,                             
-                             usuario.email,
-                             usuario.estado]} for usuario in usuarios
-                    ]
-            result = dict(page=page, total=total, rows=rows)
-        except:
-            result = dict() 
-        return result
 
     @expose()
     def get_one(self, *args, **kw):

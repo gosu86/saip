@@ -6,12 +6,13 @@ $(function(){
 		
 		colModel : [
 			{display: 'ID', name : 'id', width : 40, sortable : true, align: 'left', hide : true},
+			{display: 'Codigo', name : 'codigo', width : 50, sortable : true, align: 'left'},
 			{display: 'Nombre', name : 'name', width : 150, sortable : true, align: 'left'},
 			{display: 'Version', name : 'version', width : 60, sortable : true, align: 'left'},			
 			{display: 'Descripcion', name : 'descripcion', width : 150, sortable : true, align: 'left'},
 			{display: 'Complejidad', name : 'complejidad', width : 100, sortable : true, align: 'left'},
 			{display: 'Estado', name : 'estado', width : 100, sortable : true, align: 'left'},
-			{display: 'Tipo De Item', name : 'tipoDeItem', width : 150, sortable : true, align: 'left'},			
+			{display: 'Tipo De Item', name : 'tipoDeItem', width : 150, sortable : true, align: 'left'},
 		],
 		
 		buttons : [	           
@@ -26,8 +27,10 @@ $(function(){
 		],
 		
 		searchitems : [
-			{display: 'Nombre', name : 'name', isdefault: true},
-			{display: 'Estado', name : 'estado', isdefault: true},
+			{display: 'Nombre', name : 'name'},
+			{display: 'Estado', name : 'estado'},
+			{display: 'Version', name : 'version'},
+			{display: 'Codigo', name : 'codigo', isdefault: true}
 		],
 		
 		sortname: "id",
@@ -69,32 +72,32 @@ function get_id(tr){
 }
 
 function revivir(id){
-    $.ajax(
-    	    {
-    	      type: 'POST',
-    	      dataType: "json",
-    	      url: '/configurar/revivir',
-    	      data: {id:id},
-    	      success: function(data)
-    	      { 
-    	        	  jQuery.noticeAdd(
-    	        	    	  {
-    	        	              text: data.msg,
-    	        	              stay: false,
-    	        	              stayTime: 2500,
-    	        	              type: data.type
-    	        	    	  });    	        		  
-    	        	  $("#faseVerItemsFlexi").flexReload();
-    	      }
-    	    	 
-    	    });	
+	estado=get_estado()
+	if (estado=='Eliminado'){
+		window.location = '/desarrollar/items/'+id+'/edit/'
+	}
+	else
+	{
+		msg_no_eliminado()
+	}
 }
 
-
+function get_estado(grid){
+	estado=$('.trSelected').find('td[abbr="estado"]').text();
+	return estado
+} 
 
 function msg_falta_seleccion(){
 	jQuery.noticeAdd({
 	              text: "Debe seleccionar al menos un item!",
+	              stay: false,
+	              stayTime: 2500,
+	              type: "notice"
+	    	  });
+}
+function msg_no_eliminado(){
+	jQuery.noticeAdd({
+	              text: "Solo se pueden revivir items en con estado 'Eliminado'",
 	              stay: false,
 	              stayTime: 2500,
 	              type: "notice"

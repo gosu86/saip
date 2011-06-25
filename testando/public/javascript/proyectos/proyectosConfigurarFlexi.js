@@ -15,11 +15,7 @@ $(function()
 		],
 
 		buttons : [
-			{separator: true},         
-			/*{name: 'Detalle Completo', bclass: 'detail', onpress : doCommandFases},
-			{separator: true},	
-			{separator: true},
-			{separator: true},	*/		
+			{separator: true},         	
 			{name: 'Fases', bclass: 'phases', onpress : doCommandFases},
 			{separator: true},
 			{separator: true},
@@ -33,7 +29,8 @@ $(function()
 		
 		searchitems : [
 			{display: 'Nombre', name : 'name', isdefault: true},
-			{display: 'Estado', name : 'estado', isdefault: true}
+			{display: 'Estado', name : 'estado'},
+			{display: 'Empresa', name : 'empresa'}
 		],
 		
 		sortname: "id",
@@ -131,6 +128,10 @@ function iniciarP(id){
               stayTime: 2500,
               type: data.type
     	  });
+    	  
+    	  if (data.type=='notice'){
+    		  msg_no_iniciar()
+    	  }
     	  
     	  $("#proyectosConfigurarFlexi").flexReload();
     	  

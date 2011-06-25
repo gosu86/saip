@@ -13,13 +13,14 @@ $(function()
 		],
 		
 		buttons : [
+		    /*
 			{separator: true},
 			{name: 'Crear', bclass: 'add', onpress : doCommandPermiso},
 			{separator: true},
 			{name: 'Editar', bclass: 'edit', onpress : doCommandPermiso},
 			{separator: true},
 			{name: 'Borrar', bclass: 'delete', onpress : doCommandPermiso},
-			{separator: true}
+			{separator: true}*/
 		],
 		
 		searchitems : [

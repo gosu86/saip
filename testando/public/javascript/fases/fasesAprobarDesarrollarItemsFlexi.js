@@ -6,7 +6,7 @@ $(function(){
 		
 		colModel : [
 			{display: 'ID', name : 'id', width : 40, sortable : true, align: 'left', hide : true},
-			{display: 'Codigo', name : 'codigo', width : 40, sortable : true, align: 'left'},
+			{display: 'Codigo', name : 'codigo', width : 50, sortable : true, align: 'left'},
 			{display: 'Nombre', name : 'name', width : 150, sortable : true, align: 'left'},
 			{display: 'Version', name : 'version', width : 50, sortable : true, align: 'left'},
 			{display: 'Estado', name : 'estado', width : 80, sortable : true, align: 'left'},			
@@ -21,20 +21,27 @@ $(function(){
 			{name: 'Editar', bclass: 'edit_item', onpress : doCommandItem},
 			{separator: true},{separator: true},{separator: true},
 			{name: 'Adjuntos', bclass: 'attachment', onpress : doCommandItem},
+			{separator: true},{separator: true},{separator: true},
+			{separator: true},{separator: true},{separator: true},			
+			{name: 'Dar por terminado', bclass: 'finish', onpress : doCommandItem},
+			{separator: true},{separator: true},{separator: true},
 			{separator: true},{separator: true},{separator: true},				
 			{name: 'Borrar', bclass: 'delete_item', onpress : doCommandItem},
 			{separator: true},{separator: true},{separator: true},
-			{separator: true},{separator: true},{separator: true},			
-			{name: 'Dar por terminado', bclass: 'finish', onpress : doCommandItem},			
 			{separator: true},{separator: true},{separator: true},
 			{separator: true},{separator: true},{separator: true},			
 			{name: 'Aprobar', bclass: 'approve', onpress : doCommandItem},
-			{separator: true},			
+			{separator: true},{separator: true},{separator: true},
+			{separator: true},{separator: true},{separator: true},
+			{name: 'Historial de Items', bclass: 'items', onpress : doCommandItem},				
+			{separator: true},
+			{name: 'Calculo de Impacto', bclass: 'calculo', onpress : doCommandItem},
+			{separator: true},	
 			
 		],
 		
 		searchitems : [
-			{display: 'Nombre', name : 'name', isdefault: true},
+			{display: 'Nombre', name : 'name'},
 			{display: 'Codigo', name : 'codigo', isdefault: true}
 		],
 		
@@ -54,6 +61,9 @@ $(function(){
 
 function doCommandItem(com, grid)
 {
+	if (com=='Historial de Items'){
+		window.location = "/configurar/vista_de_items/?fid="+$('input#fid').val()
+	}	
 	if ($('.trSelected', grid).length > 0)
 	{	
 			if (com == 'Aprobar')
@@ -102,7 +112,22 @@ function doCommandItem(com, grid)
 					$('.trSelected', grid).each(function()
 					{
 						id = get_id(this)
-							window.location = '/desarrollar/items/index/?itemid='+id;		
+							window.location = '/desarrollar/items/index/?itemid='+id+'&fid='+$('input#fid').val();		
+					});					
+				}			
+
+			}
+			else if (com == 'Calculo de Impacto')
+			{
+				if ($('.trSelected', grid).length > 1)
+				{
+					msg_toManySelected('Calcular el Impacto de')
+				}
+				else{
+					$('.trSelected', grid).each(function()
+					{
+						id = get_id(this)
+							window.location = '/desarrollar/items/impacto/?itemid='+id;		
 					});					
 				}			
 
@@ -176,7 +201,7 @@ function aprobar(ids){
     	    {
     	      type: 'POST',
     	      dataType: "json",
-    	      url: '/desarrollar/items/aprobar',
+    	      url: '/desarrollar/aprobar',
     	      data: {ids:ids},
     	      success: function(data)
     	      { 
@@ -215,7 +240,7 @@ function terminar(ids){
     	    {
     	      type: 'POST',
     	      dataType: "json",
-    	      url: '/desarrollar/items/terminar',
+    	      url: '/desarrollar/terminar',
     	      data: {ids:ids},
     	      success: function(data)
     	      { 
@@ -247,7 +272,7 @@ function borrar(id){
     	    {
     	      type: 'POST',
     	      dataType: "json",
-    	      url: '/desarrollar/items/post_delete',
+    	      url: '/desarrollar/eliminar_item',
     	      data: {id:id},
     	      success: function(data)
     	      { 

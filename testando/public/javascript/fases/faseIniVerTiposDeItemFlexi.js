@@ -6,6 +6,7 @@ $(function(){
 		
 		colModel : [
 			{display: 'ID', name : 'id', width : 40, sortable : true, align: 'left', hide : true},
+			{display: 'Codigo', name : 'codigo', width : 50, sortable : true, align: 'left'},
 			{display: 'Nombre', name : 'name', width : 150, sortable : true, align: 'left'},
 			{display: 'Descripcion', name : 'descripcion', width : 150, sortable : true, align: 'left'},
 			{display: 'Complejidad', name : 'complejidad', width : 150, sortable : true, align: 'left'},
@@ -21,7 +22,8 @@ $(function(){
 		],
 		
 		searchitems : [
-			{display: 'Nombre', name : 'name', isdefault: true}
+			{display: 'Nombre', name : 'name'},
+			{display: 'Codigo', name : 'codigo', isdefault: true}
 		],
 		
 		sortname: "id",
@@ -41,6 +43,7 @@ $(function(){
 				
 				colModel : [
 							{display: 'ID', name : 'id', width : 40, sortable : true, align: 'left', hide : true},
+							{display: 'Codigo', name : 'codigo', width : 50, sortable : true, align: 'left'},
 							{display: 'Nombre', name : 'name', width : 150, sortable : true, align: 'left'},
 							{display: 'Descripcion', name : 'descripcion', width : 150, sortable : true, align: 'left'},
 							{display: 'Complejidad', name : 'complejidad', width : 150, sortable : true, align: 'left'},
@@ -55,7 +58,8 @@ $(function(){
 				],
 				
 				searchitems : [
-					{display: 'Nombre', name : 'name', isdefault: true}
+					{display: 'Nombre', name : 'name'},
+					{display: 'Codigo', name : 'codigo', isdefault: true}
 				],
 				
 				sortname: "id",

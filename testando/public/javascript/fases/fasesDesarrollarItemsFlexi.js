@@ -6,7 +6,7 @@ $(function(){
 		
 		colModel : [
 			{display: 'ID', name : 'id', width : 40, sortable : true, align: 'left', hide : true},
-			{display: 'Codigo', name : 'codigo', width : 40, sortable : true, align: 'left'},
+			{display: 'Codigo', name : 'codigo', width : 50, sortable : true, align: 'left'},
 			{display: 'Nombre', name : 'name', width : 150, sortable : true, align: 'left'},
 			{display: 'Version', name : 'version', width : 50, sortable : true, align: 'left'},
 			{display: 'Estado', name : 'estado', width : 80, sortable : true, align: 'left'},			
@@ -25,8 +25,11 @@ $(function(){
 			{separator: true},{separator: true},{separator: true},	
 			{name: 'Dar por terminado', bclass: 'finish', onpress : doCommandItem},
 			{separator: true},{separator: true},{separator: true},
-			{separator: true},{separator: true},{separator: true},							
+			{separator: true},{separator: true},{separator: true},			
 			{name: 'Borrar', bclass: 'delete_item', onpress : doCommandItem},
+			{separator: true},{separator: true},{separator: true},
+			{separator: true},{separator: true},{separator: true},
+			{name: 'Historial de Items', bclass: 'items', onpress : doCommandItem},			
 			{separator: true},
 			
 		],
@@ -52,6 +55,10 @@ $(function(){
 
 function doCommandItem(com, grid)
 {
+	if (com=='Historial de Items'){
+		window.location = "/configurar/vista_de_items/?fid="+$('input#fid').val()
+	}
+	
 	if ($('.trSelected', grid).length > 0)
 	{	
 			if (com == 'Dar por terminado')
@@ -95,7 +102,7 @@ function doCommandItem(com, grid)
 				else
 				{
 					id = get_id($('.trSelected', grid)) 
-					window.location = '/desarrollar/items/index/?itemid='+id;
+					window.location = '/desarrollar/items/index/?itemid='+id+'&fid='+$('input#fid').val();
 				}
 			}
 			else if (com == 'Borrar')
@@ -134,7 +141,7 @@ function borrar(id){
     	    {
     	      type: 'POST',
     	      dataType: "json",
-    	      url: '/desarrollar/items/post_delete',
+    	      url: '/desarrollar/eliminar_item',
     	      data: {id:id},
     	      success: function(data)
     	      { 
@@ -156,7 +163,7 @@ function terminar(ids){
     	    {
     	      type: 'POST',
     	      dataType: "json",
-    	      url: '/desarrollar/items/terminar',
+    	      url: '/desarrollar/terminar',
     	      data: {ids:ids},
     	      success: function(data)
     	      { 

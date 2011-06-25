@@ -10,6 +10,22 @@
     <script type="text/javascript">
 	    $(function() {$("#lider").multiselect();});
             </script>
+<script type="text/javascript">
+$().ready(function() {
+	$(".tableform").validate({
+		rules: {
+			empresa: "required",
+			name: "required",
+			lider: "required",
+		},
+		messages: {
+			name: "Por favor... Ingrese el nombre para el proyecto.",
+			empresa: "Por favor... Ingrese la empresa que solicito el proyecto.",
+			lider: "Por favor, seleccione un lider para el proyecto.",		
+		}
+	});
+	});
+</script>            
 </head>
 <body class="tundra">
   <div style="float:left;" class="crud_add">

@@ -178,6 +178,7 @@ class DesarrollarController(BaseController):
             
             rows = [{'id'  : tipoDeItem.id,
                     'cell': [tipoDeItem.id,
+                             tipoDeItem.codigo,
                             tipoDeItem.name,
                             tipoDeItem.descripcion,
                             tipoDeItem.complejidad,
@@ -194,15 +195,21 @@ class DesarrollarController(BaseController):
             offset = (int(page)-1) * int(rp)
             
             if (query):
-                d = {qtype:query,'fase_id':int(fid)}
+                d = {'fase_id':int(fid)}
                 items = DBSession.query(Item).filter_by(**d)
                 items = items.filter(Item.historico==False)
-                items = items.filter(Item.estado!='Eliminado')
+                if qtype=='name':
+                    items   =   items.filter(Item.name.like('%'+query+'%'))
+                elif qtype=='estado':
+                    items   =   items.filter(Item.estado.like('%'+query+'%'))
+                elif qtype=='codigo':
+                    items   =   items.filter(Item.codigo.like('%'+query+'%'))                
+                elif qtype=='version':
+                    items   =   items.filter_by(version=int(query))
             else:
                 d = {'fase_id':int(fid)}
                 items = DBSession.query(Item).filter_by(**d)
                 items = items.filter(Item.historico==False)
-                items = items.filter(Item.estado!='Eliminado')
                 
             total = items.count()
             log.debug('total %s' %total)
@@ -222,17 +229,7 @@ class DesarrollarController(BaseController):
             result = dict(page=page, total=total, rows=rows)
         except:
             result = dict() 
-        return result             
-    
-    
-    @expose('json')        
-    def aprobar(self,**kw):
-        i=DBSession.query(Item).filter_by(id=int(kw['id'])).first()
-        i.estado='Aprobado'
-        DBSession.flush()
-        msg='El item se ha aprobado con exito'
-        type= 'succes'
-        return dict(msg=msg,type=type)        
+        return result                
             
     @expose('json')        
     def comprometer(self,**kw):
@@ -244,10 +241,71 @@ class DesarrollarController(BaseController):
         type= 'notice'
         return dict(msg=msg,type=type)      
     
+    @expose('json')        
+    def aprobar(self,**kw):
+        ids=kw['ids'].split(',')
+        ids.pop()
+        cant=len(ids)
+        error=0
+        msg=''
+        type=''
+        cods=''
+        for id in ids:
+            id=int(id)
+            i=DBSession.query(Item).filter_by(id=id).first()
+            if i.estado == 'Terminado':
+                i.estado='Aprobado'
+            else:
+                error=error+1
+                cods=cods+i.codigo+','
+                
+        DBSession.flush()
+        
+        dif=cant-error
+        if dif!=0:
+            msg=str(dif)+' items se han aprobado con exito'
+            type= 'succes'
+        if error!=0:
+            error=str(error) +' items ('+cods+') no se han aprobado!'        
+            
+        return dict(msg=msg,type=type,error=error)        
+                
+    @expose('json')        
+    def terminar(self,**kw):
+        ids=kw['ids'].split(',')
+        ids.pop()
+        cant=len(ids)
+        error=0
+        msg=''
+        type=''
+        cods=''        
+        for id in ids:
+            id=int(id)
+            i=DBSession.query(Item).filter_by(id=id).first()
+            if i.estado != 'Aprobado':
+                i.estado='Terminado'
+            else:
+                error=error+1
+                cods=cods+i.codigo+','
+                
+        DBSession.flush()
+        
+        dif=cant-error
+        if dif!=0:
+            msg=str(dif)+' items se han terminado con exito'
+            type= 'succes'
+        if error!=0:
+            error=str(error) +' items ('+cods+') no han cambiado, tienen estado "Aprobado"!'
+        return dict(msg=msg,type=type,error=error)      
     
-    
-    
-    
-    
-    
+       
+    @expose('json')
+    def eliminar_item(self,**kw):        
+        item = DBSession.query(Item).filter_by(id = int(kw['id'])).first()
+        item.estado='Eliminado'
+        item.padres=[]
+        item.antecesores =[]
+        DBSession.flush()
+        msg="El item se ha eliminado."
+        return dict(msg=msg)    
     

@@ -18,31 +18,24 @@
 $().ready(function() {
 	$(".tableform").validate({
 			rules: {
-				descripcion:{
-				 required:true,
-				 minlength:2,
-				 },
 				complejidad: {
 				required: true,
-				digits: true,
-				maxlength: 1,
+				number: true,
+				max: 10,
+				min:1,
 				},
-				"antecesores[]":"required"
+				"antecesores":"required"
 			},
 			messages: {
-			descripcion:"Por favor... Ingrese una descripcion al item.",
 			complejidad		: {
-			required:"Por favor... Ingrese el valor complejida este es obligatorio",
-			digits: "La complejidad debe ser un digito del 0 a 9",
-			maxlength:"La complejidad no puede ser mayor que un digito",
+						required:"Por favor... Ingrese el valor complejida este es obligatorio.",
+						number:"La complejidad tiene que ser un numero entero positivo.",
+						max:"La complejidad no puede ser mayor que 10.",
+						min:"La complejidad no puede ser menor que 1.",
+						
 			},
-
-			"antecesores[]": "Por favor, seleccione una realcion en la fase anterior.",
-			descripcion: {
-			required:"Por favor... Ingrese la descripcion este es un campo obligatorio",
-			minlength:"La descripcion tiene tener una longitud mayor a 2 caracteres"
-			},
-			},
+			"antecesores": "Por favor, seleccione una realcion en la fase anterior.",
+		},
 		errorClass: "fielderror"
 	});
 
@@ -129,7 +122,7 @@ $(function(){
                 <label style="font-size:10px; text-align:center" for="${attr.campo_extra.tipo}" id="attr_${attr.id}.label">(${attr.campo_extra.tipo})</label>
             </td>
             <td class="fieldcol">
-                <input type="text" value="${attr.valor}" id="${attr.campo_extra.tipo}" class="textfield" name="atributos_extra_${attr.id}"/>
+                <input type="text" value="${attr.valor}" id="${attr.campo_extra.tipo}" class="${('','numbrer')[attr.campo_extra.tipo=='Numero']}" name="atributos_extra_${attr.id}"/>
                 <input type="hidden" name="atributos_extra" value="${attr.id}"/>
             </td>
         </tr>

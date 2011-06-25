@@ -1,7 +1,6 @@
-from tg             import expose,redirect, validate,flash,tmpl_context,config
-from tg.decorators  import override_template
-from tg.decorators  import without_trailing_slash
-from decorators import registered_validate, register_validators, catch_errors
+from tg             import expose,redirect, validate,tmpl_context
+
+from decorators import registered_validate, catch_errors
 from tgext.crud     import CrudRestController
 from repoze.what.predicates import All,not_anonymous,has_any_permission
 from tg.decorators  import without_trailing_slash
