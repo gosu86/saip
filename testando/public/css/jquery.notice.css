@@ -1,7 +1,7 @@
 .notice-wrap {
 	position: fixed;
-	top: 40%;
-	right: 40%;
+	top: 50%;
+	right: 10%;
 	width: 300px;
 	z-index: 9999;
 }

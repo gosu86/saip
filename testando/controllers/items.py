@@ -263,7 +263,15 @@ class ItemsController(CrudRestController):
                     adjunto.filecontent =   a.filecontent
                     adjunto.item    =   item
                     DBSession.add(adjunto)
-                                
+                    
+        if len(i.hijos)>0:
+            for h in i.hijos:
+                item.hijos.append(h)
+                
+        if len(i.sucesores)>0:
+            for s in i.sucesores:
+                item.sucesores.append(s)
+                
         return item        
         
     @expose()
@@ -368,6 +376,7 @@ class ItemsController(CrudRestController):
         ItemActual = DBSession.query(Item).filter_by(id=IdActual).first()
         inombre= ItemActual.name
         calculados=[]
+        referer='/desarrollar/desarrollo_de_fases/?fid='+str(ItemActual.fase.id)
         
         grafo=pgv.AGraph(rankdir='LR')
         grafo.node_attr['shape']='ellipse'
@@ -375,11 +384,11 @@ class ItemsController(CrudRestController):
         grafo.node_attr['style']='filled'
         grafo.node_attr['fillcolor']='#f0f8ff'
         fase = DBSession.query(Fase).filter_by(id=ItemActual.fase_id).first()
-        
+        color='red'
         grafo.add_node(ItemActual.codigo+"[F"+str(fase.orden)+"] " 
                        + "[" +str(ItemActual.complejidad)
-                       +","+str(ItemActual.id)+"]", 
-                       fillcolor= 'red')
+                       +"]", 
+                       fillcolor= color)
         
         calculados.append(ItemActual)
         calcular,calculados, grafo = self.calcular_impacto(IdActual, calculados, 0, grafo)
@@ -390,7 +399,9 @@ class ItemsController(CrudRestController):
         grafo.draw(dir+'impacto.png') # write to file 
         log.debug('calculoImpacto = %s' %str(calcular))
         return dict(calcular=calcular,
-                    inombre = inombre)
+                    inombre = inombre,
+                    title_nav='Lista de Items',
+                    referer=referer)
         
         
 
@@ -402,7 +413,7 @@ class ItemsController(CrudRestController):
         if(ItemActual not in calculados):
             grafo.add_node(ItemActual.codigo+"[F"+str(fase.orden)+"] " 
                            + "[" +str(ItemActual.complejidad)
-                           +","+str(ItemActual.id)+"]")
+                           +"]")
             calculados.append(ItemActual)
             
         calculo= calculo + ItemActual.complejidad
@@ -415,59 +426,62 @@ class ItemsController(CrudRestController):
         # relacion de padres y antecesores
         if(len(padres)!=0):
             for p in padres:
-                f = DBSession.query(Fase).filter_by(id=p.fase_id).first()
-                grafo.add_edge(p.codigo+"[F"+str(f.orden)+"] " 
-                                  + "[" +str(p.complejidad)
-                                  +","+str(p.id)+"]",
-                                  ItemActual.codigo+"[F"+str(fase.orden)+"] " 
-                                  + "[" +str(ItemActual.complejidad)
-                                  +","+str(ItemActual.id)+"]", 
-                                  color='blueviolet', label='padre-hijo')
-               
-                if(p not in calculados):
-                    
-                    calculo , calculados,grafo = self.calcular_impacto(p.id, calculados, calculo, grafo)
+                if (p.historico==False):
+                    f = DBSession.query(Fase).filter_by(id=p.fase_id).first()
+                    grafo.add_edge(p.codigo+"[F"+str(f.orden)+"] " 
+                                      + "[" +str(p.complejidad)
+                                      +"]",
+                                      ItemActual.codigo+"[F"+str(fase.orden)+"] " 
+                                      + "[" +str(ItemActual.complejidad)
+                                      +"]", 
+                                      color='blueviolet', label='padre-hijo')
+                   
+                    if(p not in calculados):            
+                        calculo , calculados,grafo = self.calcular_impacto(p.id, calculados, calculo, grafo)
         
         if(len(antecesores)!=0):
             
             for a in antecesores:
-                f = DBSession.query(Fase).filter_by(id=a.fase_id).first()
-                grafo.add_edge(a.codigo+"[F"+str(f.orden)+"] " 
-                                  + "[" +str(a.complejidad)
-                                  +","+str(a.id)+"]",
-                                  ItemActual.codigo+"[F"+str(fase.orden)+"] " 
-                                  + "[" +str(ItemActual.complejidad)
-                                  +","+str(ItemActual.id)+"]", 
-                                  color='green', label='antecesor-sucesor')
-                if(a not in calculados):
-                    calculo, calculados, grafo = self.calcular_impacto(a.id, calculados, calculo, grafo)
+                if (a.historico==False):
+                    f = DBSession.query(Fase).filter_by(id=a.fase_id).first()
+                    grafo.add_edge(a.codigo+"[F"+str(f.orden)+"] " 
+                                      + "[" +str(a.complejidad)
+                                      +"]",
+                                      ItemActual.codigo+"[F"+str(fase.orden)+"] " 
+                                      + "[" +str(ItemActual.complejidad)
+                                      +"]", 
+                                      color='green', label='antecesor-sucesor')
+                    if(a not in calculados):
+                        calculo, calculados, grafo = self.calcular_impacto(a.id, calculados, calculo, grafo)
                    
         #relacion de hijos y sucesores
         if(len(hijos)!=0):
             for h in hijos:
-                f = DBSession.query(Fase).filter_by(id=h.fase_id).first()
-                grafo.add_edge(ItemActual.codigo+"[F"+str(fase.orden)+"] " 
-                                  + "[" +str(ItemActual.complejidad)
-                                  +","+str(ItemActual.id)+"]",
-                                  h.codigo+"[F"+str(f.orden)+"] " 
-                                  + "[" +str(h.complejidad)
-                                  +","+str(h.id)+"]", 
-                                  color='blueviolet', label='padre-hijo')
-                if(h not in calculados):
-                    calculo , calculados,grafo = self.calcular_impacto(h.id, calculados, calculo, grafo)
+                if (h.historico==False):
+                    f = DBSession.query(Fase).filter_by(id=h.fase_id).first()
+                    grafo.add_edge(ItemActual.codigo+"[F"+str(fase.orden)+"] " 
+                                      + "[" +str(ItemActual.complejidad)
+                                      +"]",
+                                      h.codigo+"[F"+str(f.orden)+"] " 
+                                      + "[" +str(h.complejidad)
+                                      +"]", 
+                                      color='blueviolet', label='padre-hijo')
+                    if(h not in calculados):
+                        calculo , calculados,grafo = self.calcular_impacto(h.id, calculados, calculo, grafo)
                    
         if(len(sucesores)!=0):
             for s in sucesores:
-                f = DBSession.query(Fase).filter_by(id=s.fase_id).first()
-                grafo.add_edge(ItemActual.codigo+"[F"+str(fase.orden)+"] " 
-                                  + "[" +str(ItemActual.complejidad)
-                                  +","+str(ItemActual.id)+"]",
-                                  s.codigo+"[F"+str(f.orden)+"] " 
-                                  + "[" +str(s.complejidad)
-                                  +","+str(s.id)+"]", 
-                                  color='green', label='antecesor-sucesor')
-                if(s not in calculados):
-                    calculo , calculados,grafo = self.calcular_impacto(s.id, calculados, calculo, grafo)
+                if (s.historico==False):
+                    f = DBSession.query(Fase).filter_by(id=s.fase_id).first()
+                    grafo.add_edge(ItemActual.codigo+"[F"+str(fase.orden)+"] " 
+                                      + "[" +str(ItemActual.complejidad)
+                                      +"]",
+                                      s.codigo+"[F"+str(f.orden)+"] " 
+                                      + "[" +str(s.complejidad)
+                                      +"]", 
+                                      color='green', label='antecesor-sucesor')
+                    if(s not in calculados):
+                        calculo , calculados,grafo = self.calcular_impacto(s.id, calculados, calculo, grafo)
                    
         return(calculo,calculados, grafo)
     
