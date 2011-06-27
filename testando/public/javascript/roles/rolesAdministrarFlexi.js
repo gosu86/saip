@@ -2,7 +2,7 @@ $(function()
 {
 	$("#rolesAdministrarFlexi").flexigrid(
 	{
-		url: location+'fetch/',
+		url: '/administrar/lista_de_roles/',
 		dataType: 'json',
 		
 		colModel : [
@@ -22,8 +22,7 @@ $(function()
 		],
 		
 		searchitems : [
-			{display: 'Nombre', name : 'name', isdefault: true},
-			{display: 'Estado', name : 'estado', isdefault: true}
+			{display: 'Nombre', name : 'name', isdefault: true}
 		],
 		
 		sortname: "id",
@@ -38,7 +37,34 @@ $(function()
 		singleSelect: true
 	});
 });
-
+function doCommandRol(com, grid)
+{
+	if (com == 'Crear')
+	{window.location = location+"new/";}
+	else if ($('.trSelected', grid).length > 0)
+	{
+		if (com == 'Editar')
+		{
+			var id = $('.trSelected', grid).attr('id');
+			id = id.substring(id.lastIndexOf('row')+3);
+			window.location = location+id+"/edit/";	
+		}
+		else if (com == 'Borrar')
+		{
+			var nombre = $('.trSelected', grid).find('td[abbr="name"]').children().text()	
+			var id = $('.trSelected', grid).attr('id');
+			id = id.substring(id.lastIndexOf('row')+3);
+			if(confirm('Seguro que desea BORRAR el rol: "' + nombre + '" ?'))
+			{
+				deleteR(id);
+			}			
+		}
+			
+	}	
+	else{
+		msg_falta_seleccion('un rol')
+	}
+}
 function deleteR(id)
 {
     $.ajax(
@@ -60,48 +86,11 @@ function deleteR(id)
       },
     });
 }
-
-
-function doCommandRol(com, grid)
-{
-	if (com == 'Crear')
-	{window.location = location+"new/";}
-	else if (com == 'Editar')
-	{
-		if ($('.trSelected', grid).length > 0)
-		{	
-			$('.trSelected', grid).each(function()
-			{
-				var id = $(this).attr('id');
-				id = id.substring(id.lastIndexOf('row')+3);
-				window.location = location+id+"/edit/"
-			});
-		}
-		else
-		{alert("Debe seleccionar una fila para editar!");}
-	}
-	else if (com == 'Borrar') 
-	{
-		if ($('.trSelected', grid).length > 0)
-		{
-			var nombre = $('.trSelected',"#rolesAdministrarFlexi").find('td[abbr="name"]').children().text()	
-			$('.trSelected', grid).each(function()
-			{
-				var id = $(this).attr('id');
-				id = id.substring(id.lastIndexOf('row')+3);
-				if(confirm('Seguro que desea BORRAR el rol: "' + nombre + '" ?'))
-				{deleteR(id)}
-			});
-		}
-		else
-		{    	  
-			jQuery.noticeAdd(
-		    	  {
-		              text: "Debe seleccionar una fila para borrar!",
-		              stay: false,
-		              stayTime: 5000,
-		              type: "notice"
-		    	  });
-		}
-	}
+function msg_falta_seleccion(an_element){
+	jQuery.noticeAdd({
+	              text: "Debe seleccionar al menos "+an_element+"!",
+	              stay: false,
+	              stayTime: 2500,
+	              type: "notice"
+	    	  });
 }

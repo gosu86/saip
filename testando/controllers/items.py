@@ -31,7 +31,6 @@ class ItemsController(CrudRestController):
     @without_trailing_slash
     @expose('testando.templates.desarrollar.items.new')
     def new(self, *args, **kw):
-        
         referer=request.headers.get("Referer", "")
         log.debug("referer == %s" % (referer))
         log.debug('kw %s' %str(kw))
@@ -49,11 +48,25 @@ class ItemsController(CrudRestController):
         attr_extra=tdi.campos_extra
         posibles_antecesores=False
         if fase_orden > 1:
-            posibles_antecesores=DBSession.query(Item).filter(and_(Item.fase_id==(fase_orden-1),Item.historico==False))
-            posibles_antecesores=posibles_antecesores.filter(Item.linea_base.has(estado='Activa'))
-            posibles_antecesores=posibles_antecesores.filter(Item.estado!='Eliminado')
+            posibles_antecesores=DBSession.query(Item).filter(and_(
+                                                                   Item.historico==False,
+                                                                   Item.estado!='Eliminado'
+                                                                   )
+                                                              )
+            posibles_antecesores=posibles_antecesores.filter(and_(
+                                                                  Item.linea_base.has(estado='Activa'),
+                                                                  Item.fase.has(orden=(fase_orden-1))
+                                                                  )
+                                                             )
             
-        posibles_padres=DBSession.query(Item).filter(and_(Item.fase_id==fase_id,Item.historico==False,Item.estado!='Eliminado'))
+        posibles_padres=DBSession.query(Item).filter(and_(
+                                                          Item.fase_id==fase_id,
+                                                          Item.historico==False,
+                                                          Item.estado!='Eliminado'
+                                                          )
+                                                     )
+        
+        
         return dict(page="Desarrollar",
                     attr_extra=attr_extra,
                     fase_id=fase_id,
@@ -114,15 +127,6 @@ class ItemsController(CrudRestController):
             result = dict() 
         return result
     
-    @expose('json')
-    def post_delete(self,**kw):
-        
-        item = DBSession.query(Item).filter_by(id = int(kw['id'])).first()
-        item.estado='Eliminado'
-        DBSession.flush()
-
-        msg="El item se ha eliminado."
-        return dict(msg=msg)
     
     
     @expose('testando.templates.desarrollar.items.edit')
@@ -150,14 +154,24 @@ class ItemsController(CrudRestController):
         
         posibles_antecesores=False
         if fase_orden > 1:
-            posibles_antecesores=DBSession.query(Item).filter(and_(Item.fase_id==(fase_orden-1),
+            posibles_antecesores=DBSession.query(Item).filter(and_(
                                                                    Item.historico==False,
-                                                                   Item.estado!='Eliminado')).all()
+                                                                   Item.estado!='Eliminado'
+                                                                   )
+                                                              )
+            posibles_antecesores=posibles_antecesores.filter(and_(
+                                                                  Item.linea_base.has(estado='Activa'),
+                                                                  Item.fase.has(orden=(fase_orden-1))
+                                                                  )
+                                                             )
             
-        posibles_padres=DBSession.query(Item).filter(and_(Item.fase_id==fase_id,
-                                                          Item.id!=i.id,
+        posibles_padres=DBSession.query(Item).filter(and_(
+                                                          Item.fase_id==fase_id,
                                                           Item.historico==False,
-                                                          Item.estado!='Eliminado')).all()
+                                                          Item.estado!='Eliminado',
+                                                          Item.id!=i.id
+                                                          )
+                                                     )
 
         for h in i.hijos:
             if h in posibles_padres:
@@ -170,109 +184,7 @@ class ItemsController(CrudRestController):
                     referer=referer,
                     title_nav=title_nav,
                     item=i)
-        
-    def nueva_version(self,kw,adjunto_id=None):
-        i                   =   DBSession.query(Item).filter_by(id=int(kw['itemid'])).first()
-        i.historico         =   True
-        
-        item                =   Item()
-        if kw.has_key('name'):
-            item.name           =   kw['name']
-        else:
-            item.name           =   i.name        
-        item.fase           =   i.fase
-        item.codigo         =   i.codigo
-        item.version        =   i.version+ 1
-        item.tipo_item      =   i.tipo_item
-        
-        if kw.has_key('descripcion'):
-            item.descripcion           =   kw['descripcion']
-        else:
-            item.descripcion           =   i.descripcion         
-
-        if kw.has_key('complejidad'):
-            item.complejidad           =   kw['complejidad']
-        else:
-            item.complejidad           =   i.complejidad
-                    
-        item.historico_id   =   i.historico_id
-        
-        if kw.has_key('atributos_extra'):
-            
-            if type(kw['atributos_extra'])==type(u''):
-                a=kw['atributos_extra']
-                kw['atributos_extra']=[]
-                kw['atributos_extra'].append(a)
-            for id in kw['atributos_extra']:
-                log.debug('id = %s' %str(id))
-                aeo          =   DBSession.query(AtributoExtra).filter_by(id=int(id)).first()
-                aen          =   AtributoExtra()
-                aen.valor    =   kw['atributos_extra_'+str(id)]
-                aen.campo_extra_id  =   aeo.campo_extra_id
-                DBSession.add(aen)
-                item.atributos_extra.append(aen)
-                log.debug('ae = %s' %str(aen))
-                log.debug('attr extra valor = %s' %str(kw['atributos_extra_'+id]))
-                log.debug('attr extra id = %s' %str(id))
-        else:
-            for ae in i.atributos_extra:
-                aen          =   AtributoExtra()
-                aen.valor    =   ae.valor
-                aen.campo_extra_id  =   ae.campo_extra_id
-                DBSession.add(aen)
-                item.atributos_extra.append(aen)
-           
-        if kw.has_key('padres'):
-            item.padres=[]             
-            for id in kw['padres']:
-                p=DBSession.query(Item).filter_by(id=int(id)).first()
-                item.padres.append(p)
-        else:
-            if kw.has_key('name'):
-                item.padres=[]
-            else:
-                item.padres=[]             
-                for p in i.padres:
-                    item.padres.append(p)                
-        
-        if kw.has_key('antecesores'):
-            item.antecesores=[]             
-            for id in kw['antecesores']:
-                a=DBSession.query(Item).filter_by(id=int(id)).first()
-                item.antecesores.append(a)
-        else:
-            if kw.has_key('name'):            
-                item.antecesores=[]
-            else:
-                for a in i.antecesores:
-                    item.antecesores.append(a)
-        
-        
-        if adjunto_id==None:
-            for a in i.adjuntos:
-                adjunto=Adjunto()
-                adjunto.name    =   a.name
-                adjunto.filecontent =   a.filecontent
-                adjunto.item    =   item
-                DBSession.add(adjunto)
-        else:
-            for a in i.adjuntos:
-                if adjunto_id!=a.id:
-                    adjunto=Adjunto()
-                    adjunto.name    =   a.name
-                    adjunto.filecontent =   a.filecontent
-                    adjunto.item    =   item
-                    DBSession.add(adjunto)
-                    
-        if len(i.hijos)>0:
-            for h in i.hijos:
-                item.hijos.append(h)
-                
-        if len(i.sucesores)>0:
-            for s in i.sucesores:
-                item.sucesores.append(s)
-                
-        return item        
+  
         
     @expose()
     def put(self, *args, **kw):
@@ -286,16 +198,16 @@ class ItemsController(CrudRestController):
         
         for i, pk in enumerate(pks):
             if pk not in kw and i < len(args):
-                kw['itemid'] = args[i]          
+                kw['itemid'] = args[i]
+        i       =   DBSession.query(Item).filter_by(id=int(kw['itemid'])).first()
         log.debug('kw-> kw = %s' %str(kw))
-        item=self.nueva_version(kw)
+        item=i.nueva_version(kw)
         log.debug('kw-> kw = %s' %str(kw))
                            
         DBSession.flush() 
 
 
-        redirect('/desarrollar/desarrollo_de_fases/?fid='+str(item.fase_id))
-        
+        redirect('/desarrollar/desarrollo_de_fases/?fid='+str(item.fase_id))       
        
 #-----------------------------------------------------------------#
 #-------------------Adjunto Controller----------------------------#
@@ -313,7 +225,8 @@ class ItemsController(CrudRestController):
         adjunto=Adjunto()
         adjunto.filecontent=kw['userfile'].value
         adjunto.name=kw['userfile'].filename
-        item=self.nueva_version(kw)
+        i = DBSession.query(Item).filter_by(id=int(kw['itemid'])).first()
+        item=i.nueva_version(kw)
         DBSession.add(adjunto)
         
         item.adjuntos.append(adjunto)
@@ -350,8 +263,8 @@ class ItemsController(CrudRestController):
         kw={}
         try:           
             adjunto = DBSession.query(Adjunto).filter_by(id=fileid).one()
-            kw['itemid']= adjunto.item_id
-            item=self.nueva_version(kw,adjunto.id)
+            i = DBSession.query(Item).filter_by(id=adjunto.item_id).first()            
+            item=i.nueva_version(kw,adjunto.id)
             DBSession.flush()
             
         except:
@@ -359,12 +272,7 @@ class ItemsController(CrudRestController):
 
         DBSession.flush()
         return redirect('/desarrollar/items/index/?itemid='+str(item.id)+'&fid='+str(item.fase_id))        
-        
-        
-        
-        
-        
-        
+
 #--------------------------------------------------------------
 #-----------------------------------------------------------------#
 #-------------------Calculo de Impacto----------------------------#
@@ -485,3 +393,12 @@ class ItemsController(CrudRestController):
                    
         return(calculo,calculados, grafo)
     
+    @expose('json')
+    def post_delete(self,**kw):
+        
+        item = DBSession.query(Item).filter_by(id = int(kw['id'])).first()
+        item.estado='Eliminado'
+        DBSession.flush()
+
+        msg="El item se ha eliminado."
+        return dict(msg=msg)

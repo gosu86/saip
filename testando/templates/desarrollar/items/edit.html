@@ -112,7 +112,19 @@ $(function(){
                 <label class="fieldlabel" for="complejidad" id="complejidad.label">Complejidad</label>
             </td>
             <td class="fieldcol">
-                <input type="text" value="${item.complejidad}" id="complejidad" class="textfield" name="complejidad"/>
+                
+                <select id="complejidad" class="textfield" name="complejidad">
+                	<option value='1' selected="${('','true')[item.complejidad==1]}">1</option>
+                	<option value='2' selected="${('','true')[item.complejidad==2]}">2</option>
+                	<option value='3' selected="${('','true')[item.complejidad==3]}">3</option>
+                	<option value='4' selected="${('','true')[item.complejidad==4]}">4</option>
+                	<option value='5' selected="${('','true')[item.complejidad==5]}">5</option>
+                	<option value='6' selected="${('','true')[item.complejidad==6]}">6</option>
+                	<option value='7' selected="${('','true')[item.complejidad==7]}">7</option>
+                	<option value='8' selected="${('','true')[item.complejidad==8]}">8</option>
+                	<option value='9' selected="${('','true')[item.complejidad==9]}">9</option>       
+                	<option value='10' selected="${('','true')[item.complejidad==10]}">10</option>
+                </select>                
             </td>
         </tr>
         

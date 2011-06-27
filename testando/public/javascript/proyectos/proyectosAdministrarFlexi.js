@@ -2,7 +2,7 @@ $(function()
 {
 	$("#proyectosAdministrarFlexi").flexigrid(
 	{
-		url: location+'lista_de_proyectos/',
+		url: '/administrar/lista_de_proyectos/',
 		dataType: 'json',
 		
 		colModel : [
@@ -26,6 +26,7 @@ $(function()
 		
 		searchitems : [
 			{display: 'Nombre', name : 'name', isdefault: true},
+			{display: 'Lider', name : 'lider', isdefault: true},
 			{display: 'Estado', name : 'estado', isdefault: true}
 		],
 		

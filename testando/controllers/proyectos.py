@@ -34,6 +34,10 @@ class ProyectosController(CrudRestController):
 	edit_filler	=	proyecto_edit_filler
 	edit_form 	=	proyecto_edit_form
 
+	@expose('testando.templates.administrar.proyectos.index')
+	def get_all(self):
+		return dict(page="Administar")
+
 	@without_trailing_slash
 	@expose('testando.templates.administrar.proyectos.new')
 	def new(self, *args, **kw):
@@ -41,6 +45,7 @@ class ProyectosController(CrudRestController):
 		tmpl_context.widget = self.new_form
 		referer='/administrar/proyectos/'
 		return dict(value=kw, model=self.model.__name__,referer=referer,title_nav='Lista de Proyectos')
+	
 	@catch_errors(errors, error_handler=new)
 	@expose()
 	@registered_validate(error_handler=new)
@@ -84,23 +89,7 @@ class ProyectosController(CrudRestController):
 		p.lider_id=int(kw['lider'])
 		DBSession.flush()
 		redirect('../' * len(pks))
-
-	@expose('json')
-	def usuarios(self):
-		usuarios=DBSession.query(Usuario)
-		names=''
-		ids=''
-		for u in usuarios:
-			names=names+'"'+u.name+'"'+','
-			ids=ids+str(u.id)+','
-		names=names+'""'
-		ids=ids+'""'
-		return dict(names=names,ids=ids)
-
-	@expose('testando.templates.administrar.proyectos.index')
-	def get_all(self):
-		return dict(page="Administar")
-			
+		
 	@validate(validators={"id":validators.Int()})
 	@expose('json')
 	def post_delete(self,**kw):
@@ -123,33 +112,4 @@ class ProyectosController(CrudRestController):
 	@expose()
 	def get_one(self, *args, **kw):
 		redirect('../')
-		
-	@validate(validators={"page":validators.Int(), "rp":validators.Int()})
-	@expose('json')
-	def lista_de_proyectos(self, page='1', rp='25', sortname='id', sortorder='asc', qtype=None, query=None):
-		try:
-			offset = (int(page)-1) * int(rp)
-			if (query):
-				d = {qtype:query}
-				proyectos = DBSession.query(Proyecto).filter_by(**d)
-			else:
-				proyectos = DBSession.query(Proyecto)
 			
-			total = proyectos.count()
-			column = getattr(Proyecto, sortname)
-			proyectos = proyectos.order_by(getattr(column,sortorder)()).offset(offset).limit(rp)
-			for p in proyectos:
-				log.debug("Lider == %s" % (p.lider.name))
-			
-			rows = [{'id'  : proyecto.id,
-					'cell': [proyecto.id,
-							proyecto.name,
-							proyecto.lider.name,
-							proyecto.descripcion,
-							proyecto.estado,
-							(', '.join([f.name for f in proyecto.fases]))]} for proyecto in proyectos]
-			result = dict(page=page, total=total, rows=rows)
-		except:
-			result = dict()
-		log.debug("RESULT == %s" % result) 
-		return result		

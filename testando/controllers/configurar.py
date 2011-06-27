@@ -54,41 +54,8 @@ class ConfigurarController(BaseController):
 
         
     items=ItemsController(DBSession)
-
-
-    #lineasBase=LineasBaseController(DBSession)
-    #lineasBase.template='genshi:testando.templates.configurar.lineasBase.index'
-    #lineasBase.page='configurar'
  
-    error = ErrorController()
-
-    def tiene_fases(self,m):
-        c=len(m.fases)
-        if c > 0:
-            return 'si ' +'('+str(c)+')' 
-        else:
-            return 'no'
-        
-    def tiene_usuarios(self,m):
-        c=len(m.usuarios)
-        if c > 0:
-            return 'si ' +'('+str(c)+')' 
-        else:
-            return 'no'
-
-    def tiene_tiposDeItem(self,m):
-        c=len(m.tiposDeItem)
-        if c > 0:
-            return 'si ' +'('+str(c)+')' 
-        else:
-            return 'no'
-        
-    def tiene_items(self,m):
-        c=len(m.items)
-        if c > 0:
-            return 'si ' +'('+str(c)+')' 
-        else:
-            return 'no'        
+    error = ErrorController() 
     
     @expose('testando.templates.configurar.index')    
     def index(self, **kw):
@@ -129,8 +96,8 @@ class ConfigurarController(BaseController):
                             proyecto.name,
                             proyecto.empresa,
                             proyecto.estado,
-                            (self.tiene_fases(proyecto)),
-                            (self.tiene_usuarios(proyecto))]} for proyecto in proyectos]
+                            (proyecto.tiene_fases()),
+                            (proyecto.tiene_usuarios())]} for proyecto in proyectos]
             result = dict(page=page, total=total, rows=rows)
         except:
             result = dict() 
@@ -205,9 +172,9 @@ class ConfigurarController(BaseController):
                             fase.descripcion,
                             fase.estado,
                             fase.orden,
-                            self.tiene_usuarios(fase),
-                            self.tiene_tiposDeItem(fase),
-                            self.tiene_items(fase)]} for fase in fases]
+                            fase.tiene_usuarios(),
+                            fase.tiene_tiposDeItem(),
+                            fase.tiene_items()]} for fase in fases]
             result = dict(page=page, total=total, rows=rows)
         except:
             result = dict() 

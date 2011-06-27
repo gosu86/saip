@@ -23,9 +23,7 @@ usuario_rol_fase_table = Table('usuarios_roles_fases', metadata,
 
 class Fase(DeclarativeBase):
     __tablename__ = 'fases'
-    
-    #{ Columns
-    
+
     id = Column(Integer, primary_key=True)
     
     name = Column(Unicode(150), nullable=False)
@@ -37,22 +35,32 @@ class Fase(DeclarativeBase):
     orden = Column(SMALLINT)
     
     fecha_creacion = Column(DateTime, default=datetime.now)
-    
-    
-    
-    #}
-    
-    #{ Relations
+
     tiposDeItem       = relationship(TipoItem, backref="fase")
+
     proyecto_id = Column(Integer, ForeignKey('proyectos.id'))
-    #proyecto (por backref en la relacion "fases" en el modelo proyecto.py)
-    
-    
+
     items = relationship(Item, order_by=Item.id, backref="fase")
     
     usuarios = relation('Usuario', secondary=usuario_rol_fase_table, backref='fases')
-    
-    __table_args__ = (
-            UniqueConstraint('proyecto_id', 'orden'),{}
-            )      
-    #}    
+
+    def tiene_usuarios(self):
+        c=len(self.usuarios)
+        if c > 0:
+            return 'si ' +'('+str(c)+')' 
+        else:
+            return 'no'
+
+    def tiene_tiposDeItem(self):
+        c=len(self.tiposDeItem)
+        if c > 0:
+            return 'si ' +'('+str(c)+')' 
+        else:
+            return 'no'
+        
+    def tiene_items(self):
+        c=len(self.items)
+        if c > 0:
+            return 'si ' +'('+str(c)+')' 
+        else:
+            return 'no'  

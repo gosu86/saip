@@ -2,7 +2,7 @@ $(function()
 {
 	$("#permisosAdministrarFlexi").flexigrid(
 	{
-		url: location+'fetch/',
+		url: '/administrar/lista_de_permisos/',
 		dataType: 'json',
 		
 		colModel : [
@@ -11,18 +11,7 @@ $(function()
 			{display: 'Descripcion', name : 'descripcion', width : 150, sortable : false, align: 'left'},
 			{display: 'Roles al que pertenece', name : 'roles', width : 150, sortable : false, align: 'left'}
 		],
-		
-		buttons : [
-		    /*
-			{separator: true},
-			{name: 'Crear', bclass: 'add', onpress : doCommandPermiso},
-			{separator: true},
-			{name: 'Editar', bclass: 'edit', onpress : doCommandPermiso},
-			{separator: true},
-			{name: 'Borrar', bclass: 'delete', onpress : doCommandPermiso},
-			{separator: true}*/
-		],
-		
+
 		searchitems : [
 			{display: 'Nombre', name : 'name', isdefault: true},
 		],
@@ -39,7 +28,35 @@ $(function()
 		singleSelect: true
 	});
 });
-
+function doCommandPermiso(com, grid)
+{
+	if (com == 'Crear')
+	{window.location = location+"new/";}
+	else if ($('.trSelected', grid).length > 0)
+	{
+		if (com == 'Editar')
+		{
+			var id = $('.trSelected', grid).attr('id');
+			id = id.substring(id.lastIndexOf('row')+3);
+			window.location = location+id+"/edit/"
+		}
+		else if (com == 'Borrar') 
+		{
+			var nombre = $('.trSelected', grid).find('td[abbr="permiso_name"]').children().text()	
+			var id = $('.trSelected', grid).attr('id');
+			id = id.substring(id.lastIndexOf('row')+3);
+			if(confirm('Seguro que desea BORRAR el permiso: "' + nombre + '" ?'))
+			{
+				deletePER(id)
+			}
+		}
+	}
+	else
+	{
+		msg_falta_seleccion('un permiso')
+	}
+	
+}
 function deletePER(id) {
     $.ajax(
     {
@@ -60,47 +77,11 @@ function deletePER(id) {
       },
     });
 }
-
-
-function doCommandPermiso(com, grid)
-{
-	if (com == 'Crear')
-	{window.location = location+"new/";}
-	else if (com == 'Editar')
-	{
-		if ($('.trSelected', grid).length > 0)
-		{	
-			$('.trSelected', grid).each(function()
-			{
-				var id = $(this).attr('id');
-				id = id.substring(id.lastIndexOf('row')+3);
-				window.location = location+id+"/edit/"
-			});
-		}
-		else
-		{alert("Debe seleccionar una fila para editar!");}
-	}
-	else if (com == 'Borrar') 
-	{
-		if ($('.trSelected', grid).length > 0)
-		{
-			var nombre = $('.trSelected',"#permisosAdministrarFlexi").find('td[abbr="permiso_name"]').children().text()	
-			$('.trSelected', grid).each(function() {
-				var id = $(this).attr('id');
-				id = id.substring(id.lastIndexOf('row')+3);
-				if(confirm('Seguro que desea BORRAR el permiso: "' + nombre + '" ?'))
-				{deletePER(id)}
-			});
-		}
-		else
-		{
-			jQuery.noticeAdd(
-			    	  {
-			              text: "Debe seleccionar una fila para borrar!",
-			              stay: false,
-			              stayTime: 5000,
-			              type: "notice"
-			    	  });			
-		}
-	}
+function msg_falta_seleccion(an_element){
+	jQuery.noticeAdd({
+	              text: "Debe seleccionar al menos "+an_element+"!",
+	              stay: false,
+	              stayTime: 2500,
+	              type: "notice"
+	    	  });
 }

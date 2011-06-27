@@ -38,22 +38,22 @@ class Proyecto(DeclarativeBase):
     
     fecha_creacion  =   Column(DateTime, default=datetime.now)
     
-    #}
-    
-    #{ Relations
     fases       = relationship(Fase, order_by=Fase.orden, backref="proyecto")
     
     usuarios    = relation('Usuario', secondary=usuario_proyecto_table, backref='proyectos')
     
-    lider_id    = Column(Integer, ForeignKey('usuarios.id'))   
-    #}    
+    lider_id    = Column(Integer, ForeignKey('usuarios.id'))
     
-    #{ Special methods
-
-#    def __repr__(self):
-#        return ('<Proyecto: nombre=%s>' % self.nombre).encode('utf-8')
-
- #   def __unicode__(self):
- #       return self.nombre
-
-    #}
+    def tiene_fases(self):
+        c=len(self.fases)
+        if c > 0:
+            return 'si ' +'('+str(c)+')' 
+        else:
+            return 'no'
+        
+    def tiene_usuarios(self):
+        c=len(self.usuarios)
+        if c > 0:
+            return 'si ' +'('+str(c)+')' 
+        else:
+            return 'no'

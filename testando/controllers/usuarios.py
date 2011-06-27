@@ -27,41 +27,7 @@ class UsuariosController(CrudRestController):
     @expose('testando.templates.administrar.usuarios.index')
     def get_all(self):   
         return dict(page="Administrar")
-
-
-    @expose()
-    def get_one(self, *args, **kw):
-        redirect('../')
-    
-    @validate(validators={"id":validators.Int()})
-    @expose('json')
-    def post_delete(self,**kw):
-        id = kw['id']
-        log.debug("Inside post_fetch: id == %s" % (id))
-        if (id != None):
-            d = {'id':id}
-            u = DBSession.query(Usuario).filter_by(**d).first()
-            nombre=u.name
-            DBSession.delete(u)
-            DBSession.flush()
-            msg="El usuario se ha eliminado con exito!."
-        return dict(msg=msg,nombre=nombre)
-    
-    @expose('testando.templates.administrar.usuarios.edit')
-    def edit(self, *args, **kw):
-        """Display a page to edit the record."""
-        tmpl_context.widget = self.edit_form
-        pks = self.provider.get_primary_fields(self.model)
-        kw = {}
-        for i, pk in  enumerate(pks):
-            kw[pk] = args[i]
-        value = self.edit_filler.get_value(kw)
-        
-        value['_method'] = 'PUT'
-        referer='/administrar/usuarios/'
-        return dict(value=value, model=self.model.__name__, pk_count=len(pks), referer=referer, title_nav='Lista de Usuarios')
-    
-    
+  
     @without_trailing_slash
     @expose('testando.templates.administrar.usuarios.new')
     def new(self, *args, **kw):
@@ -69,8 +35,6 @@ class UsuariosController(CrudRestController):
         tmpl_context.widget = self.new_form
         referer='/administrar/usuarios/'
         return dict(value=kw, model=self.model.__name__, referer=referer, title_nav='Lista de Usuarios')
-
-   
     
     @catch_errors(errors, error_handler=new)
     @expose()
@@ -89,6 +53,20 @@ class UsuariosController(CrudRestController):
         DBSession.flush()        
         raise redirect('./')
     
+    @expose('testando.templates.administrar.usuarios.edit')
+    def edit(self, *args, **kw):
+        """Display a page to edit the record."""
+        tmpl_context.widget = self.edit_form
+        pks = self.provider.get_primary_fields(self.model)
+        kw = {}
+        for i, pk in  enumerate(pks):
+            kw[pk] = args[i]
+        value = self.edit_filler.get_value(kw)
+        
+        value['_method'] = 'PUT'
+        referer='/administrar/usuarios/'
+        return dict(value=value, model=self.model.__name__, pk_count=len(pks), referer=referer, title_nav='Lista de Usuarios')
+
     @expose()
     def put(self, *args, **kw):
         """update"""
@@ -125,4 +103,22 @@ class UsuariosController(CrudRestController):
         
         
         DBSession.flush()
-        redirect('../' * len(pks))    
+        redirect('../' * len(pks))
+        
+    @validate(validators={"id":validators.Int()})
+    @expose('json')
+    def post_delete(self,**kw):
+        id = kw['id']
+        log.debug("Inside post_fetch: id == %s" % (id))
+        if (id != None):
+            d = {'id':id}
+            u = DBSession.query(Usuario).filter_by(**d).first()
+            nombre=u.name
+            DBSession.delete(u)
+            DBSession.flush()
+            msg="El usuario se ha eliminado con exito!."
+        return dict(msg=msg,nombre=nombre)
+    
+    @expose()
+    def get_one(self, *args, **kw):
+        redirect('../')
