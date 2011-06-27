@@ -113,36 +113,16 @@ $(function(){
             </td>
             <td class="fieldcol">
                 <select id="complejidad" class="textfield" name="complejidad">
-                	<option value='1'>
-                	1
-                	</option>
-                	<option value='2'>
-                	2
-                	</option>
-                	<option value='3'>
-                	3
-                	</option>
-                	<option value='4'>
-                	4
-                	</option>
-                	<option value='5'>
-                	5
-                	</option>
-                	<option value='6'>
-                	6
-                	</option>
-                	<option value='7'>
-                	7
-                	</option>
-                	<option value='8'>
-                	8
-                	</option>
-                	<option value='9'>
-                	9
-                	</option>       
-                	<option value='10'>
-                	10
-                	</option>
+                	<option value='1'>1</option>
+                	<option value='2'>2</option>
+                	<option value='3'>3</option>
+                	<option value='4'>4</option>
+                	<option value='5'>5</option>
+                	<option value='6'>6</option>
+                	<option value='7'>7</option>
+                	<option value='8'>8</option>
+                	<option value='9'>9</option>       
+                	<option value='10'>10</option>
                 </select>
             </td>
         </tr>
@@ -153,8 +133,17 @@ $(function(){
                 <label style="font-size:10px; text-align:center" for="${attr.name}" id="${attr.name}.label">(${attr.tipo})</label>
             </td>
             <td class="fieldcol">
-                <input type="text" value="" id="${attr.tipo}" class="${('', 'number')[attr.tipo=='Numero']}" name="${attr.name}"/>
-                
+				<py:choose test="attr.tipo">
+				  <py:when test="'Numero'">
+				  	<input type="text" value="" id="${attr.tipo}" class="number" name="${attr.name}"/>
+				  </py:when>
+				  <py:when test="'Fecha'">
+				  	<input type="text" value="" id="${attr.tipo}" class="date" name="${attr.name}"/>
+				  </py:when>
+				  <py:otherwise>
+				  	<input type="text" value="" id="${attr.tipo}" class="text" name="${attr.name}"/>
+				  </py:otherwise>
+				</py:choose>            				                
             </td>
         </tr>
         

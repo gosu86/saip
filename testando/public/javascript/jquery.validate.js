@@ -264,7 +264,7 @@ $.extend($.validator, {
 		remote: "Please fix this field.",
 		email: "Please enter a valid email address.",
 		url: "Please enter a valid URL.",
-		date: "Please enter a valid date.",
+		date: "Por favor... ingrese una fecha valida.",
 		dateISO: "Please enter a valid date (ISO).",
 		number: "Por favor.. ingrese un numero valido.",
 		digits: "Please enter only digits.",
