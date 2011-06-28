@@ -1,7 +1,7 @@
 $(function(){
 	$("#faseNoIniVerTiposDeItemFlexi").flexigrid(
 	{	
-		url: '/configurar/tiposDeItem_asignados/?fid='+$('input#fid').val(),
+		url: '/configurar/fases/tiposDeItem_asignados/?fid='+$('input#fid').val(),
 		dataType: 'json',
 		
 		colModel : [

@@ -107,4 +107,69 @@ class ProyectosController(CrudRestController):
 				msg="El proyecto esta Iniciado! No se puede eliminar."
 				type="error"
 		return dict(msg=msg,nombre=nombre,type=type)
+
+	@validate(validators={"id":validators.Int()})
+	@expose('json')
+	def iniciar_proyecto(self,**kw):
+		"""
+		Inicia un proyecto seleccionado.
+		@param id: id del proyecto. 
+		"""
+		id = kw['id']
+		if (id != None):
+			d = {'id':id}
+			proyecto = DBSession.query(Proyecto).filter_by(**d).first()
+			nombre=proyecto.name
+			if (proyecto.estado != 'Iniciado'):
+				f=proyecto.fases[0]
+				if len(f.usuarios)!=0:
+					proyecto.estado = 'Iniciado'
+					DBSession.flush()
+					msg="El proyecto se ha Iniciado."
+					type="succes"
+				else:
+					msg="La primera fase del proyecto no posee usuarios."
+					type="notice"					
+			else:
+				msg="El proyecto ya se encuentra Iniciado."
+				type="notice"
+		return dict(msg=msg,nombre=nombre,type=type)
+	
+	@validate(validators={"page":validators.Int(), "rp":validators.Int()})
+	@expose('json')	
+	def fases_asignadas(self,pid=None, page='1', rp='25', sortname='id', sortorder='asc', qtype=None, query=None):
+		"""
+		Devuelve la lista de fases asignadas a un proyecto.
+		@param proyecto_id: id del proyecto.
+		"""
+		try:
+			offset = (int(page)-1) * int(rp)
 			
+			if (query):
+				d = {'proyecto_id':int(pid)}
+				fases = DBSession.query(Fase).filter_by(**d)
+				if qtype == 'name':
+					fases=fases.filter(Fase.name.like('%'+query+'%'))
+				elif qtype == 'estado':
+					fases=fases.filter(Fase.estado.like('%'+query+'%'))					
+			else:
+				d = {'proyecto_id':int(pid)}
+				fases = DBSession.query(Fase).filter_by(**d)
+				
+			total	   =   fases.count()
+			column	  =   getattr(Fase, sortname)
+			fases	   =   fases.order_by(getattr(column,sortorder)()).offset(offset).limit(rp)
+			
+			rows = [{'id'  : fase.id,
+					'cell': [fase.id,
+							fase.name,
+							fase.descripcion,
+							fase.estado,
+							fase.orden,
+							fase.tiene_usuarios(),
+							fase.tiene_tiposDeItem(),
+							fase.tiene_items()]} for fase in fases]
+			result = dict(page=page, total=total, rows=rows)
+		except:
+			result = dict() 
+		return result

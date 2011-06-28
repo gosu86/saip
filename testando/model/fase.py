@@ -11,7 +11,7 @@ from datetime import datetime
 # modelos relacionados
 from testando.model.tipoitem import TipoItem
 from testando.model.item import Item
-from testando.model.auth import Usuario
+
 
 usuario_rol_fase_table = Table('usuarios_roles_fases', metadata,
     Column('usuario_id', Integer, ForeignKey('usuarios.id',

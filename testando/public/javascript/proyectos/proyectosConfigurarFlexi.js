@@ -16,14 +16,14 @@ $(function()
 
 		buttons : [
 			{separator: true},         	
-			{name: 'Fases', bclass: 'phases', onpress : doCommandFases},
+			{name: 'Fases', bclass: 'phases', onpress : doCommandProyecto},
 			{separator: true},
 			{separator: true},
 			{separator: true},
 			{separator: true},
 			{separator: true},
 			{separator: true},	
-			{name: 'Iniciar', bclass: 'start', onpress : doCommandFases},
+			{name: 'Iniciar', bclass: 'start', onpress : doCommandProyecto},
 			{separator: true},
 		],
 		
@@ -46,13 +46,11 @@ $(function()
 	});
 });
 
-function doCommandFases(com, grid)
+function doCommandProyecto(com, grid)
 {
 	if ($('.trSelected', grid).length > 0)
 	{	
-		if (com == 'Detalle Completo')
-			{detalle_completo(grid)}
-		else if (com == 'Fases')
+		if (com == 'Fases')
 			{ver_fases(grid)}
 		else if (com == 'Iniciar')
 			{iniciar(grid)}
@@ -60,17 +58,6 @@ function doCommandFases(com, grid)
 	else
 	{msg_falta_seleccion()}	
 }
-
-function detalle_completo(grid){
-	$('.trSelected', grid).each(function()
-	{
-		id = get_id(this) 
-		estado=get_estado()
-		nombre=get_nombre()
-		window.location = "/configurar/detalle_completo/?pid="+id
-	});	
-}
-
 function ver_fases(grid){
 		$('.trSelected', grid).each(function()
 		{	
@@ -117,7 +104,7 @@ function iniciarP(id){
     {
       type: 'POST',
       dataType: "json",
-      url: "/configurar/iniciar_proyecto",
+      url: "/configurar/proyectos/iniciar_proyecto",
       data: {id:id},
       success: function(data)
       {

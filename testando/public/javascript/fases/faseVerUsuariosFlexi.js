@@ -2,7 +2,7 @@ $(function()
 {
 	$("#faseVerUsuariosFlexi").flexigrid(
 	{
-		url: '/configurar/usuarios_asignados/?fid='+$('input#faseId').val(),
+		url: '/configurar/fases/usuarios_asignados/?fid='+$('input#faseId').val(),
 		dataType: 'json',
 		
 		colModel : [
@@ -85,16 +85,7 @@ function doCommandUsuarios(com, grid) {
 	}	
 	else if ($('.trSelected', grid).length > 0)
 	{
-		if (com == 'Borrar') 
-		{
-			$('.trSelected', grid).each(function() {
-				nombre = get_nombre();
-				id = get_id(this);
-				if(confirm('Seguro que desea BORRAR la fase: "' + nombre + '" ?'))
-				{deleteF(id);}
-			});
-		}
-		else if (com == 'Agregar a la Fase')
+		if (com == 'Agregar a la Fase')
 		{
 				obtener_ids(grid,'agregar');
 		}
@@ -114,29 +105,7 @@ function doCommandUsuarios(com, grid) {
 
 } 
 
-function cambiar_roles(idsyroles){
-    $.ajax(
-    	    {
-    	      type: 'POST',
-    	      dataType: "json",
-    	      url: '/configurar/cambiar_roles',
-    	      data: {idsyroles:idsyroles},
-    	      success: function(data)
-    	      { 
-    	    	  $("#faseVerUsuariosFlexi").flexReload();
-    	    	  jQuery.noticeAdd(
-    	    	    	  {
-    	    	              text: data.msg,
-    	    	              stay: false,
-    	    	              stayTime: 2500,
-    	    	              type: data.type
-    	    	    	  });
-    	    		  
-    	    	  $('#usuariosListaFlexi').flexReload();
-    	    	 
-    	      },
-    	    });	
-}
+
 function obtener_ids(grid,tipo){
 		faseId=$('input#faseId').val();
 		ids=''
@@ -156,15 +125,14 @@ function obtener_ids(grid,tipo){
 		{quitar_usuarios(ids)}
 		else if (tipo=='cambiar')
 		{cambiar_roles(idsyroles)}
-	}
-
+}
 
 function agregar_usuarios(idsyroles) {
     $.ajax(
     {
       type: 'POST',
       dataType: "json",
-      url: '/configurar/agregar_usuarios',
+      url: '/configurar/fases/agregar_usuarios',
       data: {idsyroles:idsyroles},
       success: function(data)
       { 
@@ -188,13 +156,12 @@ function agregar_usuarios(idsyroles) {
       },
     });
 }
-
 function quitar_usuarios(ids) {
     $.ajax(
     {
       type: 'POST',
       dataType: "json",
-      url: '/configurar/quitar_usuarios',
+      url: '/configurar/fases/quitar_usuarios',
       data: {ids:ids},
       success: function(data)
       { 
@@ -228,62 +195,34 @@ function quitar_usuarios(ids) {
       },
     });
 }
-
-
-
-
-
-function deleteF(id) {
+function cambiar_roles(idsyroles){
     $.ajax(
-    {
-      type: 'POST',
-      dataType: "json",
-      url: "/configurar/fases/post_delete",
-      data: {id:id},
-      success: function(data)
-      {
-    	  jQuery.noticeAdd(
-    	    	  {
-    	              text: data.msg,
-    	              stay: false,
-    	              stayTime: 5000,
-    	              type: data.type
-    	    	  });
-    	  
-    	  $("#faseVerUsuariosFlexi").flexReload();
-      },
-    });
+    	    {
+    	      type: 'POST',
+    	      dataType: "json",
+    	      url: '/configurar/cambiar_roles',
+    	      data: {idsyroles:idsyroles},
+    	      success: function(data)
+    	      { 
+    	    	  $("#faseVerUsuariosFlexi").flexReload();
+    	    	  jQuery.noticeAdd(
+    	    	    	  {
+    	    	              text: data.msg,
+    	    	              stay: false,
+    	    	              stayTime: 2500,
+    	    	              type: data.type
+    	    	    	  });
+    	    		  
+    	    	  $('#usuariosListaFlexi').flexReload();
+    	    	 
+    	      },
+    	    });	
 }
-
-function ver_usuarios(grid){
-	$('.trSelected', grid).each(function()
-	{	
-		id = get_id(this) 
-		nombre=get_nombre()
-		window.location = "/configurar/vista_de_usuarios/?fId="+id+"&nombre="+nombre
-	});	
-}
-
-function ver_tipos_de_item(grid){
-	$('.trSelected', grid).each(function()
-	{	
-		id = get_id(this) 
-		nombre=get_nombre()
-		window.location = "/configurar/vista_de_tiposDeItem/?fId="+id+"&nombre="+nombre
-	});	
-}
-
 function get_id(tr){
 	var id = $(tr).attr('id');
 	id = id.substring(id.lastIndexOf('row')+3);
 	return id;
 }
-
-function get_nombre(){
-	nombre=$('.trSelected').find('td[abbr="name"]').text();
-	return nombre
-}
-
 function msg_falta_seleccion(){
 	jQuery.noticeAdd({
 	              text: "Debe seleccionar al menos un usuario!",

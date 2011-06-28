@@ -1,7 +1,7 @@
 $(function(){
 	$("#faseVerItemsFlexi").flexigrid(
 	{	
-		url: '/configurar/items_creados/?fid='+$('input#fid').val(),
+		url: '/configurar/fases/items_creados/?fid='+$('input#fid').val(),
 		dataType: 'json',
 		
 		colModel : [
@@ -53,7 +53,7 @@ function doCommandItem(com, grid)
 			id = get_id($('.trSelected', grid))
 			if (com == 'Ver Historial')
 			{
-					window.location = '/configurar/historial/?iid='+id;
+					window.location = '/configurar/items/vista_de_historial/?iid='+id;
 			}
 			else if (com == 'Revivir')
 			{

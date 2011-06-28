@@ -43,7 +43,7 @@ class ItemsController(CrudRestController):
         
         cant=len(DBSession.query(Item).filter(and_(Item.fase_id==fase_id,Item.tipo_item_id==tdi.id)).all())
         cod=str(tdi.codigo)
-        cod= cod+'-'+str(cant)
+        cod= cod+'-'+str(cant+1)
         version=1
         
         tipo_item_id=tdi.id
@@ -203,6 +203,101 @@ class ItemsController(CrudRestController):
             result = dict() 
         return result
            
+           
+    @expose('testando.templates.configurar.items.vista_de_historial')    
+    def vista_de_historial(self, iid=None,**kw):
+        referer=request.headers.get("Referer", "")        
+                
+        if find(referer,'configurar') >=0:
+            page='Configurar'
+        else:
+            page='Desarrollar'
+                    
+        i=DBSession.query(Item).filter_by(id=int(iid)).first()
+        #referer='/configurar/vista_de_items/?fid='+str(i.fase.id)
+        return dict(page=page,item=i,referer=referer,title_nav="Lista de Items")
+
+    @validate(validators={"page":validators.Int(), "rp":validators.Int()})
+    @expose('json')    
+    def historial(self,iid=None, page='1', rp='25', sortname='version', sortorder='desc', qtype=None, query=None):
+        i=DBSession.query(Item).filter_by(id=int(iid)).first()
+        try:
+            offset = (int(page)-1) * int(rp)
+            
+            if (query):
+                d = {'historico_id':i.historico_id}
+                items = DBSession.query(Item).filter_by(**d)
+                items = items.filter(Item.historico==True)
+                if qtype=='name':
+                    items   =   items.filter(Item.name.like('%'+query+'%'))
+                elif qtype=='estado':
+                    items   =   items.filter(Item.estado.like('%'+query+'%'))
+                elif qtype=='codigo':
+                    items   =   items.filter(Item.codigo.like('%'+query+'%'))
+                elif qtype=='version':
+                    items   =   items.filter_by(version=int(query))                    
+            else:
+                d = {'historico_id':i.historico_id}
+                items = DBSession.query(Item).filter_by(**d)
+                items = items.filter(Item.historico==True)
+                
+            total = items.count()
+            column = getattr(Item, sortname)
+            items = items.order_by(getattr(column,sortorder)()).offset(offset).limit(rp)
+            total = items.count()         
+            rows = [{'id'  : item.id,
+                    'cell': [item.id,
+                             item.codigo,
+                            item.name,
+                            item.version,
+                            item.descripcion,
+                            item.complejidad,
+                            item.estado,
+                            item.tipo_item.name]} for item in items]
+            result = dict(page=page, total=total, rows=rows)
+        except:
+            result = dict() 
+        return result          
+
+    @expose('json')        
+    def revertir(self,**kw):          
+        id                  =   kw['id'].split(',')
+        
+        i_version_a_revertir  =   DBSession.query(Item).filter_by(id=int(id[1])).first()
+        i_ultima_version      =   DBSession.query(Item).filter_by(id=int(id[0])).first()
+        i_ultima_version.historico        = True
+        item                  =   i_version_a_revertir.nueva_version()
+        item.version          =   i_ultima_version.version+1
+        item.historico        = False
+        
+        
+        ok=False
+        relaciones= len(item.padres) + len(item.antecesores)
+        for p in item.padres:
+            if p.estado=='Eliminado':
+                item.padres.remove(p)
+                relaciones=relaciones-1
+                
+        if item.fase.orden >1:
+            for a in item.antecesores:
+                if a.estado=='Eliminado':
+                    item.antecesores.remove(a)
+                    relaciones=relaciones-1
+            if len(item.antecesores)>0:
+                ok=True
+                DBSession.flush()
+        else:
+            ok=True
+            DBSession.flush()
+             
+        if ok: 
+            msg='El item se ha revertido con exito!'
+            type='succes'
+        else:
+            msg='El item no se puede revertir, NO se todas sus relaciones esta rotas'
+            type='error'        
+        return dict(msg=msg,type=type,id=str(item.id)) 
+
 #-----------------------------------------------------------------#
 #-------------------Adjunto Controller----------------------------#
 #-----------------------------------------------------------------#

@@ -94,13 +94,12 @@ class UsuariosController(CrudRestController):
     @validate(validators={"id":validators.Int()})
     @expose('json')
     def post_delete(self,**kw):
+        """Elimina un usuario (cambia su estado a eliminado)."""
         id = kw['id']
-        log.debug("Inside post_fetch: id == %s" % (id))
         if (id != None):
             d = {'id':id}
             u = DBSession.query(Usuario).filter_by(**d).first()
-            nombre=u.name
-            DBSession.delete(u)
+            u.estado='Eliminado'
             DBSession.flush()
             msg="El usuario se ha eliminado con exito!."
-        return dict(msg=msg,nombre=nombre)
+        return dict(msg=msg,nombre=u.name)

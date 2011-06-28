@@ -130,47 +130,17 @@ class TiposDeItemController(CrudRestController):
         redirect('/configurar/vista_de_tiposDeItem/?fid='+str(tdi.fase_id))
                 
     def actualizar_items(self,tdi,ce):
-        """Actualiza los atributos extras de los items que son del tipo de item al cual se le agregaron campos extras."""
+        """Actualiza los atributos extra de los items que son del tipo de item al cual se le agregaron campos extras."""
         for i in tdi.items:
             ae=AtributoExtra()
             ae.item_id=i.id
             ae.campo_extra_id=ce.id
             DBSession.add(ae)
 
-                
-    @validate(validators={"page":validators.Int(), "rp":validators.Int()})
-    @expose('json')
-    def fetch(self, page='1', rp='25', sortname='id', sortorder='asc', qtype=None, query=None):
-        try:
-            if (qtype=="id"):
-                id=int(query)
-            
-            offset = (int(page)-1) * int(rp)
-            if (query):
-                d = {qtype:query}
-                tipositems = DBSession.query(TipoItem).filter_by(**d)
-            else:
-                tipositems = DBSession.query(TipoItem)
-            
-            total = tipositems.count()
-            column = getattr(TipoItem, sortname)
-            tipositems = tipositems.order_by(getattr(column,sortorder)()).offset(offset).limit(rp)    
-            rows = [{'id'  : tipoitem.id,
-                    'cell': [
-                             tipoitem.id,
-                             tipoitem.name,
-                             tipoitem.descripcion,
-                             tipoitem.complejidad,
-                             (','.join([ce.name for ce in tipoitem.campos_extra]))]
-                     } for tipoitem in tipositems]
-            result = dict(page=page, total=total, rows=rows)
-        except:
-            result = dict() 
-        return result
-    
     @validate(validators={"id":validators.Int()})
     @expose('json')
     def post_delete(self,**kw):
+        """Elimina un tipo de item del sistema."""
         id = kw['id']
         if (id != None):
             d = {'id':id}

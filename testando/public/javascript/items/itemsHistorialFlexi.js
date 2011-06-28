@@ -1,7 +1,7 @@
 $(function(){
 	$("#itemsHistorialFlexi").flexigrid(
 	{	
-		url: '/configurar/items_historial/?iid='+$('input#iid').val(),
+		url: '/desarrollar/items/historial/?iid='+$('input#iid').val(),
 		dataType: 'json',
 		
 		colModel : [
@@ -102,7 +102,7 @@ function revertir(id){
     	    {
     	      type: 'POST',
     	      dataType: "json",
-    	      url: '/configurar/revertir',
+    	      url: '/desarrollar/items/revertir',
     	      data: {id:id},
     	      success: function(data)
     	      { 
@@ -113,7 +113,7 @@ function revertir(id){
     	        	              stayTime: 2500,
     	        	              type: data.type
     	        	    	  });  
-				window.location='/configurar/historial/?iid='+data.id 	        		  
+				window.location='/'+$('a.active').text().toLowerCase()+'/items/vista_de_historial/?iid='+data.id.toString()	        		  
     	      }
     	    	 
     	    });

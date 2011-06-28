@@ -18,22 +18,9 @@
 $().ready(function() {
 	$(".tableform").validate({
 			rules: {
-				complejidad: {
-				required: true,
-				number: true,
-				max: 10,
-				min:1,
-				},
 				"antecesores":"required"
 			},
 			messages: {
-			complejidad		: {
-						required:"Por favor... Ingrese el valor complejida este es obligatorio.",
-						number:"La complejidad tiene que ser un numero entero positivo.",
-						max:"La complejidad no puede ser mayor que 10.",
-						min:"La complejidad no puede ser menor que 1.",
-						
-			},
 			"antecesores": "Por favor, seleccione una realcion en la fase anterior.",
 		},
 		errorClass: "fielderror"

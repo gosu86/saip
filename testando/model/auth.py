@@ -18,11 +18,12 @@ except ImportError:
     sys.exit('ImportError: No module named hashlib\n'
              'If you are on python2.4 this library is not part of python. '
              'Please install it. Example: easy_install hashlib')
-
+from tg import config
+from testando.model.fase            import usuario_rol_fase_table
 from sqlalchemy import Table, ForeignKey, Column
 from sqlalchemy.types import Unicode, Integer, DateTime
 from sqlalchemy.orm import relation, synonym,relationship
-
+from sqlalchemy.sql import select, and_
 from testando.model import DeclarativeBase, metadata, DBSession
 #from testando.model.proyecto import Proyecto
 __all__ = ['Usuario', 'Rol', 'Permiso']
@@ -193,6 +194,49 @@ class Usuario(DeclarativeBase):
             password = password.encode('utf-8')
         hash.update(password + str(self.password[:40]))
         return self.password[40:] == hash.hexdigest()
+
+    def roles_select(self,selected=None):
+            """
+            Devuelve un select tag con los roles posibles en una fase.
+            """
+            selectINI='<select id="'+str(self.id)+'">'
+            op1='<option value=1>Aprobador</option>'
+            op2='<option value=2>Desarrollador</option>'
+            op3='<option value=3>Aprobador y Desarrollador</option>'            
+            if selected==1:
+                #log.debug('1')
+                op1='<option value=1 selected="true">Aprobador</option>'
+            elif selected==2:
+                #log.debug('2')
+                op2='<option value=2 selected="true">Desarrollador</option>'
+                
+            elif selected==3:
+                #log.debug('3')
+                op3='<option value=3 selected="true":>Aprobador y Desarrollador</option>'
+
+            selectFIN='</select>'
+            select=selectINI+op1+op2+op3+selectFIN
+            
+            return select
+
+           
+    def get_rol(self,fid):
+        """
+        Devuelve un select tag con el rol del usuario seleccionado por defecto. en la fase en configuracion.
+        """
+        fid=int(fid)
+        conn = config['pylons.app_globals'].sa_engine.connect()
+        se=select([usuario_rol_fase_table.c.rol_id],and_(usuario_rol_fase_table.c.usuario_id==self.id, usuario_rol_fase_table.c.fases_id==fid))
+        
+        result=conn.execute(se)
+        row=result.fetchone() 
+        rol=int(row['rol_id'])
+
+        conn.close()
+        select_tag=self.roles_select(rol) 
+        return select_tag
+
+
 
 
 class Permiso(DeclarativeBase):

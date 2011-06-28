@@ -1,7 +1,7 @@
 $(function(){
 	$("#fasesAprobarDesarrollarItemsFlexi").flexigrid(
 	{	
-		url: '/desarrollar/items_creados/?fid='+$('input#fid').val(),
+		url: '/desarrollar/fases/items_creados/?fid='+$('input#fid').val(),
 		dataType: 'json',
 		
 		colModel : [
@@ -33,7 +33,7 @@ $(function(){
 			{name: 'Aprobar', bclass: 'approve', onpress : doCommandItem},
 			{separator: true},{separator: true},{separator: true},
 			{separator: true},{separator: true},{separator: true},
-			{name: 'Historial de Items', bclass: 'items', onpress : doCommandItem},				
+			{name: 'Historial', bclass: 'items', onpress : doCommandItem},				
 			{separator: true},
 			{name: 'Calculo de Impacto', bclass: 'calculo', onpress : doCommandItem},
 			{separator: true},	
@@ -61,8 +61,8 @@ $(function(){
 
 function doCommandItem(com, grid)
 {
-	if (com=='Historial de Items'){
-		window.location = "/configurar/vista_de_items/?fid="+$('input#fid').val()
+	if (com=='Historial'){
+		window.location = "/desarrollar/items/vista_de_historial/?iid="+get_id($('.trSelected', grid))
 	}	
 	if ($('.trSelected', grid).length > 0)
 	{	

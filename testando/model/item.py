@@ -79,11 +79,11 @@ class Item(DeclarativeBase):
             return 'No tiene'
         
         
-    def nueva_version(self,kw,adjunto_id=None):
+    def nueva_version(self,kw=None,adjunto_id=None):
         self.historico         =   True
         
         item                =   Item()
-        if kw.has_key('name'):
+        if kw!=None and kw.has_key('name'):
             item.name           =   kw['name']
         else:
             item.name           =   self.name        
@@ -92,64 +92,59 @@ class Item(DeclarativeBase):
         item.version        =   self.version+ 1
         item.tipo_item      =   self.tipo_item
         
-        if kw.has_key('descripcion'):
+        if kw!=None and kw.has_key('descripcion'):
             item.descripcion           =   kw['descripcion']
         else:
             item.descripcion           =   self.descripcion         
 
-        if kw.has_key('complejidad'):
+        if kw!=None and kw.has_key('complejidad'):
             item.complejidad           =   kw['complejidad']
         else:
             item.complejidad           =   self.complejidad
                     
         item.historico_id   =   self.historico_id
         
-        if kw.has_key('atributos_extra'):
+        if kw!=None and kw.has_key('atributos_extra'):
             
             if type(kw['atributos_extra'])==type(u''):
                 a=kw['atributos_extra']
                 kw['atributos_extra']=[]
                 kw['atributos_extra'].append(a)
             for id in kw['atributos_extra']:
-                log.debug('id = %s' %str(id))
                 aeo          =   DBSession.query(AtributoExtra).filter_by(id=int(id)).first()
                 aen          =   AtributoExtra()
                 aen.valor    =   kw['atributos_extra_'+str(id)]
                 aen.campo_extra_id  =   aeo.campo_extra_id
                 DBSession.add(aen)
                 item.atributos_extra.append(aen)
-                log.debug('ae = %s' %str(aen))
-                log.debug('attr extra valor = %s' %str(kw['atributos_extra_'+id]))
-                log.debug('attr extra id = %s' %str(id))
         else:
             for ae in self.atributos_extra:
                 aen          =   AtributoExtra()
                 aen.valor    =   ae.valor
                 aen.campo_extra_id  =   ae.campo_extra_id
-                log.debug('ae = %s' %str(aen))
                 DBSession.add(aen)
                 item.atributos_extra.append(aen)
            
-        if kw.has_key('padres'):
+        if kw!=None and kw.has_key('padres'):
             item.padres=[]             
             for id in kw['padres']:
                 p=DBSession.query(Item).filter_by(id=int(id)).first()
                 item.padres.append(p)
         else:
-            if kw.has_key('name'):
+            if kw!=None and kw.has_key('name'):
                 item.padres=[]
             else:
                 item.padres=[]             
                 for p in self.padres:
                     item.padres.append(p)                
         
-        if kw.has_key('antecesores'):
+        if kw!=None and kw.has_key('antecesores'):
             item.antecesores=[]             
             for id in kw['antecesores']:
                 a=DBSession.query(Item).filter_by(id=int(id)).first()
                 item.antecesores.append(a)
         else:
-            if kw.has_key('name'):            
+            if kw!=None and kw.has_key('name'):            
                 item.antecesores=[]
             else:
                 for a in self.antecesores:

@@ -36,21 +36,15 @@
                     class="first">
 
 
-                <a href="${tg.url('/administrar/')}" class="${('', 'active')[defined('page') and page=='Administrar']}">
-                  Administrar
-                </a>
+                <a href="${tg.url('/administrar/')}" class="${('', 'active')[defined('page') and page=='Administrar']}">Administrar</a>
               </li>
               <li py:if="tg.predicates.in_group('Configuradores')" class="">
 
-              <a href="${tg.url('/configurar/')}" class="${('', 'active')[defined('page') and page=='Configurar']}">
-                Configurar
-              </a>
+              <a href="${tg.url('/configurar/')}" class="${('', 'active')[defined('page') and page=='Configurar']}">Configurar</a>
             </li>
             <li py:if="tg.predicates.in_group('Desarrolladores')" class="">
 
-            <a href="${tg.url('/desarrollar/')}" class="${('', 'active')[defined('page') and page=='Desarrollar']}">
-              Desarrollar
-            </a>
+            <a href="${tg.url('/desarrollar/')}" class="${('', 'active')[defined('page') and page=='Desarrollar']}">Desarrollar</a>
           </li>
             <li py:if="defined('referer')" class="">
 

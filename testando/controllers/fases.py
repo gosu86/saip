@@ -1,12 +1,14 @@
-from tg             import expose,redirect, validate,flash,tmpl_context,config
+from tg             import expose,redirect, validate,flash,tmpl_context,config, request
 from tg.decorators  import override_template
 from tg.decorators  import without_trailing_slash
 from decorators import registered_validate, register_validators, catch_errors
 from tgext.crud     import CrudRestController
-from sqlalchemy.sql import and_, or_, not_
+from sqlalchemy.sql import and_, or_, not_,select
 from testando.model             import DBSession
-from testando.model.fase        import Fase
+from testando.model.fase            import Fase,usuario_rol_fase_table
 from testando.model.auth        import Rol
+from testando.model.auth            import Usuario
+from testando.model.item            import Item
 from testando.model.campoextra  import CampoExtra
 from testando.model.tipoitem        import TipoItem
 from testando.model.proyecto        import Proyecto
@@ -78,6 +80,7 @@ class FasesController(CrudRestController):
     @validate(validators={"id":validators.Int()})
     @expose('json')
     def post_delete(self,**kw):
+        """ Elimina una fase del sistema."""
         id = kw['id']
         if (id != None):
             d = {'id':id}
@@ -108,6 +111,7 @@ class FasesController(CrudRestController):
              
     @expose('json')
     def importar_TiposDeItem(self,**kw):
+        """Gestiona la importacino de items"""
         ids    =    kw['ids']
         ids    =    ids.split(",")
         f_id    =    ids[0]
@@ -154,3 +158,198 @@ class FasesController(CrudRestController):
         if cantNames > 0:
             error = 'Los tipos de item '+str(names)+'no pudieron importarse, existen tipos de item con mismo nombre y/o codigo en la fase destino.'
         return dict(msg=msg,type=type, error=error)
+    
+    @validate(validators={"page":validators.Int(), "rp":validators.Int()})
+    @expose('json')    
+    def tiposDeItem_asignados(self,fid=None, page='1', rp='25', sortname='id', sortorder='asc', qtype=None, query=None):
+        """Devuelve los tipos de item pertenecientes a la fase seleccionada. """
+        try:
+            offset = (int(page)-1) * int(rp)
+            
+            if (query):
+                d = {qtype:query,'fase_id':int(fid)}
+                if qtype == 'name':
+                    tiposDeItem = DBSession.query(TipoItem).filter(and_(TipoItem.fase_id!=fid,TipoItem.name.like('%'+query+'%')))
+                elif qtype == 'codigo':
+                    tiposDeItem = DBSession.query(TipoItem).filter(and_(TipoItem.fase_id!=fid,TipoItem.codigo.like('%'+query+'%')))
+                else:
+                    tiposDeItem = DBSession.query(TipoItem).filter_by(**d)
+                    
+            else:
+                d = {'fase_id':int(fid)}
+                tiposDeItem = DBSession.query(TipoItem).filter_by(**d)
+                
+            total = tiposDeItem.count()
+            
+            column = getattr(TipoItem, sortname)
+            tiposDeItem = tiposDeItem.order_by(getattr(column,sortorder)()).offset(offset).limit(rp)
+            
+            rows = [{'id'  : tipoDeItem.id,
+                    'cell': [tipoDeItem.id,
+                             tipoDeItem.codigo,
+                            tipoDeItem.name,
+                            tipoDeItem.descripcion,
+                            (', </br>'.join([(ce.name+': '+ce.tipo) for ce in tipoDeItem.campos_extra]))]} for tipoDeItem in tiposDeItem]
+            result = dict(page=page, total=total, rows=rows)
+        except:
+            result = dict() 
+        return result
+
+    @validate(validators={"page":validators.Int(), "rp":validators.Int()})
+    @expose('json')    
+    def items_creados(self,fid=None, page='1', rp='25', sortname='id', sortorder='asc', qtype=None, query=None):
+        try:
+            offset = (int(page)-1) * int(rp)
+            
+            if (query):
+                d = {'fase_id':int(fid)}
+                items = DBSession.query(Item).filter_by(**d)
+                items = items.filter(Item.historico==False)
+                if qtype=='name':
+                    items   =   items.filter(Item.name.like('%'+query+'%'))
+                elif qtype=='estado':
+                    items   =   items.filter(Item.estado.like('%'+query+'%'))
+                elif qtype=='codigo':
+                    items   =   items.filter(Item.codigo.like('%'+query+'%'))                
+                elif qtype=='version':
+                    items   =   items.filter_by(version=int(query))
+            else:
+                d = {'fase_id':int(fid)}
+                items = DBSession.query(Item).filter_by(**d)
+                items = items.filter(Item.historico==False)
+
+                
+            total = items.count()
+            log.debug('total %s' %total)
+            column = getattr(Item, sortname)
+            items = items.order_by(getattr(column,sortorder)()).offset(offset).limit(rp)
+            total = items.count()
+            log.debug('total 2 %s' %total)            
+            rows = [{'id'  : item.id,
+                    'cell': [item.id,
+                             item.codigo,                             
+                            item.name,
+                            item.version,
+                            item.estado,
+                            item.descripcion,
+                            item.complejidad,
+                            item.tipo_item.name,
+                            item.lineaBase]} for item in items]
+            result = dict(page=page, total=total, rows=rows)
+        except:
+            result = dict() 
+        return result                     
+
+    @validate(validators={"page":validators.Int(), "rp":validators.Int()})
+    @expose('json')    
+    def usuarios_asignados(self,fid=None, page='1', rp='25', sortname='id', sortorder='asc', qtype=None, query=None):
+        """
+        
+        """
+        
+        try:
+            offset = (int(page)-1) * int(rp)
+            
+            if (query):
+                d = {qtype:query}
+                usuarios = DBSession.query(Usuario).filter(Usuario.fases.any(id = int(fid))).filter_by(**d)
+
+            else:
+                usuarios = DBSession.query(Usuario).filter(Usuario.fases.any(id = int(fid)))
+                
+            total = usuarios.count()
+            log.debug('total %s' %total)
+            column = getattr(Usuario, sortname)
+            usuarios = usuarios.order_by(getattr(column,sortorder)()).offset(offset).limit(rp)
+            rows = [{'id'  : u.id,
+                    'cell': [u.id,
+                            u.name,
+                            u.get_rol(fid),
+                            ]} for u in usuarios]
+            result = dict(page=page, total=total, rows=rows)
+        except:
+            result = dict() 
+        return result
+    
+    @expose('json')
+    def agregar_usuarios(self,**kw):
+        idsyroles    =    kw['idsyroles']
+        idsyroles    =    idsyroles.split(";")
+
+        f_id    =    idsyroles[0]
+        idsyroles.remove(f_id)
+        idsyroles.pop()
+        
+        current_user=request.identity['user']
+        current_user_id =current_user.id
+        reload=False
+        cantidad    =    len(idsyroles)
+        
+        f_id    =    int(f_id)
+        f=DBSession.query(Fase).filter_by(id=f_id).first()
+        p=f.proyecto
+        conn = config['pylons.app_globals'].sa_engine.connect()
+        for idyrol in idsyroles:
+            idyrol=idyrol.split(',')
+            u_id = int(idyrol[0])
+            if u_id == current_user_id:
+                reload=True
+            rol = int(idyrol[1])
+            ins=usuario_rol_fase_table.insert().values(usuario_id=u_id,rol_id=rol,fases_id=f_id)
+            ins.compile().params
+            conn.execute(ins)
+            u=DBSession.query(Usuario).filter_by(id=u_id).first()
+            r=DBSession.query(Rol).filter(Rol.rol_name=='Desarrolladores').first()
+            u.roles.append(r)
+            p.usuarios.append(u)
+            DBSession.flush()
+        conn.close()
+            
+        msg    =    str(cantidad)    +    " usuarios agregados con exito!"
+        type="succes"
+        
+        return dict(msg=msg,type=type, reload=reload)
+    
+    @expose('json')
+    def quitar_usuarios(self,**kw):
+        ids    =    kw['ids']
+        ids    =    ids.split(",")
+
+        f_id    =    ids[0]
+        ids.remove(f_id)
+        ids.pop()
+        log.debug('ids %s' %ids)
+        c1    =    len(ids)
+        c2=0
+        f_id    =    int(f_id)
+        f=DBSession.query(Fase).filter_by(id=f_id).first()
+        p=f.proyecto
+        current_user=request.identity['user']
+        current_user_id =current_user.id
+        reload=False
+        
+        for id in ids:
+            u_id = int(id)
+            if u_id == current_user_id:
+                reload=True
+            u=DBSession.query(Usuario).filter_by(id=u_id).first()
+            f.usuarios.remove(u)
+            fases_del_usuario=DBSession.query(Fase).filter(Fase.usuarios.any(id = u_id))
+            fases_del_proyecto=fases_del_usuario.filter_by(proyecto_id=p.id)
+            r=DBSession.query(Rol).filter(Rol.rol_name==u'Desarrolladores').first()
+            
+            if len(u.fases)==0:
+                r.usuarios.remove(u)
+            if fases_del_proyecto.count()==0:
+                c2=c2+1
+                p.usuarios.remove(u)
+                
+        DBSession.flush()
+        if c2>0:
+            msg_proyectos=str(c2)+" usuarios ya no forman parte de este proyecto."
+        else:
+            msg_proyectos=''
+        msg    =    str(c1)    +    " usuarios quitados de la fase con exito!"
+        type="succes"
+        
+        return dict(msg=msg,type=type,msg_p=msg_proyectos,reload=reload)

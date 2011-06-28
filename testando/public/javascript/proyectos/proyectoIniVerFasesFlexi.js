@@ -2,7 +2,7 @@ $(function()
 {
 	$("#proyectoVerFasesFlexi").flexigrid(
 	{
-		url: '/configurar/fases_asignadas/?pid='+$('input#pid').val(),
+		url: '/configurar/proyectos/fases_asignadas/?pid='+$('input#pid').val(),
 		dataType: 'json',
 		
 		colModel : [
