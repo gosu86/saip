@@ -31,6 +31,8 @@ $(function(){
 			{separator: true},{separator: true},{separator: true},
 			{name: 'Historial', bclass: 'items', onpress : doCommandItem},			
 			{separator: true},
+			{name: 'Calculo de Impacto', bclass: 'calculo', onpress : doCommandItem},
+			{separator: true},	
 			
 		],
 		
@@ -102,8 +104,23 @@ function doCommandItem(com, grid)
 				else
 				{
 					id = get_id($('.trSelected', grid)) 
-					window.location = '/desarrollar/items/index/?itemid='+id+'&fid='+$('input#fid').val();
+					window.location = '/desarrollar/items/impacto/?itemid='+id+'&fid='+$('input#fid').val();
 				}
+			}
+			else if (com == 'Calculo de Impacto')
+			{
+				if ($('.trSelected', grid).length > 1)
+				{
+					msg_toManySelected('Calcular el Impacto de')
+				}
+				else{
+					$('.trSelected', grid).each(function()
+					{
+						id = get_id(this)
+							window.location = '/desarrollar/items/impacto/?itemid='+id;		
+					});					
+				}			
+
 			}
 			else if (com == 'Borrar')
 			{

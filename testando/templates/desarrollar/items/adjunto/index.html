@@ -29,7 +29,7 @@
 
 <body>
     
-    <form class="adjForm"  action="../save" enctype="multipart/form-data" method="post">
+    <form class="adjForm"  action="../save_adjunto" enctype="multipart/form-data" method="post">
     <h style="color:white">Selecciona un Archivo:</h>
     <br />
     <input type="file" name="userfile" /> <br />
@@ -40,10 +40,11 @@
     <h2 style="color:white">Archivos Adjuntos</h2>
     <blockquote>
     <div py:for="file in current_files">
-    <h style="color:white"> ${file.name}   </h> <a href="../view/${file.id}">
+    <h style="color:white"> ${file.name}</h> 
+    <a href="../view_adjunto/${file.id}">
     	<img height="15" width="15" src="/images/view.png" />
     </a> 
-    <a href="../delete/${file.id}">
+    <a href="../delete_adjunto/${file.id}">
     	<img  src="/images/delete.png" />
     </a>
     </div>

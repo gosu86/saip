@@ -303,15 +303,16 @@ class ItemsController(CrudRestController):
 #-----------------------------------------------------------------#
     
     @expose('testando.templates.desarrollar.items.adjunto.index')
-    def index(self, *args, **kw):
+    def adjuntar(self, *args, **kw):
         itemid=int(kw['itemid'])
         current_files = DBSession.query(Adjunto).filter_by(item_id=itemid)
         referer='/desarrollar/desarrollo_de_fases/?fid='+str(kw['fid'])
         return dict(current_files=current_files,
-                    itemid=itemid,referer=referer,title_nav="Desarrollo de Fase")
+                    itemid=itemid,referer=referer,
+                    title_nav="Desarrollo de Fase")
         
     @expose()
-    def save(self, *args, **kw):
+    def save_adjunto(self, *args, **kw):
         adjunto=Adjunto()
         adjunto.filecontent=kw['userfile'].value
         adjunto.name=kw['userfile'].filename
@@ -321,10 +322,10 @@ class ItemsController(CrudRestController):
         
         item.adjuntos.append(adjunto)
         DBSession.flush()
-        redirect('/desarrollar/items/index/?itemid='+str(item.id)+'&fid='+str(item.fase_id))
+        redirect('/desarrollar/items/adjuntar/?itemid='+str(item.id)+'&fid='+str(item.fase_id))
     
     @expose(content_type=CUSTOM_CONTENT_TYPE)
-    def view(self, fileid):
+    def view_adjunto(self, fileid):
         try:
             userfile = DBSession.query(Adjunto).filter_by(id=fileid).one()
             iid= userfile.item_id
@@ -346,10 +347,10 @@ class ItemsController(CrudRestController):
             response.headers["Content-Type"] = "text/plain"
         return userfile.filecontent
     
-        return redirect('/desarrollar/items/index/?itemid='+str(iid)+'&fid='+str('item.fase_id'))
+        return redirect('/desarrollar/items/adjuntar/?itemid='+str(iid)+'&fid='+str('item.fase_id'))
     
     @expose()
-    def delete(self, fileid):
+    def delete_adjunto(self, fileid):
         kw={}
         try:           
             adjunto = DBSession.query(Adjunto).filter_by(id=fileid).one()
@@ -358,18 +359,21 @@ class ItemsController(CrudRestController):
             DBSession.flush()
             
         except:
-            return redirect('/desarrollar/items/index')
+            return redirect('/desarrollar/items/adjuntar')
 
         DBSession.flush()
-        return redirect('/desarrollar/items/index/?itemid='+str(item.id)+'&fid='+str(item.fase_id))        
+        return redirect('/desarrollar/items/adjuntar/?itemid='+str(item.id)+'&fid='+str(item.fase_id))
 
-#--------------------------------------------------------------
 #-----------------------------------------------------------------#
 #-------------------Calculo de Impacto----------------------------#
 #-----------------------------------------------------------------#
 
     @expose('testando.templates.desarrollar.items.impacto.index') 
     def impacto(self, *args, **kw):
+        """
+            Realiza el Calculo de Impacto de un item.
+            @param itemid: Identificador del item. 
+        """
         IdActual=int(kw['itemid'])
         ItemActual = DBSession.query(Item).filter_by(id=IdActual).first()
         inombre= ItemActual.name
@@ -382,14 +386,13 @@ class ItemsController(CrudRestController):
         grafo.node_attr['style']='filled'
         grafo.node_attr['fillcolor']='#f0f8ff'
         fase = DBSession.query(Fase).filter_by(id=ItemActual.fase_id).first()
-        color='red'
         grafo.add_node(ItemActual.codigo+"[F"+str(fase.orden)+"] " 
-                       + "[" +str(ItemActual.complejidad)
-                       +"]", 
-                       fillcolor= color)
+                       + "[" +str(ItemActual.complejidad)+"]", 
+                       fillcolor= 'red')
         
         calculados.append(ItemActual)
-        calcular,calculados, grafo = self.calcular_impacto(IdActual, calculados, 0, grafo)
+        calcular,calculados, grafo = self.antecesor_padre(IdActual, calculados, 0, grafo)
+        calcular,calculados, grafo = self.sucesor_hijo(IdActual, calculados, calcular, grafo)
 
         grafo.layout('dot') # layout with dot
         dir=config['pylons.paths']['static_files']+'/images/'
@@ -404,83 +407,83 @@ class ItemsController(CrudRestController):
         
 
     @expose()        
-    def calcular_impacto(self, IdActual, calculados, calculo, grafo):
+    def antecesor_padre(self, IdActual, calculados, calculo, grafo):
         
         ItemActual = DBSession.query(Item).filter_by(id=IdActual).first()
         fase = DBSession.query(Fase).filter_by(id=ItemActual.fase_id).first()
         if(ItemActual not in calculados):
             grafo.add_node(ItemActual.codigo+"[F"+str(fase.orden)+"] " 
-                           + "[" +str(ItemActual.complejidad)
-                           +"]")
+                           + "[" +str(ItemActual.complejidad)+"]")
             calculados.append(ItemActual)
             
-        calculo= calculo + ItemActual.complejidad
-        
+            calculo= calculo + ItemActual.complejidad
         padres=ItemActual.padres
         antecesores=ItemActual.antecesores
-        hijos=ItemActual.hijos
-        sucesores=ItemActual.sucesores
-        
         # relacion de padres y antecesores
         if(len(padres)!=0):
             for p in padres:
                 if (p.historico==False):
                     f = DBSession.query(Fase).filter_by(id=p.fase_id).first()
                     grafo.add_edge(p.codigo+"[F"+str(f.orden)+"] " 
-                                      + "[" +str(p.complejidad)
-                                      +"]",
+                                      + "[" +str(p.complejidad)+"]",
                                       ItemActual.codigo+"[F"+str(fase.orden)+"] " 
-                                      + "[" +str(ItemActual.complejidad)
-                                      +"]", 
-                                      color='blueviolet', label='padre-hijo')
+                                      + "[" +str(ItemActual.complejidad)+"]", 
+                                      color='blueviolet', label='padre')
                    
                     if(p not in calculados):            
-                        calculo , calculados,grafo = self.calcular_impacto(p.id, calculados, calculo, grafo)
+                        calculo , calculados,grafo = self.antecesor_padre(p.id, calculados, calculo, grafo)
         
         if(len(antecesores)!=0):
-            
             for a in antecesores:
                 if (a.historico==False):
                     f = DBSession.query(Fase).filter_by(id=a.fase_id).first()
                     grafo.add_edge(a.codigo+"[F"+str(f.orden)+"] " 
-                                      + "[" +str(a.complejidad)
-                                      +"]",
+                                      + "[" +str(a.complejidad)+"]",
                                       ItemActual.codigo+"[F"+str(fase.orden)+"] " 
-                                      + "[" +str(ItemActual.complejidad)
-                                      +"]", 
-                                      color='green', label='antecesor-sucesor')
+                                      + "[" +str(ItemActual.complejidad)+"]", 
+                                      color='green', label='antecesor')
                     if(a not in calculados):
-                        calculo, calculados, grafo = self.calcular_impacto(a.id, calculados, calculo, grafo)
-                   
+                        calculo, calculados, grafo = self.antecesor_padre(a.id, calculados, calculo, grafo)
+                
+        return(calculo,calculados, grafo)
+    
+    @expose()        
+    def sucesor_hijo(self, IdActual, calculados, calculo, grafo):
+        
+        ItemActual = DBSession.query(Item).filter_by(id=IdActual).first()
+        fase = DBSession.query(Fase).filter_by(id=ItemActual.fase_id).first()
+        if(ItemActual not in calculados):
+            grafo.add_node(ItemActual.codigo+"[F"+str(fase.orden)+"] " 
+                           + "[" +str(ItemActual.complejidad)+"]")
+            calculados.append(ItemActual)    
+        calculo= calculo + ItemActual.complejidad
+        hijos=ItemActual.hijos
+        sucesores=ItemActual.sucesores
         #relacion de hijos y sucesores
         if(len(hijos)!=0):
             for h in hijos:
                 if (h.historico==False):
                     f = DBSession.query(Fase).filter_by(id=h.fase_id).first()
                     grafo.add_edge(ItemActual.codigo+"[F"+str(fase.orden)+"] " 
-                                      + "[" +str(ItemActual.complejidad)
-                                      +"]",
+                                      + "[" +str(ItemActual.complejidad)+"]",
                                       h.codigo+"[F"+str(f.orden)+"] " 
-                                      + "[" +str(h.complejidad)
-                                      +"]", 
-                                      color='blueviolet', label='padre-hijo')
+                                      + "[" +str(h.complejidad)+"]", 
+                                      color='orange', label='hijo')
                     if(h not in calculados):
-                        calculo , calculados,grafo = self.calcular_impacto(h.id, calculados, calculo, grafo)
+                        calculo , calculados,grafo = self.sucesor_hijo(h.id, calculados, calculo, grafo)
                    
         if(len(sucesores)!=0):
             for s in sucesores:
                 if (s.historico==False):
                     f = DBSession.query(Fase).filter_by(id=s.fase_id).first()
                     grafo.add_edge(ItemActual.codigo+"[F"+str(fase.orden)+"] " 
-                                      + "[" +str(ItemActual.complejidad)
-                                      +"]",
+                                      + "[" +str(ItemActual.complejidad)+"]",
                                       s.codigo+"[F"+str(f.orden)+"] " 
-                                      + "[" +str(s.complejidad)
-                                      +"]", 
-                                      color='green', label='antecesor-sucesor')
+                                      + "[" +str(s.complejidad)+"]", 
+                                      color='blue', label='sucesor')
                     if(s not in calculados):
-                        calculo , calculados,grafo = self.calcular_impacto(s.id, calculados, calculo, grafo)
-                   
+                        calculo , calculados,grafo = self.sucesor_hijo(s.id, calculados, calculo, grafo)
+        
         return(calculo,calculados, grafo)
     
     @expose('json')

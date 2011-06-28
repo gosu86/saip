@@ -112,7 +112,7 @@ function doCommandItem(com, grid)
 					$('.trSelected', grid).each(function()
 					{
 						id = get_id(this)
-							window.location = '/desarrollar/items/index/?itemid='+id+'&fid='+$('input#fid').val();		
+							window.location = '/desarrollar/items/adjuntar/?itemid='+id+'&fid='+$('input#fid').val();		
 					});					
 				}			
 
