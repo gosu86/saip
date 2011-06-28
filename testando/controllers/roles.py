@@ -27,11 +27,13 @@ class RolesController(CrudRestController):
 
 	@expose('testando.templates.administrar.roles.index')
 	def get_all(self):
+		"""Muestra la pagina index.html de roles, en la cual se muestra la lista de roles existentes en el sistema."""
 		return dict(page="Administrar")
 	
 	@without_trailing_slash
 	@expose('testando.templates.administrar.roles.new')
 	def new(self, *args, **kw):
+		"""Muestra la pagina new.html con el form para la creacion de un nuevo rol."""
 		tmpl_context.widget = self.new_form
 		referer='/administrar/roles/'
 		return dict(value=kw, model=self.model.__name__,referer=referer,title_nav='Lista de Roles')
@@ -40,11 +42,13 @@ class RolesController(CrudRestController):
 	@expose()
 	@registered_validate(error_handler=new)
 	def post(self, *args, **kw):
+		""" Guarda un rol nuevo en la base de datos."""
 		self.provider.create(self.model, params=kw)
-		raise redirect('./')
+		raise redirect('/administrar/roles/')
 		
 	@expose('testando.templates.administrar.roles.edit')
 	def edit(self, *args, **kw):
+		"""Muestra la pagina edit.html con el form para la edicion de un rol seleccionado."""
 		tmpl_context.widget = self.edit_form
 		pks = self.provider.get_primary_fields(self.model)
 		kw = {}
@@ -57,6 +61,7 @@ class RolesController(CrudRestController):
 
 	@expose()
 	def put(self, *args, **kw):
+		"""Actualiza en la BD los cambios realizados a un rol."""
 		id=kw['name']
 		pks = self.provider.get_primary_fields(self.model)
 		for i, pk in enumerate(pks):
@@ -73,7 +78,6 @@ class RolesController(CrudRestController):
 				kw['permisos']=kw['permisos'].split(',')
 				
 			for id in kw['permisos']:
-				log.debug('id: %s' %(type(kw['permisos'])==type(u'd')) )
 				id=int(str(id))
 				p=DBSession.query(Permiso).filter_by(id=id).first()
 				r.permisos.append(p)
@@ -88,13 +92,12 @@ class RolesController(CrudRestController):
 				r.usuarios.append(u)
 		
 		DBSession.flush()
-		redirect('../' * len(pks))
+		redirect('/administrar/roles/')
 	
 	@validate(validators={"id":validators.Int()})
 	@expose('json')
 	def post_delete(self,**kw):
 		id = kw['id']
-		log.debug("Inside post_fetch: id == %s" % (id))
 		if (id != None):
 			d = {'id':id}
 			rol = DBSession.query(Rol).filter_by(**d).first()
@@ -104,8 +107,3 @@ class RolesController(CrudRestController):
 			msg="El rol se ha eliminado."
 
 		return dict(msg=msg,nombre=nombre)
-	
-			
-	@expose()
-	def get_one(self, *args, **kw):
-		redirect('../')		

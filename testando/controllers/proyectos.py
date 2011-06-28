@@ -36,12 +36,13 @@ class ProyectosController(CrudRestController):
 
 	@expose('testando.templates.administrar.proyectos.index')
 	def get_all(self):
+		"""Muestra la pagina index.html de proyectos, en la cual se muestra la lista de proyectos existentes en el sistema."""
 		return dict(page="Administar")
 
 	@without_trailing_slash
 	@expose('testando.templates.administrar.proyectos.new')
 	def new(self, *args, **kw):
-		"""Display a page to show a new record."""
+		"""Muestra la pagina new.html con el from para la creacion de un nuevo proyecto."""
 		tmpl_context.widget = self.new_form
 		referer='/administrar/proyectos/'
 		return dict(value=kw, model=self.model.__name__,referer=referer,title_nav='Lista de Proyectos')
@@ -50,15 +51,16 @@ class ProyectosController(CrudRestController):
 	@expose()
 	@registered_validate(error_handler=new)
 	def post(self, *args, **kw):
+		""" Guarda un proyecto nuevo en la base de datos."""
 		p=self.provider.create(self.model, params=kw)
 		r=DBSession.query(Rol).filter(Rol.rol_name=='Configuradores').first()
 		p.lider.roles.append(r)
 		DBSession.flush()
-		raise redirect('./')		
+		raise redirect('/administrar/proyectos/')		
 	
 	@expose('testando.templates.administrar.proyectos.edit')
 	def edit(self, *args, **kw):
-		"""Display a page to edit the record."""
+		"""Muestra la pagina edit.html con el form para la edicion de un proyecto seleccionado."""
 		tmpl_context.widget = self.edit_form
 		pks = self.provider.get_primary_fields(self.model)
 		kw = {}
@@ -71,45 +73,38 @@ class ProyectosController(CrudRestController):
 	
 	@expose()
 	def put(self, *args, **kw):
-		"""update"""
-		id=kw['name']
-		log.debug('id: %s' %id )
-		log.debug('ARGS: %s' %str(args))
+		"""Actualiza en la BD los cambios realizados a un proyecto."""
 		pks = self.provider.get_primary_fields(self.model)
 		for i, pk in enumerate(pks):
 			if pk not in kw and i < len(args):
 				kw[pk] = args[i]
 		d={'id':kw[pk]}
 		p=DBSession.query(Proyecto).filter_by(**d).first()
-		log.debug('proyecto.name: %s' %p.name )
+		
 		p.name=kw['name']
 		p.empresa=kw['empresa']
 		p.estado=kw['estado']
 		p.descripcion=kw['descripcion']
 		p.lider_id=int(kw['lider'])
 		DBSession.flush()
-		redirect('../' * len(pks))
+		redirect('/administrar/proyectos/')
 		
 	@validate(validators={"id":validators.Int()})
 	@expose('json')
 	def post_delete(self,**kw):
+		"""Elimina un proyecto (cambia su estado a eliminado)."""
 		id = kw['id']
-		log.debug("Inside post_fetch: id == %s" % (id))
 		if (id != None):
 			d = {'id':id}
 			proyecto = DBSession.query(Proyecto).filter_by(**d).first()
 			nombre=proyecto.name
 			if (proyecto.estado != 'Iniciado'):
-				DBSession.delete(proyecto)
+				proyecto.estado='Eliminado'
 				DBSession.flush()
 				msg="El proyecto se ha eliminado con exito!."
 				type="succes"
 			else:
 				msg="El proyecto esta Iniciado! No se puede eliminar."
 				type="error"
-		return dict(msg=msg,nombre=nombre,type=type)			
-				
-	@expose()
-	def get_one(self, *args, **kw):
-		redirect('../')
+		return dict(msg=msg,nombre=nombre,type=type)
 			

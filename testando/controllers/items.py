@@ -25,12 +25,14 @@ class ItemsController(CrudRestController):
     
     @expose('testando.templates.desarrollar.items.index')
     def get_all(self):
+        """Muestra la pagina index.html de items, en la cual se muestra la lista de items existentes en el sistema."""
         override_template(self.get_all,self.template)    
         return dict(page=self.page)
 
     @without_trailing_slash
     @expose('testando.templates.desarrollar.items.new')
     def new(self, *args, **kw):
+        """Muestra la pagina new.html con el form para la creacion de un nuevo item."""
         referer=request.headers.get("Referer", "")
         log.debug("referer == %s" % (referer))
         log.debug('kw %s' %str(kw))
@@ -81,7 +83,7 @@ class ItemsController(CrudRestController):
     
     @expose()
     def post(self, *args, **kw):
-        log.debug('post -> kw = %s' %str(kw))
+        """ Guarda un item nuevo en la base de datos."""
         
         fid=kw['fase_id']
                
@@ -100,37 +102,9 @@ class ItemsController(CrudRestController):
         DBSession.flush()  
         raise redirect('/desarrollar/desarrollo_de_fases/?fid='+fid)
     
-    @validate(validators={"page":validators.Int(), "rp":validators.Int()})
-    @expose('json')
-    def lista_de_Items(self, page='1', rp='25', sortname='id', sortorder='asc', qtype=None, query=None):
-        try:
-            #____________________________________________
-            # hacer esto para cada dato del tipo numerico
-            if (qtype=="id"):
-                id=int(query)
-            #_____________________________________________
-            
-            offset = (int(page)-1) * int(rp)
-            if (query):
-                d = {qtype:query}
-                items = DBSession.query(Item).filter_by(**d)
-            else:
-                items = DBSession.query(Item)
-            
-            total = items.count()
-            column = getattr(Item, sortname)
-            items = items.order_by(getattr(column,sortorder)()).offset(offset).limit(rp)    
-            rows = [{'id'  : item.id,
-                    'cell': [item.id, item.name, item.descripcion]} for item in items]
-            result = dict(page=page, total=total, rows=rows)
-        except:
-            result = dict() 
-        return result
-    
-    
-    
     @expose('testando.templates.desarrollar.items.edit')
     def edit(self, *args, **kw):
+        """Muestra la pagina edit.html con el form para la edicion de un item seleccionado."""
         referer=request.headers.get("Referer", "")        
         log.debug("len(kw) %s" %len(kw))
         
@@ -184,34 +158,55 @@ class ItemsController(CrudRestController):
                     referer=referer,
                     title_nav=title_nav,
                     item=i)
-  
-        
+          
     @expose()
     def put(self, *args, **kw):
-        """update"""
-        log.debug('-------- PUTTING --------')
-        log.debug('kw-> kw = %s' %str(kw))
-        log.debug('ARGS %s' %str(args))
-        
+        """Actualiza en la BD los cambios realizados a un item."""
         pks = self.provider.get_primary_fields(self.model)
-        log.debug('put -> pks = %s' %str(pks))
         
         for i, pk in enumerate(pks):
             if pk not in kw and i < len(args):
                 kw['itemid'] = args[i]
         i       =   DBSession.query(Item).filter_by(id=int(kw['itemid'])).first()
-        log.debug('kw-> kw = %s' %str(kw))
+
         item=i.nueva_version(kw)
-        log.debug('kw-> kw = %s' %str(kw))
                            
         DBSession.flush() 
 
 
         redirect('/desarrollar/desarrollo_de_fases/?fid='+str(item.fase_id))       
-       
+
+    @validate(validators={"page":validators.Int(), "rp":validators.Int()})
+    @expose('json')
+    def lista_de_Items(self, page='1', rp='25', sortname='id', sortorder='asc', qtype=None, query=None):
+        try:
+            #____________________________________________
+            # hacer esto para cada dato del tipo numerico
+            if (qtype=="id"):
+                id=int(query)
+            #_____________________________________________
+            
+            offset = (int(page)-1) * int(rp)
+            if (query):
+                d = {qtype:query}
+                items = DBSession.query(Item).filter_by(**d)
+            else:
+                items = DBSession.query(Item)
+            
+            total = items.count()
+            column = getattr(Item, sortname)
+            items = items.order_by(getattr(column,sortorder)()).offset(offset).limit(rp)    
+            rows = [{'id'  : item.id,
+                    'cell': [item.id, item.name, item.descripcion]} for item in items]
+            result = dict(page=page, total=total, rows=rows)
+        except:
+            result = dict() 
+        return result
+           
 #-----------------------------------------------------------------#
 #-------------------Adjunto Controller----------------------------#
 #-----------------------------------------------------------------#
+    
     @expose('testando.templates.desarrollar.items.adjunto.index')
     def index(self, *args, **kw):
         itemid=int(kw['itemid'])

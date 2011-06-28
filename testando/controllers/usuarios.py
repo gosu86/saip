@@ -25,13 +25,14 @@ class UsuariosController(CrudRestController):
 
 
     @expose('testando.templates.administrar.usuarios.index')
-    def get_all(self):   
+    def get_all(self):
+        """Muestra la pagina index.html de usuarios, en la cual se muestra la lista de usuarios existentes en el sistema."""   
         return dict(page="Administrar")
   
     @without_trailing_slash
     @expose('testando.templates.administrar.usuarios.new')
     def new(self, *args, **kw):
-        """Display a page to show a new record."""
+        """Muestra la pagina new.html con el form para la creacion de un nuevo usuario."""
         tmpl_context.widget = self.new_form
         referer='/administrar/usuarios/'
         return dict(value=kw, model=self.model.__name__, referer=referer, title_nav='Lista de Usuarios')
@@ -40,7 +41,7 @@ class UsuariosController(CrudRestController):
     @expose()
     @registered_validate(error_handler=new)
     def post(self, *args, **kw):
-        #self.provider.create(self.model, params=kw)
+        """ Guarda un usuario nuevo en la base de datos."""
         u=Usuario()
 
         u.name=kw['name']
@@ -51,11 +52,11 @@ class UsuariosController(CrudRestController):
         
         DBSession.add(u)
         DBSession.flush()        
-        raise redirect('./')
+        raise redirect('/administrar/usuarios/')
     
     @expose('testando.templates.administrar.usuarios.edit')
     def edit(self, *args, **kw):
-        """Display a page to edit the record."""
+        """Muestra la pagina edit.html con el form para la edicion de un usuario seleccionado."""
         tmpl_context.widget = self.edit_form
         pks = self.provider.get_primary_fields(self.model)
         kw = {}
@@ -69,41 +70,26 @@ class UsuariosController(CrudRestController):
 
     @expose()
     def put(self, *args, **kw):
-        """update"""
-        id=kw['name']
-        log.debug('id: %s' %id )
-        log.debug('ARGS: %s' %str(args))
+        """Actualiza en la BD los cambios realizados a un usuario."""
         pks = self.provider.get_primary_fields(self.model)
         for i, pk in enumerate(pks):
             if pk not in kw and i < len(args):
                 kw[pk] = args[i]
+                
         d={'id':kw[pk]}
+        
         u=DBSession.query(Usuario).filter_by(**d).first()
-        log.debug('usuario.name: %s' %u.name )
-        u=DBSession.query(Usuario).filter_by(**d).first()
-        log.debug('usuario.name: %s' %u.name )
         u.name=kw['name']
         u.usuario_name=kw['usuario_name']
         u.email=kw['email']
         u.apellido=kw['apellido']
         u.estado=kw['estado']
-        pas=len(kw['password'])
-        if(pas!=0):
+
+        if(len(kw['password'])!=0):
             u._set_password(kw['_password'])
-        
-        
+            
         DBSession.flush()
-        u.email=kw['email']
-        u.empresa=kw['apellido']
-        u.estado=kw['estado']
-        pas=len(kw['password'])
-        log.debug('pass: %s' %pas )
-        if(pas>0):
-            u._set_password(kw['_password'])
-        
-        
-        DBSession.flush()
-        redirect('../' * len(pks))
+        redirect('/administrar/usuarios/')
         
     @validate(validators={"id":validators.Int()})
     @expose('json')
@@ -118,7 +104,3 @@ class UsuariosController(CrudRestController):
             DBSession.flush()
             msg="El usuario se ha eliminado con exito!."
         return dict(msg=msg,nombre=nombre)
-    
-    @expose()
-    def get_one(self, *args, **kw):
-        redirect('../')
