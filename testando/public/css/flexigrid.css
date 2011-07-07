@@ -54,8 +54,25 @@
     background: url("images/key_pencil.png") no-repeat scroll left center transparent;
 }
 
+div.flexigrid div.fbutton .calculus
+{
+    background: url("images/calculus1.png") no-repeat scroll left center transparent;
+}
 
+div.flexigrid div.fbutton .history
+{
+    background: url("images/history.png") no-repeat scroll left center transparent;
+}
 
+div.flexigrid div.fbutton .reborn
+{
+    background: url("images/reborn.png") no-repeat scroll left center transparent;
+}
+
+div.flexigrid div.fbutton .goback
+{
+    background: url("images/goback.png") no-repeat scroll left center transparent;
+}
 
 div.flexigrid div.fbutton .approve
 {

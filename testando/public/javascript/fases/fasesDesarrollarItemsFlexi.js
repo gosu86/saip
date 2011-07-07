@@ -29,9 +29,9 @@ $(function(){
 			{name: 'Borrar', bclass: 'delete_item', onpress : doCommandItem},
 			{separator: true},{separator: true},{separator: true},
 			{separator: true},{separator: true},{separator: true},
-			{name: 'Historial', bclass: 'items', onpress : doCommandItem},			
+			{name: 'Historial', bclass: 'history', onpress : doCommandItem},			
 			{separator: true},
-			{name: 'Calculo de Impacto', bclass: 'calculo', onpress : doCommandItem},
+			{name: 'Calculo de Impacto', bclass: 'calculus', onpress : doCommandItem},
 			{separator: true},	
 			
 		],
