@@ -165,7 +165,7 @@ function doCommandItem(com, grid)
 					else
 					{
 						id = get_id($('.trSelected', grid)) 
-						borrar(id)						
+						borrar(id)
 					}
 
 				}
@@ -309,6 +309,7 @@ function borrar(id){
     	      data: {id:id},
     	      success: function(data)
     	      { 
+    	    	  
 				  jQuery.noticeAdd(
 				    	  {
 				              text: data.msg,
@@ -317,7 +318,7 @@ function borrar(id){
 				              type: data.type
 				    	  });
 				  $('#fasesAprobarDesarrollarItemsFlexi').flexReload();
-    	    	 
+				  $("#fasesVerItemsEliminadosFlexi").flexReload();
     	      },
     	    });	
 }
@@ -362,7 +363,7 @@ function msg_comprometida(){
 
 function msg_activa(){
 	jQuery.noticeAdd({
-        text: "El item posee un linea base activa, No se puede eeliminar.",
+        text: "El item posee un linea base activa, No se puede eliminar.",
         stay: false,
         stayTime: 3000,
         type: "notice"

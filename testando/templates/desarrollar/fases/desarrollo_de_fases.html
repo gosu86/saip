@@ -9,6 +9,8 @@
     <py:if test=" not A">
     <script type="text/javascript" src="${url('/javascript/fases/fasesDesarrollarTiposDeItemFlexi.js')}">
     </script>
+    <script type="text/javascript" src="${url('/javascript/fases/fasesVerItemsEliminadosFlexi.js')}">
+    </script>    
     </py:if>
     <py:if test="A">    
     <script type="text/javascript" src="${url('/javascript/fases/fasesAprobarItemsFlexi.js')}">
@@ -52,7 +54,11 @@
         <table id="fasesAprobarDesarrollarItemsFlexi">
         </table>
       </div>
-      </py:if>          
+      </py:if>  
+	<div class="TablaItemsEliminados">
+        <table id="fasesVerItemsEliminadosFlexi">
+        </table>
+	</div>
     <br />
   </body>
 </html>

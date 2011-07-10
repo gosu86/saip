@@ -325,7 +325,7 @@ class ConfigurarController(BaseController):
                 
     @validate(validators={"page":validators.Int(), "rp":validators.Int()})
     @expose('json')    
-    def lineas_base(self,fid=None, page='1', rp='25', sortname='id', sortorder='asc', qtype=None, query=None):
+    def lineas_base(self,fid=None, page='1', rp='25', sortname='id', sortorder='desc', qtype=None, query=None):
         try:
             offset = (int(page)-1) * int(rp)
             
@@ -341,14 +341,14 @@ class ConfigurarController(BaseController):
             total = lineasBase.count()
             log.debug('total lineas base %s' %total)
             column = getattr(LineaBase, sortname)
+            sortorder='desc'
             lineasBase = lineasBase.order_by(getattr(column,sortorder)()).offset(offset).limit(rp)
             total = lineasBase.count()
             log.debug('total lineas base 2 %s' %total)            
             rows = [{'id'  : lineaBase.id,
                     'cell': [lineaBase.id,
                             lineaBase.fecha_creacion,
-                            lineaBase.estado,
-                            len(lineaBase.items)
+                            lineaBase.estado
                             ]} for lineaBase in lineasBase]
             result = dict(page=page, total=total, rows=rows)
         except:
@@ -418,16 +418,13 @@ class ConfigurarController(BaseController):
         DBSession.flush()
         items = DBSession.query(Item).filter(and_(
                                                   Item.historico==False,
-                                                  Item.fase_id==i.fase_id
+                                                  Item.fase_id==i.fase_id,
+                                                  Item.estado!='Eliminado'
                                                   )
                                              )
         
-        items_con_lba = items.filter(and_(
-                                     Item.historico==False,
-                                     Item.fase_id==i.fase_id,
-                                     Item.linea_base.has(estado='Activa')
-                                     )
-                                )
+        items_con_lba = items.filter(Item.linea_base.has(estado='Activa'))
+        
         if items_con_lba.count()==items.count():
             i.fase.estado="Con Linea Base"
         else:
@@ -442,8 +439,20 @@ class ConfigurarController(BaseController):
     @expose('json')        
     def abrir_linea_base(self,**kw):
         lb=DBSession.query(LineaBase).filter_by(id=int(kw['id'])).first()
+        
         lb.estado='Abierta'
-        lb.fase.estado='Con Lineas Base Parciales'     
+        items = DBSession.query(Item).filter(and_(
+                                                  Item.historico==False,
+                                                  Item.fase_id==lb.fase_id,
+                                                  Item.estado!='Eliminado'
+                                                  )
+                                             )        
+        items_con_lba = items.filter(Item.linea_base.has(estado='Activa')).count()
+        
+        if items_con_lba>0:
+            lb.fase.estado='Con Lineas Base Parciales'
+        else:     
+            lb.fase.estado='En Desarrollo'
         DBSession.flush()
         
         lb.marcar_items()

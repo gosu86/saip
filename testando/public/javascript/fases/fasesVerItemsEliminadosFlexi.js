@@ -1,7 +1,7 @@
 $(function(){
-	$("#faseVerItemsFlexi").flexigrid(
+	$("#fasesVerItemsEliminadosFlexi").flexigrid(
 	{	
-		url: '/configurar/fases/items_creados/?fid='+$('input#fid').val(),
+		url: '/desarrollar/fases/items_creados/?fid='+$('input#fid').val()+'&solo_e=true',
 		dataType: 'json',
 		
 		colModel : [
@@ -18,18 +18,13 @@ $(function(){
 		
 		buttons : [	           
 			{separator: true},
-			{name: 'Ver Historial', bclass: 'history', onpress : doCommandItem},
-			{separator: true},
-			{separator: true},
-			{separator: true},
-			{name: 'Revivir', bclass: 'reborn', onpress : doCommandItem},
+			{name: 'Revivir', bclass: 'reborn', onpress : doCommandItemEliminado},
 			{separator: true},			
 			
 		],
 		
 		searchitems : [
 			{display: 'Nombre', name : 'name'},
-			{display: 'Estado', name : 'estado'},
 			{display: 'Version', name : 'version'},
 			{display: 'Codigo', name : 'codigo', isdefault: true}
 		],
@@ -37,26 +32,25 @@ $(function(){
 		sortname: "id",
 		sortorder: "asc",
 		usepager: true,
-		title: "Items de la fase: "+$('#fNombre').val(),
+		title: "Items Eliminados",
 		useRp: true,
 		rp: 5,
 		showTableToggleBtn: true,
 		height: 'auto',
 		singleSelect: true
 	});	
+	
+	$('div.TablaItemsEliminados .flexigrid').addClass('hideBody');
 });
 
 
-function doCommandItem(com, grid)
+function doCommandItemEliminado(com, grid)
 {
 	if ($('.trSelected', grid).length > 0)
 	{	
 			id = get_id($('.trSelected', grid))
-			if (com == 'Ver Historial')
-			{
-					window.location = '/configurar/items/vista_de_historial/?iid='+id;
-			}
-			else if (com == 'Revivir')
+
+			if (com == 'Revivir')
 			{
 				revivir(id)
 			}			
@@ -65,42 +59,7 @@ function doCommandItem(com, grid)
 	{msg_falta_seleccion()}
 
 }
-
-function get_id(tr){
-	var id = $(tr).attr('id');
-	id = id.substring(id.lastIndexOf('row')+3);
-	return id;
-}
-
-function revivir(id){
-	estado=get_estado()
-	if (estado=='Eliminado'){
-		window.location = '/configurar/items/'+id+'/edit/'
-	}
-	else
-	{
-		msg_no_eliminado()
-	}
-}
-
-function get_estado(grid){
-	estado=$('.trSelected').find('td[abbr="estado"]').text();
-	return estado
-} 
-
-function msg_falta_seleccion(){
-	jQuery.noticeAdd({
-	              text: "Debe seleccionar al menos un item!",
-	              stay: false,
-	              stayTime: 2500,
-	              type: "notice"
-	    	  });
-}
-function msg_no_eliminado(){
-	jQuery.noticeAdd({
-	              text: "Solo se pueden revivir items en con estado 'Eliminado'",
-	              stay: false,
-	              stayTime: 2500,
-	              type: "notice"
-	    	  });
+function revivir(id)
+{
+		window.location = '/desarrollar/items/'+id+'/edit/'
 }

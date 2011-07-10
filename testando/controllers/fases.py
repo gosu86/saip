@@ -198,16 +198,19 @@ class FasesController(CrudRestController):
 
     @validate(validators={"page":validators.Int(), "rp":validators.Int()})
     @expose('json')    
-    def items_creados(self,fid=None, page='1', rp='25', sortname='id', sortorder='asc', qtype=None, query=None):
+    def items_creados(self,solo_e=None,fid=None, page='1', rp='25', sortname='id', sortorder='asc', qtype=None, query=None):
         try:
             offset = (int(page)-1) * int(rp)
             d = {'fase_id':int(fid)}
             items = DBSession.query(Item).filter_by(**d)
             items = items.filter(Item.historico==False) 
-              
+
             referer=request.headers.get("Referer", "")        
-            if find(referer,'desarrollar') >=0:
-                items = items.filter(Item.estado!='Eliminado')
+            if (find(referer,'desarrollar') >=0): 
+                if solo_e==None:
+                    items = items.filter(Item.estado!='Eliminado')
+                else:
+                    items = items.filter(Item.estado=='Eliminado')
                                  
             if (query):                
                 if qtype=='name':

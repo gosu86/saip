@@ -12,7 +12,11 @@ $(function(){
 			{display: 'Descripcion', name : 'descripcion', width : 150, sortable : true, align: 'left'},
 			{display: 'Complejidad', name : 'complejidad', width : 100, sortable : true, align: 'left'},
 			{display: 'Estado', name : 'estado', width : 100, sortable : true, align: 'left'},
-			{display: 'Tipo De Item', name : 'tipoDeItem', width : 150, sortable : true, align: 'left'},			
+			{display: 'Tipo De Item', name : 'tipoDeItem', width : 150, sortable : true, align: 'left'},
+			{display: 'Padres', name : 'padres', width : 100, sortable : true, align: 'left'},
+			{display: 'Hijos', name : 'hijos', width : 100, sortable : true, align: 'left'},
+			{display: 'Antecesores', name : 'antecesores', width : 100, sortable : true, align: 'left'},
+			{display: 'Sucesores', name : 'sucesores', width : 100, sortable : true, align: 'left'},
 		],
 		
 		buttons : [	           

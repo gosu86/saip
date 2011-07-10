@@ -5,7 +5,7 @@ from tg.controllers import CUSTOM_CONTENT_TYPE
 
 from tg.configuration import config
 from sqlalchemy.sql import and_,or_
-from string import find
+from string import find,lower
 from testando.model                 import DBSession
 from testando.model.item            import Item
 from testando.model.tipoitem        import TipoItem
@@ -92,6 +92,24 @@ class ItemsController(CrudRestController):
         i=self.provider.create(self.model, params=kw)
         ti=i.tipo_item
         i.fase.estado='En Desarrollo'
+        items = DBSession.query(Item).filter(and_(
+                                                  Item.fase_id==i.fase_id,                                                  
+                                                  Item.historico==False,
+                                                  Item.estado!='Eliminado'
+                                                  )
+                                             )
+        
+        items_con_lba = items.filter(and_(
+                                     Item.fase_id==i.fase_id,                                          
+                                     Item.historico==False,
+                                     Item.linea_base.has(estado='Activa')
+                                     )
+                                )
+        if items_con_lba.count()>0:
+            if items_con_lba.count()==items.count():
+                i.fase.estado="Con Linea Base"
+            else:
+                i.fase.estado="Con Lineas Base Parciales"
         
         for ce in ti.campos_extra:
             ae                  =   AtributoExtra()
@@ -170,15 +188,21 @@ class ItemsController(CrudRestController):
                 kw['itemid'] = args[i]
         i       =   DBSession.query(Item).filter_by(id=int(kw['itemid'])).first()
         
+        referer=request.headers.get("Referer", "") 
         
+        if find(referer,'configurar') >=0:
+            to_redirect='/configurar/vista_de_items/?fid='+str(i.fase.id)
+        else:
+            to_redirect='/desarrollar/desarrollo_de_fases/?fid='+str(i.fase.id)
+                    
         lb=i.linea_base
-        item=i.nueva_version(kw)
+        i.nueva_version(kw)
         if lb!=None:
             lb.items=[]    
         DBSession.flush() 
 
 
-        redirect('/desarrollar/desarrollo_de_fases/?fid='+str(item.fase_id))       
+        redirect(to_redirect)       
 
     @validate(validators={"page":validators.Int(), "rp":validators.Int()})
     @expose('json')
@@ -211,14 +235,14 @@ class ItemsController(CrudRestController):
     @expose('testando.templates.configurar.items.vista_de_historial')    
     def vista_de_historial(self, iid=None,**kw):
         referer=request.headers.get("Referer", "")        
-                
+        i=DBSession.query(Item).filter_by(id=int(iid)).first()        
         if find(referer,'configurar') >=0:
             page='Configurar'
+            referer='/'+lower(page)+'/vista_de_items/?fid='+str(i.fase.id)
         else:
             page='Desarrollar'
-                    
-        i=DBSession.query(Item).filter_by(id=int(iid)).first()
-        #referer='/configurar/vista_de_items/?fid='+str(i.fase.id)
+            referer='/'+lower(page)+'/desarrollo_de_fases/?fid='+str(i.fase.id)
+
         return dict(page=page,item=i,referer=referer,title_nav="Lista de Items")
 
     @validate(validators={"page":validators.Int(), "rp":validators.Int()})
@@ -257,7 +281,11 @@ class ItemsController(CrudRestController):
                             item.descripcion,
                             item.complejidad,
                             item.estado,
-                            item.tipo_item.name]} for item in items]
+                            item.tipo_item.name,
+                            len(item.padres),
+                            len(item.hijos),
+                            len(item.antecesores),
+                            len(item.sucesores),]} for item in items]
             result = dict(page=page, total=total, rows=rows)
         except:
             result = dict() 

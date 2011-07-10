@@ -65,6 +65,7 @@ function doCommandItem(com, grid)
 	{	
 			if (com == 'Dar por terminado')
 			{
+				
 				obtener_ids(grid,'terminar');
 			}		
 			else if (com == 'Editar')
@@ -159,6 +160,7 @@ function doCommandItem(com, grid)
 					{				
 						id = get_id($('.trSelected', grid)) 
 						borrar(id)
+						$("#fasesVerItemsEliminadosFlexi").flexReload();
 					}
 				}
 			}
@@ -301,7 +303,7 @@ function msg_toManySelected(que){
 }
 function msg_activa(){
 	jQuery.noticeAdd({
-        text: "El item posee un linea base activa, No se puede eeliminar.",
+        text: "El item posee un linea base activa, No se puede eliminar.",
         stay: false,
         stayTime: 3000,
         type: "notice"

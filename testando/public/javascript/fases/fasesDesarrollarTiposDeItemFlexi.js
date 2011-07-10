@@ -34,6 +34,7 @@ $(function(){
 		height: 'auto',
 		singleSelect: true
 	});
+	$('div.TablaTiposDeItem .flexigrid').addClass('hideBody');		
 });
 
 

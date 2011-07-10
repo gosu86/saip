@@ -9,7 +9,6 @@ $(function()
 			{display: 'ID', name : 'id', width : 40, sortable : true, align: 'left', hide : true},
 			{display: 'Fecha de creacion', name : 'fecha_creacion', width : 150, sortable : true, align: 'left'},
 			{display: 'Estado', name : 'estado', width : 150, sortable : true, align: 'left'},
-			{display: 'Items', name : 'items', width : 150, sortable : true, align: 'left'},
 		],
 		
 		buttons : [
@@ -18,6 +17,9 @@ $(function()
 			{name: 'Abrir Linea Base', bclass: 'open', onpress : doCommandLineaBase},
 			{separator: true},	
 		],
+		searchitems : [
+		   			{display: 'Estado', name : 'estado'},
+		   		],		
 		sortname: "id",
 		sortorder: "asc",
 		usepager: true,
@@ -29,7 +31,7 @@ $(function()
 		showToggleBtn: true,
 		width:'auto',
 		height: 'auto',
-		singleSelect: false,
+		singleSelect: true,
 	});
 	
 	$('#faseVerItemsAprobadosFlexi').flexigrid(

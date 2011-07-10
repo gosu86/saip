@@ -252,8 +252,14 @@ class DesarrollarController(BaseController):
         for id in ids:
             id=int(id)
             i=DBSession.query(Item).filter_by(id=id).first()
-            if i.estado == 'Terminado' or i.estado == 'En Revision':
-                i.estado='Aprobado'
+            if (i.estado == 'Terminado' or i.estado == 'En Revision'):
+                if i.linea_base==None:
+                    i.estado='Aprobado'
+                elif i.linea_base.estado=='Abierta':
+                    i.estado='Aprobado'
+                else:
+                    error=error+1
+                    cods=cods+i.codigo+','                    
             else:
                 error=error+1
                 cods=cods+i.codigo+','
@@ -281,7 +287,7 @@ class DesarrollarController(BaseController):
         for id in ids:
             id=int(id)
             i=DBSession.query(Item).filter_by(id=id).first()
-            if i.estado != 'Aprobado':
+            if i.estado != 'Aprobado' and i.estado !='En Revision':
                 i.estado='Terminado'
             else:
                 error=error+1
@@ -294,7 +300,7 @@ class DesarrollarController(BaseController):
             msg=str(dif)+' items se han terminado con exito'
             type= 'succes'
         if error!=0:
-            error=str(error) +' items ('+cods+') no han cambiado, tienen estado "Aprobado"!'
+            error=str(error) +' items ('+cods+') no han cambiado, tienen estado "Aprobado" o estan "En Revision!'
         return dict(msg=msg,type=type,error=error)      
     
        
@@ -306,6 +312,7 @@ class DesarrollarController(BaseController):
         item.hijos=[]
         item.antecesores=[]
         item.sucesores=[]
+        item.linea_base=None
         DBSession.flush()
         msg="El item se ha eliminado."
         return dict(msg=msg)    

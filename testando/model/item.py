@@ -81,7 +81,7 @@ class Item(DeclarativeBase):
         
     def nueva_version(self,kw=None,adjunto_id=None):
         self.historico         =   True
-        
+        self.linea_base         =   None
         item                =   Item()
         if kw!=None and kw.has_key('name'):
             item.name           =   kw['name']
@@ -145,7 +145,7 @@ class Item(DeclarativeBase):
                
         if kw!=None and kw.has_key('antecesores'):
             item.antecesores=[]
-            if isinstance(kw['antecesores'],str):
+            if isinstance(kw['antecesores'],unicode):
                 kw['antecesores'].split            
             for id in kw['antecesores']:
                 a=DBSession.query(Item).filter_by(id=int(id)).first()
