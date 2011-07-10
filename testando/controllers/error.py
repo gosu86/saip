@@ -7,8 +7,7 @@ __all__ = ['ErrorController']
 
 import logging
 log = logging.getLogger(__name__)
-class ErrorController(object):
-    log.debug('<-- In to: ErrorController -->')    
+class ErrorController(object): 
     """
     Generates error documents as and when they are required.
 

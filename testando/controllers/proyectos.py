@@ -24,7 +24,6 @@ import logging
 __all__ = ['ProyectosController']
 log = logging.getLogger(__name__)
 class ProyectosController(CrudRestController):
-	log.debug('<-- In to ProyectosController -->')
 	allow_only = All(not_anonymous(msg='Acceso denegado. Ud. no se ha logueado!'),
 					 has_any_permission('AdministrarTodo',
 										'AdministrarProyectos',

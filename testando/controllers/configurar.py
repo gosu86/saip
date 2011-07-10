@@ -35,7 +35,6 @@ log = logging.getLogger(__name__)
 
 __all__ = ['ConfigurarController']
 class ConfigurarController(BaseController):
-    log.debug('<-- In to: ConfigurarController -->')
     allow_only = All(
                      not_anonymous(msg='Acceso denegado. Ud. no se ha loqueado!.'),
                      in_any_group('Administradores','Configuradores',
@@ -153,7 +152,6 @@ class ConfigurarController(BaseController):
         tmpl_context.faseId = hideMe()
         tmpl_context.faseNombre = hideMe()
         value=str(f.proyecto_id)
-        #log.debug('__________%s' %value)
         referer='/configurar/vista_de_fases/?pid='+ value
         return dict(page='Configurar', faseId=fid,faseNombre=nombre,referer=referer,title_nav='Lista de Fases')
 
@@ -286,7 +284,7 @@ class ConfigurarController(BaseController):
             conn.execute(updt)
         conn.close()
                     
-        msg    =    str(cantidad)    +    " roles cambiados con exito!"
+        msg    =    str(cantidad)    +    " permisos cambiados con exito!"
         type="succes"
         
         return dict(msg=msg,type=type)
@@ -339,12 +337,12 @@ class ConfigurarController(BaseController):
                 lineasBase = lineasBase.filter(LineaBase.estado!='Inactiva')
                 
             total = lineasBase.count()
-            log.debug('total lineas base %s' %total)
+
             column = getattr(LineaBase, sortname)
             sortorder='desc'
             lineasBase = lineasBase.order_by(getattr(column,sortorder)()).offset(offset).limit(rp)
             total = lineasBase.count()
-            log.debug('total lineas base 2 %s' %total)            
+           
             rows = [{'id'  : lineaBase.id,
                     'cell': [lineaBase.id,
                             lineaBase.fecha_creacion,

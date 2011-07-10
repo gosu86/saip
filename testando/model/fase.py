@@ -7,7 +7,7 @@ from sqlalchemy import Table, ForeignKey, Column,UniqueConstraint
 from sqlalchemy.types import Integer, Unicode
 from testando.model import DeclarativeBase, metadata, DBSession
 from datetime import datetime
-
+from sqlalchemy.sql import and_
 # modelos relacionados
 from testando.model.tipoitem import TipoItem
 from testando.model.item import Item
@@ -62,7 +62,7 @@ class Fase(DeclarativeBase):
             return 'no'
         
     def tiene_items(self):
-        c=len(self.items)
+        c=DBSession.query(Item).filter(and_(Item.fase_id==self.id,Item.historico==False,Item.estado!='Eliminado')).count()
         if c > 0:
             return 'si ' +'('+str(c)+')' 
         else:

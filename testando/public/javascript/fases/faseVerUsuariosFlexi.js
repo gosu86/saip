@@ -8,7 +8,7 @@ $(function()
 		colModel : [
 			{display: 'ID', name : 'id', width : 40, sortable : true, align: 'left', hide : true},
 			{display: 'Nombre', name : 'name', width : 150, sortable : true, align: 'left'},
-			{display: 'Rol', name : 'rol', width : 350, sortable : true, align: 'center'},
+			{display: 'Permiso', name : 'rol', width : 350, sortable : true, align: 'center'},
 		],
 		
 		buttons : [
@@ -21,7 +21,7 @@ $(function()
 			{separator: true},	
 			{separator: true},
 			{separator: true},
-			{name: 'Cambiar Rol', bclass: 'switch_rol', onpress : doCommandUsuarios},
+			{name: 'Cambiar Permisos', bclass: 'switch_rol', onpress : doCommandUsuarios},
 		],
 		
 		searchitems : [
@@ -50,7 +50,7 @@ $(function()
 				colModel : [
 					{display: 'ID', name : 'id', width : 40, sortable : true, align: 'left', hide : true},
 					{display: 'Nombre', name : 'name', width : 150, sortable : true, align: 'left'},
-					{display: 'Rol', name : 'rol', width : 350, sortable : true, align: 'center'},
+					{display: 'Permiso', name : 'rol', width : 350, sortable : true, align: 'center'},
 				],
 				
 				buttons : [
@@ -93,7 +93,7 @@ function doCommandUsuarios(com, grid) {
 		{
 				obtener_ids(grid,'quitar');
 		}		
-		else if (com == 'Cambiar Rol')
+		else if (com == 'Cambiar Permisos')
 		{
 				obtener_ids(grid,'cambiar');
 		}

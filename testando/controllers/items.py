@@ -19,8 +19,7 @@ import pygraphviz as pgv
 
 log = logging.getLogger(__name__)
 class ItemsController(CrudRestController):
-    log.debug('<-- In to ProyectosItems -->')
-        
+       
     model = Item
     
     @expose('testando.templates.desarrollar.items.index')
@@ -34,8 +33,6 @@ class ItemsController(CrudRestController):
     def new(self, *args, **kw):
         """Muestra la pagina new.html con el form para la creacion de un nuevo item."""
         referer=request.headers.get("Referer", "")
-        log.debug("referer == %s" % (referer))
-        log.debug('kw %s' %str(kw))
         tdiid=int(kw['tdiid'])
         tdi=DBSession.query(TipoItem).filter_by(id=tdiid).first()
         fase_id=tdi.fase_id
@@ -440,9 +437,8 @@ class ItemsController(CrudRestController):
 
         grafo.layout('dot') # layout with dot
         dir=config['pylons.paths']['static_files']+'/images/'
-        log.debug('dir=  %s' %dir)
+
         grafo.draw(dir+'impacto.png') # write to file 
-        log.debug('calculoImpacto = %s' %str(calcular))
         return dict(calcular=calcular,
                     inombre = inombre,
                     title_nav='Lista de Items',

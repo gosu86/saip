@@ -106,6 +106,7 @@ function doCommandItem(com, grid)
 				}
 				else
 				{
+					lb = $('tr.trSelected td:last').children().text()
 					if (lb == 'Activa')
 					{
 						if (confirm("El item seleccionado posee una linea base activa. Desea pasar el item al estado de revision?"))
@@ -120,7 +121,7 @@ function doCommandItem(com, grid)
 					else
 					{
 						id = get_id($('.trSelected', grid)) 
-						window.location = '/desarrollar/items/impacto/?itemid='+id+'&fid='+$('input#fid').val();						
+						window.location = '/desarrollar/items/adjuntar/?itemid='+id+'&fid='+$('input#fid').val();						
 					}
 
 				}
@@ -142,6 +143,7 @@ function doCommandItem(com, grid)
 			}
 			else if (com == 'Borrar')
 			{
+				lb = $('tr.trSelected td:last').children().text()
 				if ($('.trSelected', grid).length > 1)
 				{
 					msg_toManySelected('borrar')

@@ -204,14 +204,10 @@ class Usuario(DeclarativeBase):
             op2='<option value=2>Desarrollador</option>'
             op3='<option value=3>Aprobador y Desarrollador</option>'            
             if selected==1:
-                #log.debug('1')
                 op1='<option value=1 selected="true">Aprobador</option>'
             elif selected==2:
-                #log.debug('2')
-                op2='<option value=2 selected="true">Desarrollador</option>'
-                
+                op2='<option value=2 selected="true">Desarrollador</option>'                
             elif selected==3:
-                #log.debug('3')
                 op3='<option value=3 selected="true":>Aprobador y Desarrollador</option>'
 
             selectFIN='</select>'

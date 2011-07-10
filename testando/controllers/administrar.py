@@ -19,7 +19,6 @@ __all__ = ['AdministrarController']
 import logging
 log = logging.getLogger(__name__)
 class AdministrarController(BaseController):
-    log.debug('<-- In to: AdministrarController -->')
     allow_only = All(not_anonymous(msg='Acceso denegado. Ud. no se ha loqueado!'),
                      has_any_permission('AdministrarTodo',
                                         'AdministrarUsuarios',

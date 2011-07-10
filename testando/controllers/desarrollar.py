@@ -25,7 +25,6 @@ __all__ = ['DesarrollarController']
 import logging
 log = logging.getLogger(__name__)
 class DesarrollarController(BaseController):
-    log.debug('<-- In to: DesarrollarController -->')
     allow_only = All(
                      not_anonymous(msg='Acceso denegado. Ud. no se ha loqueado!.'),
                      in_any_group('Administrador','Configuradores','Desarrolladores',
@@ -59,7 +58,6 @@ class DesarrollarController(BaseController):
                 proyectos = DBSession.query(Proyecto).filter(and_(Proyecto.usuarios.any(id = current_user.id),Proyecto.estado=='Iniciado')).filter_by(**d)
             else:
                 proyectos = DBSession.query(Proyecto).filter(and_(Proyecto.usuarios.any(id = current_user.id),Proyecto.estado=='Iniciado'))
-            log.debug('proyectos: %s' %proyectos)
             total = proyectos.count()
             column = getattr(Proyecto, sortname)
             proyectos = proyectos.order_by(getattr(column,sortorder)()).offset(offset).limit(rp)
@@ -211,7 +209,6 @@ class DesarrollarController(BaseController):
                 items = items.filter(Item.historico==False)
                 
             total = items.count()
-            log.debug('total %s' %total)
             column = getattr(Item, sortname)
             items = items.order_by(getattr(column,sortorder)()).offset(offset).limit(rp)
             

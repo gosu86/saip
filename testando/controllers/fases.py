@@ -29,7 +29,6 @@ import logging
 __all__ = ['FasesController']
 log = logging.getLogger(__name__)
 class FasesController(CrudRestController):
-    log.debug('<-- In to FasesController -->')
     model       =   Fase
     new_form    =   fase_new_form
     edit_filler =   fase_edit_filler    
@@ -92,7 +91,6 @@ class FasesController(CrudRestController):
                 r=DBSession.query(Rol).filter(Rol.rol_name=='Desarrolladores').first()
                 for u in fase.usuarios:
                     if (len(u.fases)-1)==0:
-                        log.debug('remover')
                         u.roles.remove(r) 
                     c=0    
                     for f in u.fases:
@@ -260,7 +258,6 @@ class FasesController(CrudRestController):
                 usuarios = DBSession.query(Usuario).filter(Usuario.fases.any(id = int(fid)))
                 
             total = usuarios.count()
-            log.debug('total %s' %total)
             column = getattr(Usuario, sortname)
             usuarios = usuarios.order_by(getattr(column,sortorder)()).offset(offset).limit(rp)
             rows = [{'id'  : u.id,
@@ -320,7 +317,7 @@ class FasesController(CrudRestController):
         f_id    =    ids[0]
         ids.remove(f_id)
         ids.pop()
-        log.debug('ids %s' %ids)
+
         c1    =    len(ids)
         c2=0
         f_id    =    int(f_id)

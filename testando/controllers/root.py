@@ -14,8 +14,7 @@ from testando.model.proyecto        import Proyecto
 __all__ = ['RootController']
 import logging
 log = logging.getLogger(__name__)
-class RootController(BaseController):
-    log.debug('<-- In to: RootController -->')    
+class RootController(BaseController):  
     administrar=AdministrarController()
     desarrollar=DesarrollarController()
     configurar=ConfigurarController()
@@ -48,8 +47,6 @@ class RootController(BaseController):
             total = proyectos.count()
             column = getattr(Proyecto, sortname)
             proyectos = proyectos.order_by(getattr(column,sortorder)()).offset(offset).limit(rp)
-            for p in proyectos:
-                log.debug("Lider == %s" % (p.lider.name))
             
             rows = [{'id'  : proyecto.id,
                     'cell': [proyecto.id,
@@ -70,7 +67,6 @@ class RootController(BaseController):
         else:            
             """Start the user login."""
             login_counter = request.environ['repoze.who.logins']
-            log.debug("login counter: %s",login_counter)
             if login_counter > 0:
                 flash(_('Datos ingresados incorrectos, o no existen... Intente de nuevo.'), 'warning')
 
@@ -86,14 +82,11 @@ class RootController(BaseController):
         """
         if not request.identity:
             login_counter = request.environ['repoze.who.logins'] + 1
-            log.debug("<-- post_login --> login counter: %s",login_counter)
             redirect('/login', came_from=came_from, __logins=login_counter)
 
         current_user=request.identity['user']
         p=len(current_user.proyectos)
         f=len(current_user.fases)
-        log.debug("p: %s",p)
-        log.debug("f: %s",f)
         if current_user.estado == 'Eliminado':
             flash(_('Acceso Denegado'), 'warning')
             redirect('/logout_handler')

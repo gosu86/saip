@@ -129,7 +129,6 @@ class Item(DeclarativeBase):
             if isinstance(kw['padres'],unicode):
                 kw['padres']=kw['padres'].split()
             for id in kw['padres']:
-                log.debug('id %s' %id)
                 p=DBSession.query(Item).filter_by(id=int(id)).first()
                 item.padres.append(p)
         else:
