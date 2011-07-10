@@ -2,7 +2,7 @@ from tg             import expose,redirect, validate,tmpl_context, request,confi
 from formencode        import validators
 from repoze.what.predicates import All,not_anonymous,in_any_group
 
-from sqlalchemy.sql import select, and_
+from sqlalchemy.sql import and_,or_
 
 
 from testando.model                 import DBSession
@@ -77,7 +77,6 @@ class ConfigurarController(BaseController):
             else:
                 proyectos = DBSession.query(Proyecto).filter(and_(Proyecto.estado!='Eliminado',Proyecto.lider_id==current_user.id))
                 
-            log.debug('query: %s' %proyectos)
             total = proyectos.count()
             column = getattr(Proyecto, sortname)
             proyectos = proyectos.order_by(getattr(column,sortorder)()).offset(offset).limit(rp)
@@ -360,28 +359,35 @@ class ConfigurarController(BaseController):
     @expose('json')    
     def items_aprobados(self,fid=None, page='1', rp='25', sortname='id', sortorder='asc', qtype=None, query=None):
         try:
-            offset = (int(page)-1) * int(rp)            
+            offset = (int(page)-1) * int(rp)
+            items = DBSession.query(Item)            
             if (query):
-                d = {'fase_id':int(fid)}
-                items = DBSession.query(Item).filter_by(**d)
-                items = items.filter(and_(Item.historico==False,Item.estado=='Aprobado',Item.linea_base_id==None))
                 if qtype=='name':
                     items   =   items.filter(Item.name.like('%'+query+'%'))
                 elif qtype=='estado':
                     items   =   items.filter(Item.estado.like('%'+query+'%'))
                 elif qtype=='codigo':
-                    items   =   items.filter(Item.codigo.like('%'+query+'%'))                
-            else:
-                d = {'fase_id':int(fid)}
-                items = DBSession.query(Item).filter_by(**d)
-                items = items.filter(and_(Item.historico==False,Item.estado=='Aprobado',Item.linea_base_id==None))
+                    items   =   items.filter(Item.codigo.like('%'+query+'%'))
+                                    
+            d = {'fase_id':int(fid)}
+            items = DBSession.query(Item).filter_by(**d)
                 
+            items = items.filter(and_(
+                                      Item.historico==False,
+                                      Item.estado=='Aprobado',
+                                      or_(
+                                          Item.linea_base.has(estado='Abierta'),
+                                          Item.linea_base.has(estado='Comprometida'),
+                                          Item.linea_base==None
+                                          )
+                                      )
+                                 )
+            items = items.filter(Item.estado!='Eliminado') 
+                           
             total = items.count()
-            log.debug('total item aprobados %s' %total)
             column = getattr(Item, sortname)
             items = items.order_by(getattr(column,sortorder)()).offset(offset).limit(rp)
             total = items.count()
-            log.debug('total item aprobados %s' %total)            
             rows = [{'id'  : item.id,
                     'cell': [item.id,
                              item.codigo,                             
@@ -403,14 +409,31 @@ class ConfigurarController(BaseController):
         ids=kw['ids'].split(',')
         ids.pop()
         cant=len(ids)
-        
+
         for id in ids:
             id=int(id)
             i=DBSession.query(Item).filter_by(id=id).first()
-            lb.items.append(i)
-        lb.fase_id=i.fase_id        
+            lb.items.append(i)        
+        lb.fase_id=i.fase_id
         DBSession.flush()
-
+        items = DBSession.query(Item).filter(and_(
+                                                  Item.historico==False,
+                                                  Item.fase_id==i.fase_id
+                                                  )
+                                             )
+        
+        items_con_lba = items.filter(and_(
+                                     Item.historico==False,
+                                     Item.fase_id==i.fase_id,
+                                     Item.linea_base.has(estado='Activa')
+                                     )
+                                )
+        if items_con_lba.count()==items.count():
+            i.fase.estado="Con Linea Base"
+        else:
+            i.fase.estado="Con Lineas Base Parciales"
+            
+        DBSession.flush()
         msg=str(cant)+' items ahora tienen linea base.'
         type= 'succes'   
             
@@ -419,9 +442,11 @@ class ConfigurarController(BaseController):
     @expose('json')        
     def abrir_linea_base(self,**kw):
         lb=DBSession.query(LineaBase).filter_by(id=int(kw['id'])).first()
-        lb.estado='Abierta'     
+        lb.estado='Abierta'
+        lb.fase.estado='Con Lineas Base Parciales'     
         DBSession.flush()
-
+        
+        lb.marcar_items()
         msg='Linea base abierta con exito.'
         type= 'succes'   
             

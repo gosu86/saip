@@ -233,8 +233,8 @@ class DesarrollarController(BaseController):
     @expose('json')        
     def comprometer(self,**kw):
         i=DBSession.query(Item).filter_by(id=int(kw['id'])).first()
-        i.estado='En Revision'
-        i.linea_base.estado='Comprometida'
+        i.linea_base.estado="Comprometida"
+        i.linea_base.marcar_items()
         DBSession.flush()
         msg='El item ha pasado al estado de revision.'
         type= 'notice'
@@ -252,7 +252,7 @@ class DesarrollarController(BaseController):
         for id in ids:
             id=int(id)
             i=DBSession.query(Item).filter_by(id=id).first()
-            if i.estado == 'Terminado':
+            if i.estado == 'Terminado' or i.estado == 'En Revision':
                 i.estado='Aprobado'
             else:
                 error=error+1
@@ -303,7 +303,9 @@ class DesarrollarController(BaseController):
         item = DBSession.query(Item).filter_by(id = int(kw['id'])).first()
         item.estado='Eliminado'
         item.padres=[]
-        item.antecesores =[]
+        item.hijos=[]
+        item.antecesores=[]
+        item.sucesores=[]
         DBSession.flush()
         msg="El item se ha eliminado."
         return dict(msg=msg)    

@@ -54,8 +54,7 @@ $(function(){
 		showTableToggleBtn: true,
 		height: 'auto',
 		singleSelect: false
-	});
-	$('div.DeFase .flexigrid').addClass('hideBody');	
+	});	
 });
 
 
@@ -65,7 +64,7 @@ function doCommandItem(com, grid)
 		window.location = "/desarrollar/items/vista_de_historial/?iid="+get_id($('.trSelected', grid))
 	}	
 	if ($('.trSelected', grid).length > 0)
-	{	
+	{	lb = $('tr.trSelected td:last').children().text()
 			if (com == 'Aprobar')
 			{
 				obtener_ids(grid,'aprobar');
@@ -85,12 +84,14 @@ function doCommandItem(com, grid)
 					$('.trSelected', grid).each(function()
 					{
 						id = get_id(this) 
-						lb = $('tr.trSelected td:last').children().text()
+						
 						
 						if (lb == 'Activa')
 						{
-							alert(lb)
-							set_comprometida(id)
+							if (confirm("El item seleccionado posee una linea base activa. Desea pasar el item al estado de revision?"))
+							{
+								set_comprometida(id)
+							}
 						}
 						else if (lb == 'Comprometida')
 						{
@@ -111,8 +112,21 @@ function doCommandItem(com, grid)
 				else{
 					$('.trSelected', grid).each(function()
 					{
-						id = get_id(this)
-							window.location = '/desarrollar/items/adjuntar/?itemid='+id+'&fid='+$('input#fid').val();		
+						if (lb == 'Activa')
+						{
+							if (confirm("El item seleccionado posee una linea base activa. Desea pasar el item al estado de revision?"))
+							{
+								set_comprometida(id)
+							}
+						}
+						else if (lb == 'Comprometida')
+						{
+							msg_comprometida()
+						}
+						else{
+							id = get_id(this)
+							window.location = '/desarrollar/items/adjuntar/?itemid='+id+'&fid='+$('input#fid').val();
+						}		
 					});					
 				}			
 
@@ -140,8 +154,20 @@ function doCommandItem(com, grid)
 				}
 				else
 				{
-					id = get_id($('.trSelected', grid)) 
-					borrar(id)
+					if (lb == 'Activa')
+					{
+						msg_activa()
+					}
+					else if (lb == 'Comprometida')
+					{
+						msg_comprometida()
+					}
+					else
+					{
+						id = get_id($('.trSelected', grid)) 
+						borrar(id)						
+					}
+
 				}
 			}			
 	}
@@ -180,16 +206,23 @@ function set_comprometida(id)
 				    	  {
 				              text: data.msg,
 				              stay: false,
-				              stayTime: 2500,
+				              stayTime: 3000,
 				              type: data.type
 				    	  });
 				  jQuery.noticeAdd(
 				    	  {
 				              text: 'Su linea base ha pasado al estado "Comprometida"',
 				              stay: false,
-				              stayTime: 2500,
+				              stayTime: 4000,
 				              type: data.type
-				    	  });				    	  
+				    	  });
+				  jQuery.noticeAdd(
+				    	  {
+				              text: 'Items de otras fases podrian verse afectados',
+				              stay: false,
+				              stayTime: 5000,
+				              type: data.type
+				    	  });				  
 				  $('#fasesAprobarDesarrollarItemsFlexi').flexReload();
     	    	 
     	      },
@@ -321,6 +354,15 @@ function msg_toManySelected(que){
 function msg_comprometida(){
 	jQuery.noticeAdd({
         text: "El item posee un linea base comprometida, No se puede editar.",
+        stay: false,
+        stayTime: 3000,
+        type: "notice"
+	  });	
+}
+
+function msg_activa(){
+	jQuery.noticeAdd({
+        text: "El item posee un linea base activa, No se puede eeliminar.",
         stay: false,
         stayTime: 3000,
         type: "notice"

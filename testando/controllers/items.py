@@ -4,7 +4,7 @@ from tg.decorators  import override_template,validate,without_trailing_slash,exp
 from tg.controllers import CUSTOM_CONTENT_TYPE
 
 from tg.configuration import config
-from sqlalchemy.sql import and_
+from sqlalchemy.sql import and_,or_
 from string import find
 from testando.model                 import DBSession
 from testando.model.item            import Item
@@ -64,7 +64,9 @@ class ItemsController(CrudRestController):
         posibles_padres=DBSession.query(Item).filter(and_(
                                                           Item.fase_id==fase_id,
                                                           Item.historico==False,
-                                                          Item.estado!='Eliminado'
+                                                          Item.estado!='Eliminado',
+                                                          Item.estado!='En Revision'
+
                                                           )
                                                      )
         
@@ -105,8 +107,7 @@ class ItemsController(CrudRestController):
     @expose('testando.templates.desarrollar.items.edit')
     def edit(self, *args, **kw):
         """Muestra la pagina edit.html con el form para la edicion de un item seleccionado."""
-        referer=request.headers.get("Referer", "")        
-        log.debug("len(kw) %s" %len(kw))
+        referer=request.headers.get("Referer", "")
         
         if find(referer,'configurar') >=0:
             page='Configurar'
@@ -137,7 +138,7 @@ class ItemsController(CrudRestController):
                                                                   Item.linea_base.has(estado='Activa'),
                                                                   Item.fase.has(orden=(fase_orden-1))
                                                                   )
-                                                             )
+                                                             ).all()
             
         posibles_padres=DBSession.query(Item).filter(and_(
                                                           Item.fase_id==fase_id,
@@ -145,7 +146,7 @@ class ItemsController(CrudRestController):
                                                           Item.estado!='Eliminado',
                                                           Item.id!=i.id
                                                           )
-                                                     )
+                                                     ).all()
 
         for h in i.hijos:
             if h in posibles_padres:
@@ -168,9 +169,12 @@ class ItemsController(CrudRestController):
             if pk not in kw and i < len(args):
                 kw['itemid'] = args[i]
         i       =   DBSession.query(Item).filter_by(id=int(kw['itemid'])).first()
-
+        
+        
+        lb=i.linea_base
         item=i.nueva_version(kw)
-                           
+        if lb!=None:
+            lb.items=[]    
         DBSession.flush() 
 
 
@@ -263,40 +267,52 @@ class ItemsController(CrudRestController):
     def revertir(self,**kw):          
         id                  =   kw['id'].split(',')
         
-        i_version_a_revertir  =   DBSession.query(Item).filter_by(id=int(id[1])).first()
+        reload=False
         i_ultima_version      =   DBSession.query(Item).filter_by(id=int(id[0])).first()
-        i_ultima_version.historico        = True
-        item                  =   i_version_a_revertir.nueva_version()
-        item.version          =   i_ultima_version.version+1
-        item.historico        = False
+        revertir=True
+        if i_ultima_version.linea_base!=None:
+            if i_ultima_version.linea_base.estado!='Abierta':
+                revertir=False
+
+        if revertir:
         
-        
-        ok=False
-        relaciones= len(item.padres) + len(item.antecesores)
-        for p in item.padres:
-            if p.estado=='Eliminado':
-                item.padres.remove(p)
-                relaciones=relaciones-1
-                
-        if item.fase.orden >1:
-            for a in item.antecesores:
-                if a.estado=='Eliminado':
-                    item.antecesores.remove(a)
+            i_version_a_revertir  =   DBSession.query(Item).filter_by(id=int(id[1])).first()
+            i_ultima_version.historico        = True
+            item                  =   i_version_a_revertir.nueva_version()
+            item.version          =   i_ultima_version.version+1
+            item.historico        = False
+            
+            ok=False
+            relaciones= len(item.padres) + len(item.antecesores)
+            for p in item.padres:
+                if p.estado=='Eliminado':
+                    item.padres.remove(p)
                     relaciones=relaciones-1
-            if len(item.antecesores)>0:
+                    
+            if item.fase.orden >1:
+                for a in item.antecesores:
+                    if a.estado=='Eliminado':
+                        item.antecesores.remove(a)
+                        relaciones=relaciones-1
+                if len(item.antecesores)>0:
+                    ok=True
+                    DBSession.flush()
+            else:
                 ok=True
                 DBSession.flush()
+                 
+            if ok: 
+                msg='El item se ha revertido con exito!'
+                type='succes'
+                reload=True
+            else:
+                msg='El item no se puede revertir, NO se pudieron recuperar todas sus relaciones esta rotas'
+                type='error'
         else:
-            ok=True
-            DBSession.flush()
-             
-        if ok: 
-            msg='El item se ha revertido con exito!'
-            type='succes'
-        else:
-            msg='El item no se puede revertir, NO se todas sus relaciones esta rotas'
-            type='error'        
-        return dict(msg=msg,type=type,id=str(item.id)) 
+            item=i_ultima_version
+            msg='El item no se puede revertir, El item no debe tener linea base o de poseer una linea base esta debe estar "abierta"'
+            type='error'                    
+        return dict(msg=msg,type=type,id=str(item.id),reload=reload) 
 
 #-----------------------------------------------------------------#
 #-------------------Adjunto Controller----------------------------#
@@ -386,7 +402,7 @@ class ItemsController(CrudRestController):
         grafo.node_attr['style']='filled'
         grafo.node_attr['fillcolor']='#f0f8ff'
         fase = DBSession.query(Fase).filter_by(id=ItemActual.fase_id).first()
-        grafo.add_node(ItemActual.codigo+"[F"+str(fase.orden)+"] " 
+        grafo.add_node(ItemActual.name+"[F"+str(fase.orden)+"] " 
                        + "[" +str(ItemActual.complejidad)+"]", 
                        fillcolor= 'red')
         
@@ -412,7 +428,7 @@ class ItemsController(CrudRestController):
         ItemActual = DBSession.query(Item).filter_by(id=IdActual).first()
         fase = DBSession.query(Fase).filter_by(id=ItemActual.fase_id).first()
         if(ItemActual not in calculados):
-            grafo.add_node(ItemActual.codigo+"[F"+str(fase.orden)+"] " 
+            grafo.add_node(ItemActual.name+"[F"+str(fase.orden)+"] " 
                            + "[" +str(ItemActual.complejidad)+"]")
             calculados.append(ItemActual)
             
@@ -424,9 +440,9 @@ class ItemsController(CrudRestController):
             for p in padres:
                 if (p.historico==False):
                     f = DBSession.query(Fase).filter_by(id=p.fase_id).first()
-                    grafo.add_edge(p.codigo+"[F"+str(f.orden)+"] " 
+                    grafo.add_edge(p.name+"[F"+str(f.orden)+"] " 
                                       + "[" +str(p.complejidad)+"]",
-                                      ItemActual.codigo+"[F"+str(fase.orden)+"] " 
+                                      ItemActual.name+"[F"+str(fase.orden)+"] " 
                                       + "[" +str(ItemActual.complejidad)+"]", 
                                       color='blueviolet', label='padre')
                    
@@ -437,9 +453,9 @@ class ItemsController(CrudRestController):
             for a in antecesores:
                 if (a.historico==False):
                     f = DBSession.query(Fase).filter_by(id=a.fase_id).first()
-                    grafo.add_edge(a.codigo+"[F"+str(f.orden)+"] " 
+                    grafo.add_edge(a.name+"[F"+str(f.orden)+"] " 
                                       + "[" +str(a.complejidad)+"]",
-                                      ItemActual.codigo+"[F"+str(fase.orden)+"] " 
+                                      ItemActual.name+"[F"+str(fase.orden)+"] " 
                                       + "[" +str(ItemActual.complejidad)+"]", 
                                       color='green', label='antecesor')
                     if(a not in calculados):
@@ -453,7 +469,7 @@ class ItemsController(CrudRestController):
         ItemActual = DBSession.query(Item).filter_by(id=IdActual).first()
         fase = DBSession.query(Fase).filter_by(id=ItemActual.fase_id).first()
         if(ItemActual not in calculados):
-            grafo.add_node(ItemActual.codigo+"[F"+str(fase.orden)+"] " 
+            grafo.add_node(ItemActual.name+"[F"+str(fase.orden)+"] " 
                            + "[" +str(ItemActual.complejidad)+"]")
             calculados.append(ItemActual)    
         calculo= calculo + ItemActual.complejidad
@@ -464,9 +480,9 @@ class ItemsController(CrudRestController):
             for h in hijos:
                 if (h.historico==False):
                     f = DBSession.query(Fase).filter_by(id=h.fase_id).first()
-                    grafo.add_edge(ItemActual.codigo+"[F"+str(fase.orden)+"] " 
+                    grafo.add_edge(ItemActual.name+"[F"+str(fase.orden)+"] " 
                                       + "[" +str(ItemActual.complejidad)+"]",
-                                      h.codigo+"[F"+str(f.orden)+"] " 
+                                      h.name+"[F"+str(f.orden)+"] " 
                                       + "[" +str(h.complejidad)+"]", 
                                       color='orange', label='hijo')
                     if(h not in calculados):
@@ -476,9 +492,9 @@ class ItemsController(CrudRestController):
             for s in sucesores:
                 if (s.historico==False):
                     f = DBSession.query(Fase).filter_by(id=s.fase_id).first()
-                    grafo.add_edge(ItemActual.codigo+"[F"+str(fase.orden)+"] " 
+                    grafo.add_edge(ItemActual.name+"[F"+str(fase.orden)+"] " 
                                       + "[" +str(ItemActual.complejidad)+"]",
-                                      s.codigo+"[F"+str(f.orden)+"] " 
+                                      s.name+"[F"+str(f.orden)+"] " 
                                       + "[" +str(s.complejidad)+"]", 
                                       color='blue', label='sucesor')
                     if(s not in calculados):
@@ -486,12 +502,3 @@ class ItemsController(CrudRestController):
         
         return(calculo,calculados, grafo)
     
-    @expose('json')
-    def post_delete(self,**kw):
-        
-        item = DBSession.query(Item).filter_by(id = int(kw['id'])).first()
-        item.estado='Eliminado'
-        DBSession.flush()
-
-        msg="El item se ha eliminado."
-        return dict(msg=msg)

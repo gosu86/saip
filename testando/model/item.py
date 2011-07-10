@@ -106,10 +106,9 @@ class Item(DeclarativeBase):
         
         if kw!=None and kw.has_key('atributos_extra'):
             
-            if type(kw['atributos_extra'])==type(u''):
-                a=kw['atributos_extra']
-                kw['atributos_extra']=[]
-                kw['atributos_extra'].append(a)
+            if isinstance(kw['atributos_extra'],unicode):
+                kw['atributos_extra']=kw['atributos_extra'].split()
+                
             for id in kw['atributos_extra']:
                 aeo          =   DBSession.query(AtributoExtra).filter_by(id=int(id)).first()
                 aen          =   AtributoExtra()
@@ -126,8 +125,11 @@ class Item(DeclarativeBase):
                 item.atributos_extra.append(aen)
            
         if kw!=None and kw.has_key('padres'):
-            item.padres=[]             
+            item.padres=[]
+            if isinstance(kw['padres'],unicode):
+                kw['padres']=kw['padres'].split()
             for id in kw['padres']:
+                log.debug('id %s' %id)
                 p=DBSession.query(Item).filter_by(id=int(id)).first()
                 item.padres.append(p)
         else:
@@ -136,10 +138,15 @@ class Item(DeclarativeBase):
             else:
                 item.padres=[]             
                 for p in self.padres:
-                    item.padres.append(p)                
-        
+                    item.padres.append(p)
+                    
+        for h in self.hijos:
+            item.hijos.append(h)               
+               
         if kw!=None and kw.has_key('antecesores'):
-            item.antecesores=[]             
+            item.antecesores=[]
+            if isinstance(kw['antecesores'],str):
+                kw['antecesores'].split            
             for id in kw['antecesores']:
                 a=DBSession.query(Item).filter_by(id=int(id)).first()
                 item.antecesores.append(a)
@@ -149,7 +156,8 @@ class Item(DeclarativeBase):
             else:
                 for a in self.antecesores:
                     item.antecesores.append(a)
-        
+        for s in self.sucesores:
+            item.sucesores.append(s)        
         
         if adjunto_id==None:
             for a in self.adjuntos:

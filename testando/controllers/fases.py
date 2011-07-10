@@ -15,6 +15,7 @@ from testando.model.proyecto        import Proyecto
 from testando.widgets.fase_w    import fase_new_form,fase_edit_filler,fase_edit_form
 from testando.widgets.myWidgets import hideMe
 from formencode     import validators
+from string import find
 
 errors = ()
 try:
@@ -200,11 +201,15 @@ class FasesController(CrudRestController):
     def items_creados(self,fid=None, page='1', rp='25', sortname='id', sortorder='asc', qtype=None, query=None):
         try:
             offset = (int(page)-1) * int(rp)
-            
-            if (query):
-                d = {'fase_id':int(fid)}
-                items = DBSession.query(Item).filter_by(**d)
-                items = items.filter(Item.historico==False)
+            d = {'fase_id':int(fid)}
+            items = DBSession.query(Item).filter_by(**d)
+            items = items.filter(Item.historico==False) 
+              
+            referer=request.headers.get("Referer", "")        
+            if find(referer,'desarrollar') >=0:
+                items = items.filter(Item.estado!='Eliminado')
+                                 
+            if (query):                
                 if qtype=='name':
                     items   =   items.filter(Item.name.like('%'+query+'%'))
                 elif qtype=='estado':
@@ -213,18 +218,12 @@ class FasesController(CrudRestController):
                     items   =   items.filter(Item.codigo.like('%'+query+'%'))                
                 elif qtype=='version':
                     items   =   items.filter_by(version=int(query))
-            else:
-                d = {'fase_id':int(fid)}
-                items = DBSession.query(Item).filter_by(**d)
-                items = items.filter(Item.historico==False)
 
                 
             total = items.count()
-            log.debug('total %s' %total)
             column = getattr(Item, sortname)
             items = items.order_by(getattr(column,sortorder)()).offset(offset).limit(rp)
-            total = items.count()
-            log.debug('total 2 %s' %total)            
+            total = items.count()           
             rows = [{'id'  : item.id,
                     'cell': [item.id,
                              item.codigo,                             

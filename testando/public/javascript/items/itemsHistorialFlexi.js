@@ -73,6 +73,35 @@ function get_id(tr){
 	return id;
 }
 
+
+function revertir(id){
+    $.ajax(
+    	    {
+    	      type: 'POST',
+    	      dataType: "json",
+    	      url: '/desarrollar/items/revertir',
+    	      data: {id:id},
+    	      success: function(data)
+    	      {
+
+    	        	  jQuery.noticeAdd(
+    	        	    	  {
+    	        	              text: data.msg,
+    	        	              stay: false,
+    	        	              stayTime: 5500,
+    	        	              type: data.type
+    	        	    	  });
+    	        	 
+    	        if (data.reload)
+    	        { 
+    	        	window.location='/'+$('a.active').text().toLowerCase()+'/items/vista_de_historial/?iid='+data.id.toString()
+    	        }
+    	      }
+    	    	 
+    	    });
+       	     		
+}
+
 function msg_falta_seleccion(){
 	jQuery.noticeAdd({
 	              text: "Debe seleccionar al menos un item!",
@@ -95,27 +124,4 @@ function msg_eliminado(){
 	              stayTime: 2500,
 	              type: "error"
 	    	  });	    	  
-}
-
-function revertir(id){
-    $.ajax(
-    	    {
-    	      type: 'POST',
-    	      dataType: "json",
-    	      url: '/desarrollar/items/revertir',
-    	      data: {id:id},
-    	      success: function(data)
-    	      { 
-    	        	  jQuery.noticeAdd(
-    	        	    	  {
-    	        	              text: data.msg,
-    	        	              stay: false,
-    	        	              stayTime: 2500,
-    	        	              type: data.type
-    	        	    	  });  
-				window.location='/'+$('a.active').text().toLowerCase()+'/items/vista_de_historial/?iid='+data.id.toString()	        		  
-    	      }
-    	    	 
-    	    });
-       	     		
 }

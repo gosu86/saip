@@ -11,6 +11,7 @@ from datetime import datetime
 # modelos relacionados
 from testando.model.tipoitem import TipoItem
 from testando.model.item import Item
+from testando.model.lineabase import LineaBase
 
 
 usuario_rol_fase_table = Table('usuarios_roles_fases', metadata,
@@ -37,6 +38,8 @@ class Fase(DeclarativeBase):
     fecha_creacion = Column(DateTime, default=datetime.now)
 
     tiposDeItem       = relationship(TipoItem, backref="fase")
+    
+    lineasBase       = relationship(LineaBase, backref="fase")    
 
     proyecto_id = Column(Integer, ForeignKey('proyectos.id'))
 

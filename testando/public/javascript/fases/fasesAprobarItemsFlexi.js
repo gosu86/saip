@@ -108,7 +108,7 @@ function aprobar(ids){
 						    	  });
 						  jQuery.noticeAdd(
 						    	  {
-						              text: 'Solo items "terminados", pueden ser aprobados... ',
+						              text: 'Solo items con estado "Terminado" o "En Revision", pueden ser aprobados... ',
 						              stay: false,
 						              stayTime: 2500,
 						              type: 'notice'

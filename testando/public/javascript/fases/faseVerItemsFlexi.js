@@ -8,11 +8,12 @@ $(function(){
 			{display: 'ID', name : 'id', width : 40, sortable : true, align: 'left', hide : true},
 			{display: 'Codigo', name : 'codigo', width : 50, sortable : true, align: 'left'},
 			{display: 'Nombre', name : 'name', width : 150, sortable : true, align: 'left'},
-			{display: 'Version', name : 'version', width : 60, sortable : true, align: 'left'},			
+			{display: 'Version', name : 'version', width : 50, sortable : true, align: 'left'},			
+			{display: 'Estado', name : 'estado', width : 100, sortable : true, align: 'left'},			
 			{display: 'Descripcion', name : 'descripcion', width : 150, sortable : true, align: 'left'},
-			{display: 'Complejidad', name : 'complejidad', width : 100, sortable : true, align: 'left'},
-			{display: 'Estado', name : 'estado', width : 100, sortable : true, align: 'left'},
+			{display: 'Complejidad', name : 'complejidad', width : 80, sortable : true, align: 'left'},
 			{display: 'Tipo De Item', name : 'tipoDeItem', width : 150, sortable : true, align: 'left'},
+			{display: 'Linea Base', name : 'lineabase', width : 150, sortable : true, align: 'left'},
 		],
 		
 		buttons : [	           

@@ -138,9 +138,9 @@ $(function(){
     </tbody>
     </table>
     <table>
-    <th style="color:white">Relaciones en la misma fase</th>
-    <py:if test="posibles_antecesores">
-    <th style="color:white">Relaciones en la fase anterior</th>
+    <th style="color:white">Seleccion de Padres</th>
+    <py:if test="fase_orden>1">
+    <th style="color:white">Seleccion de Antecesores</th>
     </py:if>
     <tr>
         <td>
@@ -149,7 +149,7 @@ $(function(){
 			</select> 
         </td>
         <td>
-        <py:if test="posibles_antecesores">
+        <py:if test="fase_orden>1">
         	<select style="align:right" id="antecesores" class="multiselect" multiple="multiple" name="antecesores">
 				<option py:for="pa in posibles_antecesores" value="${pa.id}">${pa.name}</option>
 			</select>   
