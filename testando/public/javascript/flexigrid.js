@@ -1249,3 +1249,10 @@
 		}
 	}; //end noSelect
 })(jQuery);
+
+function get_ids(grid){
+	var ids=[]
+	$('.trSelected',grid).each(function()
+	{ids.push(this.id.substring(this.id.lastIndexOf('row')+3));});	
+	return ids;
+}

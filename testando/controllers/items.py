@@ -63,7 +63,6 @@ class ItemsController(CrudRestController):
                                                           Item.historico==False,
                                                           Item.estado!='Eliminado',
                                                           Item.estado!='En Revision'
-
                                                           )
                                                      )
         

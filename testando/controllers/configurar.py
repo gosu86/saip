@@ -52,7 +52,7 @@ class ConfigurarController(BaseController):
         #return dict(page='Configurar')
         redirect('seleccion_de_proyectos')
 
-    @expose('testando.templates.configurar.seleccion_de_proyectos')    
+    @expose('testando.templates.configurar.proyectos.seleccion_de_proyectos')    
     def seleccion_de_proyectos(self,**kw):
         return dict(page='Configurar')
              
@@ -265,16 +265,10 @@ class ConfigurarController(BaseController):
 
     @expose('json')
     def cambiar_roles(self,**kw):
-        idsyroles    =    kw['idsyroles']
-        idsyroles    =    idsyroles.split(";")
-        
-        f_id    =    idsyroles[0]
-        idsyroles.remove(f_id)
-        idsyroles.pop()
-        
+        idsyroles    =    kw['idsyroles[]']       
+        f_id    =    int(idsyroles.pop())       
         cantidad    =    len(idsyroles)
-        
-        f_id    =    int(f_id)
+
         conn = config['pylons.app_globals'].sa_engine.connect()
         for idyrol in idsyroles:
             idyrol=idyrol.split(',')
@@ -283,11 +277,7 @@ class ConfigurarController(BaseController):
             updt=usuario_rol_fase_table.update().where(and_(usuario_rol_fase_table.c.usuario_id==u_id, usuario_rol_fase_table.c.fases_id==f_id)).values(rol_id=rol)
             conn.execute(updt)
         conn.close()
-                    
-        msg    =    str(cantidad)    +    " permisos cambiados con exito!"
-        type="succes"
-        
-        return dict(msg=msg,type=type)
+        return dict(cantidad=cantidad)
         
     @expose('json')    
     @expose('testando.templates.configurar.fases.vista_de_items') 

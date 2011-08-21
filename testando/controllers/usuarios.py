@@ -84,6 +84,7 @@ class UsuariosController(CrudRestController):
         u.email=kw['email']
         u.apellido=kw['apellido']
         u.estado=kw['estado']
+        u.roles=[]
 
         if(len(kw['password'])!=0):
             u._set_password(kw['_password'])

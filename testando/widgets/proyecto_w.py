@@ -30,7 +30,7 @@ class ProyectoEditForm(DojoEditableForm):
     __omit_fields__     = ['fecha_creacion','fases','usuarios']
     __require_fields__  =   ['lider','lider_id']
     
-    #lider_id = TextField('lider_id',label_text="Lider")
+    lider_id = SingleSelectField("lider",label_text="Lider",options=[])
     name = TextField('name', label_text='Nombre: ')
     empresa = TextField
     estado = SingleSelectEstadosProyectos

@@ -57,3 +57,17 @@ class Proyecto(DeclarativeBase):
             return 'si ' +'('+str(c)+')' 
         else:
             return 'no'
+    def es_iniciable(self):
+        resp={}
+        resp['iniciable']=True
+        if self.estado=='Iniciado':
+            resp['iniciable']=False
+            resp['ya_iniciado']=True
+        else:
+            if self.tiene_fases()=='no':
+                resp['iniciable']=False
+                resp['sin_fases']=True
+            if self.tiene_usuarios()=='no':
+                resp['iniciable']=False
+                resp['sin_usuarios']=True
+        return resp

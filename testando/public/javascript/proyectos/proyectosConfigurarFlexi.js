@@ -10,8 +10,8 @@ $(function()
 			{display: 'Nombre', name : 'name', width : 150, sortable : true, align: 'left'},
 			{display: 'Empresa', name : 'empresa', width : 150, sortable : false, align: 'left'},
 			{display: 'Estado', name : 'estado', width : 150, sortable : true, align: 'center'},
-			{display: 'Fases', name : 'fases', width : 40, sortable : true, align: 'center'},
-			{display: 'Usuarios', name : 'usuarios', width : 40, sortable : true, align: 'center'}
+			{display: 'Fases', name : 'fases', width : 40, sortable : false, align: 'center'},
+			{display: 'Usuarios', name : 'usuarios', width : 40, sortable : false, align: 'center'}
 		],
 
 		buttons : [
@@ -51,55 +51,44 @@ function doCommandProyecto(com, grid)
 	if ($('.trSelected', grid).length > 0)
 	{	
 		if (com == 'Fases')
-			{ver_fases(grid)}
+		{ver_fases(grid)}
 		else if (com == 'Iniciar')
-			{iniciar(grid)}
+		{iniciar_proyecto(grid)}
 	}
 	else
-	{msg_falta_seleccion()}	
+	{notify("Debe seleccionar un proyecto!",null,timeL)}	
 }
-function ver_fases(grid){
-		$('.trSelected', grid).each(function()
-		{	
-			id = get_id(this) 
-			estado=get_estado()
-			nombre=get_nombre()
-			window.location = "/configurar/vista_de_fases/?pid="+id
-		});	
-}
+function ver_fases(grid)
+{window.location = "/configurar/vista_de_fases/?pid="+get_ids(grid)[0]}
 
-function iniciar(grid){
-	$('.trSelected', grid).each(function()
-	{
-		estado=get_estado()
-		if (estado !=="Iniciado")
-		{			
-			id = get_id(this) 
-			fases=get_si_no('fases')
-			if (fases != "no")
-			{
-				usuarios=get_si_no('usuarios')
-				if(usuarios != "no")
-				{iniciarP(id)}
-				else
-				{				
-					msg_no_posee_usuarios();
-					msg_no_iniciar()
-				}
-		
-			}
-			else
-			{
-				msg_no_posee_fases();
-				msg_no_iniciar()
-			}
-		}
-		else
-		{msg_proyecto_ya_iniciado()}
+function iniciar_proyecto(grid){
+	var id = get_ids(grid)[0]
+    $.ajax({
+    	type: 'POST',
+    	dataType: "json",
+    	url: "/configurar/proyectos/iniciar_proyecto",
+    	data: {id:id,iniciable:false},
+    	success: function(data){
+    		if (data.iniciable)
+    		{iniciar(id)}
+    		else{
+    			if (data.ya_iniciado)
+    			{notify("El proyecto seleccionado ya se encuentra iniciado",null,timeL)}
+    			else
+    			{
+    				notify("El proyecto no se puede iniciar.","error",timeL)
+		    		if (data.sin_fases)
+		    		{notify("El proyecto seleccionado no posee fases",null,timeL)}
+		    		if (data.sin_usuarios)
+		    		{notify("El proyecto seleccionado no posee fases",null,timeL)}
+    			}
+    		}
+   	    	  
+    	},
 	});
 }
 
-function iniciarP(id){
+function iniciar(id){
     $.ajax(
     {
       type: 'POST',
@@ -107,98 +96,9 @@ function iniciarP(id){
       url: "/configurar/proyectos/iniciar_proyecto",
       data: {id:id},
       success: function(data)
-      {
-    	  jQuery.noticeAdd(
-    	  {
-              text: data.msg,
-              stay: false,
-              stayTime: 2500,
-              type: data.type
-    	  });
-    	  
-    	  if (data.type=='notice'){
-    		  msg_no_iniciar()
-    	  }
-    	  
+      {   	  
     	  $("#proyectosConfigurarFlexi").flexReload();
-    	  
+    	  notify("El proyecto fue iniciado con exito","succes")
       },
     });
-}
-
-function get_si_no(objeto){
-	result='no'
-	if (objeto == 'usuarios'){
-			result=$('.trSelected').find('td[abbr="usuarios"]').text();
-	}
-	else if (objeto == 'fases'){
-		result=$('.trSelected').find('td[abbr="fases"]').text();
-	}
-	return result
-}
-
-
-function get_id(tr){
-	var id = $(tr).attr('id');
-	id = id.substring(id.lastIndexOf('row')+3);
-	return id;
-}
-
-function get_nombre(){
-	nombre=$('.trSelected').find('td[abbr="name"]').text();
-	return nombre
-}
-
-function get_estado(grid){
-	estado=$('.trSelected').find('td[abbr="estado"]').text();
-	return estado
-} 
-
-function msg_falta_seleccion(){
-	jQuery.noticeAdd({
-	              text: "Debe seleccionar un proyecto!",
-	              stay: false,
-	              stayTime: 2500,
-	              type: "notice"
-	    	  });
-}
-
-function msg_no_posee_fases(){
-	jQuery.noticeAdd(
-	    	  {
-	              text: "El proyecto seleccionado no posee fases",
-	              stay: false,
-	              stayTime: 2000,
-	              type: "notice"
-	    	  });	
-}
-
-function msg_no_posee_usuarios(){
-	jQuery.noticeAdd(
-	    	  {
-	              text: "El proyecto seleccionado no posee usuarios",
-	              stay: false,
-	              stayTime: 2000,
-	              type: "notice"
-	    	  });	
-}
-
-function msg_proyecto_ya_iniciado(){
-	jQuery.noticeAdd(
-	    	  {
-	              text: "El proyecto seleccionado ya se encuentra iniciado",
-	              stay: false,
-	              stayTime: 2000,
-	              type: "notice"
-	    	  });	
-}
-
-function msg_no_iniciar(){
-	jQuery.noticeAdd(
-	    	  {
-	              text: "El proyecto no se puede iniciar.",
-	              stay: false,
-	              stayTime: 3000,
-	              type: "error"
-	    	  });	
 }

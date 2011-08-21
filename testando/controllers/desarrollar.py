@@ -41,7 +41,7 @@ class DesarrollarController(BaseController):
     def index(self):
         redirect('seleccion_de_proyectos')
         
-    @expose('testando.templates.desarrollar.seleccion_de_proyectos')    
+    @expose('testando.templates.desarrollar.proyectos.seleccion_de_proyectos')    
     def seleccion_de_proyectos(self,**kw):
         return dict(page='Desarrollar')
     

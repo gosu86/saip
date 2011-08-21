@@ -77,3 +77,15 @@
 		}
 	});
 })(jQuery);
+const timeM = 3000;
+const timeL = 5000;
+function notify(texto,tipo,duracion){
+	duracion = duracion!=null ? duracion : timeM
+	tipo = tipo!=null ? tipo : "notice"
+	jQuery.noticeAdd({
+		text: texto,
+		stay: false,
+		stayTime: duracion,
+		type: tipo
+	});
+};

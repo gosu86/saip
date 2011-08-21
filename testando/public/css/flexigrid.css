@@ -94,10 +94,6 @@ div.flexigrid div.fbutton .start
 {
     background: url("images/start.png") no-repeat scroll left center transparent;
 }
-div.flexigrid div.fbutton .detail
-{
-    background: url("images/detail.png") no-repeat scroll left center transparent;
-}
 div.flexigrid div.fbutton .finish
 {
     background: url("images/finish.png") no-repeat scroll left center transparent;

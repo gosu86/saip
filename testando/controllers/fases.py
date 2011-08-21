@@ -81,32 +81,27 @@ class FasesController(CrudRestController):
     @expose('json')
     def post_delete(self,**kw):
         """ Elimina una fase del sistema."""
-        id = kw['id']
-        if (id != None):
-            d = {'id':id}
-            fase = DBSession.query(Fase).filter_by(**d).first()
+        borrada=False
+        if (kw['id'] != None):
+            fase = DBSession.query(Fase).filter_by(id=int(kw['id'])).first()
             p=fase.proyecto
-            nombre=fase.name
             if (fase.estado == 'Inicial'):
                 r=DBSession.query(Rol).filter(Rol.rol_name=='Desarrolladores').first()
                 for u in fase.usuarios:
                     if (len(u.fases)-1)==0:
-                        u.roles.remove(r) 
-                    c=0    
-                    for f in u.fases:
-                        if f.proyecto_id==p.id:
-                            c=c+1
-                    if (c-1)==0:
+                        u.roles.remove(r)
                         p.usuarios.remove(u)
-                                    
+                    else: 
+                        c=0    
+                        for f in u.fases:
+                            if f.proyecto_id==p.id:
+                                c=c+1
+                        if (c-1)==0:
+                            p.usuarios.remove(u)
                 DBSession.delete(fase)
                 DBSession.flush()
-                msg="la fase "+nombre+" se ha eliminado con exito!."
-                type="succes"
-            else:
-                msg="La fase NO se puede eliminar, ya se ha iniciado."
-                type="error"
-        return dict(msg=msg,nombre=nombre,type=type)
+                borrada=True
+        return dict(borrada=borrada)
              
     @expose('json')
     def importar_TiposDeItem(self,**kw):
@@ -272,19 +267,13 @@ class FasesController(CrudRestController):
     
     @expose('json')
     def agregar_usuarios(self,**kw):
-        idsyroles    =    kw['idsyroles']
-        idsyroles    =    idsyroles.split(";")
-
-        f_id    =    idsyroles[0]
-        idsyroles.remove(f_id)
-        idsyroles.pop()
-        
+        idsyroles    =    kw['idsyroles[]']
+        f_id    =   int(idsyroles.pop())
         current_user=request.identity['user']
         current_user_id =current_user.id
         reload=False
         cantidad    =    len(idsyroles)
-        
-        f_id    =    int(f_id)
+
         f=DBSession.query(Fase).filter_by(id=f_id).first()
         p=f.proyecto
         conn = config['pylons.app_globals'].sa_engine.connect()
@@ -303,34 +292,25 @@ class FasesController(CrudRestController):
             p.usuarios.append(u)
             DBSession.flush()
         conn.close()
-            
-        msg    =    str(cantidad)    +    " usuarios agregados con exito!"
-        type="succes"
-        
-        return dict(msg=msg,type=type, reload=reload)
+        return dict(cantidad=cantidad, reload=reload)
     
     @expose('json')
     def quitar_usuarios(self,**kw):
-        ids    =    kw['ids']
-        ids    =    ids.split(",")
-
-        f_id    =    ids[0]
-        ids.remove(f_id)
-        ids.pop()
-
-        c1    =    len(ids)
-        c2=0
-        f_id    =    int(f_id)
+        ids    =    kw['ids[]']
+        f_id    =   int(ids.pop())
         f=DBSession.query(Fase).filter_by(id=f_id).first()
         p=f.proyecto
+
         current_user=request.identity['user']
-        current_user_id =current_user.id
+        current_user_id=current_user.id
         reload=False
         
+        fuera_del_proyecto=0
         for id in ids:
             u_id = int(id)
             if u_id == current_user_id:
                 reload=True
+                
             u=DBSession.query(Usuario).filter_by(id=u_id).first()
             f.usuarios.remove(u)
             fases_del_usuario=DBSession.query(Fase).filter(Fase.usuarios.any(id = u_id))
@@ -340,15 +320,7 @@ class FasesController(CrudRestController):
             if len(u.fases)==0:
                 r.usuarios.remove(u)
             if fases_del_proyecto.count()==0:
-                c2=c2+1
+                fuera_del_proyecto=fuera_del_proyecto+1
                 p.usuarios.remove(u)
-                
         DBSession.flush()
-        if c2>0:
-            msg_proyectos=str(c2)+" usuarios ya no forman parte de este proyecto."
-        else:
-            msg_proyectos=''
-        msg    =    str(c1)    +    " usuarios quitados de la fase con exito!"
-        type="succes"
-        
-        return dict(msg=msg,type=type,msg_p=msg_proyectos,reload=reload)
+        return dict(quitados=len(ids),fuera_del_proyecto=fuera_del_proyecto,reload=reload)

@@ -36,7 +36,7 @@ class ProyectosController(CrudRestController):
 	@expose('testando.templates.administrar.proyectos.index')
 	def get_all(self):
 		"""Muestra la pagina index.html de proyectos, en la cual se muestra la lista de proyectos existentes en el sistema."""
-		return dict(page="Administar")
+		return dict(page="Administrar")
 
 	@without_trailing_slash
 	@expose('testando.templates.administrar.proyectos.new')
@@ -44,7 +44,7 @@ class ProyectosController(CrudRestController):
 		"""Muestra la pagina new.html con el from para la creacion de un nuevo proyecto."""
 		tmpl_context.widget = self.new_form
 		referer='/administrar/proyectos/'
-		return dict(value=kw, model=self.model.__name__,referer=referer,title_nav='Lista de Proyectos')
+		return dict(page="Administrar",value=kw, model=self.model.__name__,referer=referer,title_nav='Lista de Proyectos')
 	
 	@catch_errors(errors, error_handler=new)
 	@expose()
@@ -68,7 +68,7 @@ class ProyectosController(CrudRestController):
 		value = self.edit_filler.get_value(kw)
 		value['_method'] = 'PUT'
 		referer='/administrar/proyectos/'
-		return dict(value=value, model=self.model.__name__, pk_count=len(pks),referer=referer,title_nav='Lista de Proyectos')	
+		return dict(page="Administrar",value=value, model=self.model.__name__, pk_count=len(pks),referer=referer,title_nav='Lista de Proyectos')	
 	
 	@expose()
 	def put(self, *args, **kw):
@@ -79,12 +79,19 @@ class ProyectosController(CrudRestController):
 				kw[pk] = args[i]
 		d={'id':kw[pk]}
 		p=DBSession.query(Proyecto).filter_by(**d).first()
-		
+		r=DBSession.query(Rol).filter(Rol.rol_name=='Configuradores').first()
+		if p.lider_id!=int(kw['lider']):
+			if len(p.lider.mis_proyectos)==1:
+				u=DBSession.query(Usuario).filter_by(id=p.lider_id).first()
+				u.roles.remove(r)
+				DBSession.flush()
 		p.name=kw['name']
 		p.empresa=kw['empresa']
 		p.estado=kw['estado']
 		p.descripcion=kw['descripcion']
 		p.lider_id=int(kw['lider'])
+		u=DBSession.query(Usuario).filter_by(id=int(kw['lider'])).first()
+		u.roles.append(r)
 		DBSession.flush()
 		redirect('/administrar/proyectos/')
 		
@@ -114,25 +121,12 @@ class ProyectosController(CrudRestController):
 		Inicia un proyecto seleccionado.
 		@param id: id del proyecto. 
 		"""
-		id = kw['id']
-		if (id != None):
-			d = {'id':id}
-			proyecto = DBSession.query(Proyecto).filter_by(**d).first()
-			nombre=proyecto.name
-			if (proyecto.estado != 'Iniciado'):
-				f=proyecto.fases[0]
-				if len(f.usuarios)!=0:
-					proyecto.estado = 'Iniciado'
-					DBSession.flush()
-					msg="El proyecto se ha Iniciado."
-					type="succes"
-				else:
-					msg="La primera fase del proyecto no posee usuarios."
-					type="notice"					
-			else:
-				msg="El proyecto ya se encuentra Iniciado."
-				type="notice"
-		return dict(msg=msg,nombre=nombre,type=type)
+		proyecto = DBSession.query(Proyecto).filter_by(id=int(kw['id'])).first()
+		resp=proyecto.es_iniciable()
+		if resp['iniciable']:													
+			proyecto.estado = 'Iniciado'
+			DBSession.flush()				
+		return resp
 	
 	@validate(validators={"page":validators.Int(), "rp":validators.Int()})
 	@expose('json')	

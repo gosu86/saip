@@ -80,51 +80,37 @@ $(function()
 
 function doCommandUsuarios(com, grid) {
 	if (com == 'Agregar Usuarios')
-	{
-			$('div.DeSistema .flexigrid').toggleClass('hideBody');
-	}	
+	{$('div.DeSistema .flexigrid').toggleClass('hideBody');}	
 	else if ($('.trSelected', grid).length > 0)
 	{
 		if (com == 'Agregar a la Fase')
-		{
-				obtener_ids(grid,'agregar');
-		}
+		{obtener_ids(grid,'agregar');}
 		else if (com == 'Quitar de la Fase')
-		{
-				obtener_ids(grid,'quitar');
-		}		
+		{obtener_ids(grid,'quitar');}		
 		else if (com == 'Cambiar Permisos')
-		{
-				obtener_ids(grid,'cambiar');
-		}
+		{obtener_ids(grid,'cambiar');}
 	}
 	else
-	{msg_falta_seleccion();}
-	
-
-
+	{notify("Debe seleccionar al menos un usuario!");}
 } 
 
-
 function obtener_ids(grid,tipo){
+		ids=get_ids(grid)	
 		faseId=$('input#faseId').val();
-		ids=''
-		idsyroles=''
-		ids=faseId+','
-		idsyroles=faseId+';'
-		$('.trSelected', grid).each(function()
-		{
-			id = get_id(this) 
-			ids=ids+(id+',')
-			rol=$('select#'+id).val()
-			idsyroles=idsyroles+(id+','+rol+';')
-		});
-		if (tipo=='agregar')
-		{agregar_usuarios(idsyroles)}
-		else if(tipo=='quitar')
-		{quitar_usuarios(ids)}
-		else if (tipo=='cambiar')
-		{cambiar_roles(idsyroles)}
+		if(tipo=='quitar')
+		{ids.push(faseId);quitar_usuarios(ids)}		
+		else{
+			idsyroles=[]
+			for(i=0;i<ids.length;i++){
+				rol=$('select#'+ids[i]).val()
+				idsyroles.push(ids[i]+','+rol)
+			}			
+			idsyroles.push(faseId);
+			if (tipo=='agregar')
+			{agregar_usuarios(idsyroles)}
+			else if (tipo=='cambiar')
+			{cambiar_roles(idsyroles)}
+		}
 }
 
 function agregar_usuarios(idsyroles) {
@@ -136,98 +122,49 @@ function agregar_usuarios(idsyroles) {
       data: {idsyroles:idsyroles},
       success: function(data)
       { 
-    	  if (data.reload){
-    		  location.reload(true);	  
-    	  }
+    	  if (data.reload)
+    	  {location.reload(true);}
     	  else
-    	  {
-        	  $("#faseVerUsuariosFlexi").flexReload();
-        	  jQuery.noticeAdd(
-        	    	  {
-        	              text: data.msg,
-        	              stay: false,
-        	              stayTime: 2500,
-        	              type: data.type
-        	    	  });
-        		  
+    	  {	  $("#faseVerUsuariosFlexi").flexReload();
+    		  notify(data.cantidad+" usuarios agregados con exito.","succes");
         	  $('#usuariosListaFlexi').flexReload();
-    	  }
-    	 
+    	  } 
       },
     });
 }
 function quitar_usuarios(ids) {
-    $.ajax(
-    {
+    $.ajax({
       type: 'POST',
       dataType: "json",
       url: '/configurar/fases/quitar_usuarios',
       data: {ids:ids},
       success: function(data)
       { 
-    	  
-    	  if (data.reload){
-    		  location.reload(true);	  
-    	  }
+    	  if (data.reload)
+    	  {location.reload(true);}
     	  else
     	  {    	  
 	    	  $("#faseVerUsuariosFlexi").flexReload();
-	    	  jQuery.noticeAdd(
-	    	    	  {
-	    	              text: data.msg,
-	    	              stay: false,
-	    	              stayTime: 2500,
-	    	              type: data.type
-	    	    	  });
-	    	  if (data.msg_p.length > 1)
-	    	  {
-	        	  jQuery.noticeAdd(
-	        	    	  {
-	        	              text: data.msg_p,
-	        	              stay: false,
-	        	              stayTime: 4500,
-	        	              type: 'notice'
-	        	    	  });    		  
-	    	  }    	  
+	    	  notify(data.quitados +" usuarios quitados con exito.","succes")
+	    	  if (data.fuera_del_proyecto >0){
+	    		  notify(data.fuera_del_proyecto + " usuarios ya no forman parte del proyecto")
+	    	  }
 	    	  $('#usuariosListaFlexi').flexReload();
     	  }
-    	 
       },
     });
 }
 function cambiar_roles(idsyroles){
-    $.ajax(
-    	    {
-    	      type: 'POST',
-    	      dataType: "json",
-    	      url: '/configurar/cambiar_roles',
-    	      data: {idsyroles:idsyroles},
-    	      success: function(data)
-    	      { 
-    	    	  $("#faseVerUsuariosFlexi").flexReload();
-    	    	  jQuery.noticeAdd(
-    	    	    	  {
-    	    	              text: data.msg,
-    	    	              stay: false,
-    	    	              stayTime: 2500,
-    	    	              type: data.type
-    	    	    	  });
-    	    		  
-    	    	  $('#usuariosListaFlexi').flexReload();
-    	    	 
-    	      },
-    	    });	
-}
-function get_id(tr){
-	var id = $(tr).attr('id');
-	id = id.substring(id.lastIndexOf('row')+3);
-	return id;
-}
-function msg_falta_seleccion(){
-	jQuery.noticeAdd({
-	              text: "Debe seleccionar al menos un usuario!",
-	              stay: false,
-	              stayTime: 2500,
-	              type: "notice"
-	    	  });
+    $.ajax({
+	  type: 'POST',
+	  dataType: "json",
+	  url: '/configurar/cambiar_roles',
+	  data: {idsyroles:idsyroles},
+	  success: function(data)
+	  { 
+		  $("#faseVerUsuariosFlexi").flexReload();
+		  notify(data.cantidad+" permisos cambiados con exito.","succes")
+		  $('#usuariosListaFlexi').flexReload();
+	  },
+	});	
 }

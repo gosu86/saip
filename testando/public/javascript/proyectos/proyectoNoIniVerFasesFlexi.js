@@ -8,12 +8,12 @@ $(function()
 		colModel : [
 			{display: 'ID', name : 'id', width : 40, sortable : true, align: 'left', hide : true},
 			{display: 'Nombre', name : 'name', width : 150, sortable : true, align: 'left'},
-			{display: 'Descripcion', name : 'descripcion', width : 150, sortable : false, align: 'left'},			
+			{display: 'Descripcion', name : 'descripcion', width : 150, sortable : true, align: 'left'},			
 			{display: 'Estado', name : 'estado', width : 150, sortable : true, align: 'left'},
 			{display: 'Orden', name : 'orden', width : 50, sortable : true, align: 'left'},
-			{display: 'Usuarios', name : 'usuarios', width : 50, sortable : true, align: 'left'},
-			{display: 'Tipos de Items', name : 'tiposdeitem', width : 80, sortable : true, align: 'left'},
-			{display: 'Items', name : 'items', width : 50, sortable : true, align: 'left'},
+			{display: 'Usuarios', name : 'usuarios', width : 50, sortable : false, align: 'left'},
+			{display: 'Tipos de Items', name : 'tiposdeitem', width : 80, sortable : false, align: 'left'},
+			{display: 'Items', name : 'items', width : 50, sortable : false, align: 'left'},
 		],
 		
 		buttons : [
@@ -58,35 +58,21 @@ function doCommandFases(com, grid) {
 	if (com == 'Crear')
 	{window.location = "/configurar/fases/new/?proyecto_id="+$('input#pid').val();}
 	else if ($('.trSelected', grid).length > 0)
-	{
+	{	id=get_ids(grid)[0]
 		if (com == 'Editar')
-		{
-			$('.trSelected', grid).each(function()
-			{
-				id = get_id(this);
-				window.location = '/configurar/fases/'+id+"/edit/";
-			});
-		}
+		{window.location = '/configurar/fases/'+id+"/edit/";}
 		else if (com == 'Borrar') 
 		{
-			$('.trSelected', grid).each(function() {
-				nombre = get_nombre();
-				id = get_id(this);
-				if(confirm('Seguro que desea BORRAR la fase: "' + nombre + '" ?'))
-				{deleteF(id);}
-			});
+			if(confirm('Seguro que desea BORRAR la fase?'))
+			{deleteF(id);}
 		}
 		else if (com == 'Usuarios')
-		{ver_usuarios(grid);}		
+		{window.location = "/configurar/vista_de_usuarios/?fid="+id}		
 		else if (com == 'Tipos de Items')
-		{ver_tipos_de_item(grid);}
-		
+		{window.location = "/configurar/vista_de_tiposDeItem/?fid="+id}
 	}
 	else
-	{msg_falta_seleccion();}
-	
-
-
+	{notify("Debe seleccionar una Fase!")}
 } 
 
 function deleteF(id) {
@@ -98,57 +84,9 @@ function deleteF(id) {
       data: {id:id},
       success: function(data)
       {
-    	  jQuery.noticeAdd(
-    	    	  {
-    	              text: data.msg,
-    	              stay: false,
-    	              stayTime: 5000,
-    	              type: data.type
-    	    	  });
-    	  
+    	  if(data.borrada){notify("Fase borrada con exito!","succes")}
+    	  else{notify("La fase no se puede borrar, La fase esta iniciada")}    	  
     	  $("#proyectoVerFasesFlexi").flexReload();
       },
     });
-}
-
-function ver_usuarios(grid){
-	$('.trSelected', grid).each(function()
-	{	
-		id = get_id(this) 
-		nombre=get_nombre()
-		window.location = "/configurar/vista_de_usuarios/?fid="+id
-	});	
-}
-
-function ver_tipos_de_item(grid){
-	$('.trSelected', grid).each(function()
-	{	
-		id = get_id(this) 
-		nombre=get_nombre()
-		estado=get_estado()
-		window.location = "/configurar/vista_de_tiposDeItem/?fid="+id
-	});	
-}
-
-function get_id(tr){
-	var id = $(tr).attr('id');
-	id = id.substring(id.lastIndexOf('row')+3);
-	return id;
-}
- 
-function get_nombre(){
-	nombre=$('.trSelected').find('td[abbr="name"]').text();
-	return nombre
-}
-function get_estado(grid){
-	estado=$('.trSelected').find('td[abbr="estado"]').text();
-	return estado
-} 
-function msg_falta_seleccion(){
-	jQuery.noticeAdd({
-	              text: "Debe seleccionar una Fase!",
-	              stay: false,
-	              stayTime: 2500,
-	              type: "notice"
-	    	  });
 }
