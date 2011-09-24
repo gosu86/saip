@@ -80,7 +80,7 @@ function iniciar_proyecto(grid){
 		    		if (data.sin_fases)
 		    		{notify("El proyecto seleccionado no posee fases",null,timeL)}
 		    		if (data.sin_usuarios)
-		    		{notify("El proyecto seleccionado no posee fases",null,timeL)}
+		    		{notify("El proyecto seleccionado no posee usuarios",null,timeL)}
     			}
     		}
    	    	  

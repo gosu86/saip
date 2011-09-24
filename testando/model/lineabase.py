@@ -21,7 +21,7 @@ class LineaBase(DeclarativeBase):
 
     items = relationship(Item, order_by=Item.id, backref="linea_base") 
     
-    estado = Column(Unicode(25),default='Activa')
+    estado = Column(Unicode(25),default=u'Activa')
     
     fase_id         = Column(Integer, ForeignKey('fases.id')) 
  

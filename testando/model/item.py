@@ -37,7 +37,7 @@ class Item(DeclarativeBase):
     
     codigo          =   Column(Unicode(25))
     
-    estado          =   Column(Unicode(25),default="En Desarrollo")
+    estado          =   Column(Unicode(25),default=u"En Desarrollo")
     
     name            =   Column(Unicode(150), nullable=False)
     

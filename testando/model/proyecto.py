@@ -34,7 +34,7 @@ class Proyecto(DeclarativeBase):
     
     descripcion     =   Column(UnicodeText(255))
     
-    estado          =   Column(Unicode(20), default='Activo')
+    estado          =   Column(Unicode(20), default=u'Activo')
     
     fecha_creacion  =   Column(DateTime, default=datetime.now)
     
